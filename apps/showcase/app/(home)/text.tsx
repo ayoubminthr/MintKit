@@ -55,6 +55,17 @@ export function TextBody() {
           </Text>
         </View>
       </Section>
+
+      <Section label="Scaling">
+        <View style={{ gap: spacing[2] }}>
+          <Text variant="caption" tone="muted">
+            Every size is scaled to the device (mirrors the app's RFValue), relative to a
+            680dp guideline height. Pass scaled={'{false}'} to pin a fixed size.
+          </Text>
+          <Text>Responsive — scales with screen height (default)</Text>
+          <Text scaled={false}>Fixed — never scales</Text>
+        </View>
+      </Section>
     </>
   );
 }

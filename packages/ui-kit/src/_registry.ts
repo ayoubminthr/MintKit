@@ -418,6 +418,20 @@ export const kitComponents: readonly KitComponentEntry[] = [
     status: 'ready',
     description: 'Card-shaped selectable option with radio or checkbox indicator — large tap target for high-stakes choices.',
   },
+  {
+    name: 'PageShell',
+    path: '/page-shell',
+    category: 'Layout',
+    status: 'ready',
+    description: 'Screen scaffold — safe-area insets, a param-built header (icon + title + actions), scrolling or fixed body, pull-to-refresh, and a param-built primary-action footer button.',
+  },
+  {
+    name: 'SheetHeader',
+    path: '/sheet-header',
+    category: 'Overlays',
+    status: 'ready',
+    description: 'Shared BottomSheet header — title with optional brand-colored count, close button, and left/right accessory slots.',
+  },
 ];
 
 export const kitCategories: readonly ComponentCategory[] = [

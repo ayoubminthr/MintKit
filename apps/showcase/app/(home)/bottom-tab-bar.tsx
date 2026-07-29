@@ -13,11 +13,12 @@ import {
 
 import { Section } from './_components/Section';
 
-type TabKey = 'home' | 'inbox' | 'profile' | 'settings';
+type TabKey = 'home' | 'inbox' | 'add' | 'profile' | 'settings';
 
 const ITEMS: readonly BottomTabBarItem<TabKey>[] = [
   { key: 'home', label: 'Home', icon: 'home' },
   { key: 'inbox', label: 'Inbox', icon: 'inbox', badge: 3 },
+  { key: 'add', label: 'New', icon: 'plus', kind: 'primary' },
   { key: 'profile', label: 'Profile', icon: 'user', badge: true },
   { key: 'settings', label: 'Settings', icon: 'settings', disabled: true },
 ];
@@ -25,6 +26,7 @@ const ITEMS: readonly BottomTabBarItem<TabKey>[] = [
 const COPY: Record<TabKey, { title: string; body: string }> = {
   home: { title: 'Home', body: 'Welcome back. Pulse survey closes Friday.' },
   inbox: { title: 'Inbox', body: '3 unread messages waiting.' },
+  add: { title: 'New', body: 'Floating action — start something new.' },
   profile: { title: 'Profile', body: 'Your profile and preferences.' },
   settings: { title: 'Settings', body: '(Disabled — try the other tabs.)' },
 };
@@ -47,8 +49,10 @@ export function BottomTabBarBody() {
       <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[5] }}>
         <Text variant="body" tone="secondary">
           Persistent bottom navigation bar. Renders a row of icon + label tab items with
-          numeric / dot badges and active-tint styling. No shadow — it&apos;s chrome, not a
-          floating element. Wire it up with local state, or pass it as `tabBar` to a
+          numeric / dot badges and active-tint styling. The bar itself is flat chrome; mark
+          one item `kind: &apos;primary&apos;` to dock a floating action button into the row —
+          it lifts above the top edge and a page-colored ring carves it out of the bar. No
+          shadow (Rule 1). Wire it up with local state, or pass it as `tabBar` to a
           @react-navigation/bottom-tabs Navigator.
         </Text>
 
@@ -80,14 +84,30 @@ export function BottomTabBarBody() {
           </View>
         </Section>
 
-        <Section label="With primary action (5-tab layout)">
-          <View style={styles.compactPreview}>
+        <Section label="Floating primary action (5-tab layout)">
+          <View style={styles.floatingPreview}>
+            <BottomTabBar
+              items={[
+                { key: 'home', label: 'Home', icon: 'home' },
+                { key: 'team', label: 'Team', icon: 'users' },
+                { key: 'add', label: 'New', icon: 'plus', kind: 'primary' },
+                { key: 'inbox', label: 'Inbox', icon: 'message-square', badge: 2 },
+                { key: 'help', label: 'Help', icon: 'help-circle' },
+              ]}
+              active="home"
+              onChange={() => {}}
+            />
+          </View>
+        </Section>
+
+        <Section label="Compact — floating action, icon-only">
+          <View style={styles.floatingPreview}>
             <BottomTabBar
               variant="compact"
               items={[
                 { key: 'home', label: 'Home', icon: 'home' },
                 { key: 'team', label: 'Team', icon: 'users' },
-                { key: 'add', label: 'Add', icon: 'plus', kind: 'primary' },
+                { key: 'add', label: 'New', icon: 'plus', kind: 'primary' },
                 { key: 'inbox', label: 'Inbox', icon: 'message-square', badge: 2 },
                 { key: 'help', label: 'Help', icon: 'help-circle' },
               ]}
@@ -113,5 +133,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: lightColors.border,
+  },
+  // Extra top room + visible overflow so the lifted floating button isn't clipped.
+  floatingPreview: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: lightColors.border,
+    paddingTop: spacing[6],
   },
 });

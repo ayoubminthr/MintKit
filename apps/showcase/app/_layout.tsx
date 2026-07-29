@@ -1,8 +1,14 @@
 import { Feather } from '@expo/vector-icons';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  useFonts,
+} from '@expo-google-fonts/inter';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -27,9 +33,21 @@ export const unstable_settings = {
 const MOBILE_FRAME_WIDTH = 375;
 const PHONE_RADIUS = 40;
 
+// Hold the native splash until Inter is ready so text never flashes in a
+// fallback face.
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const isWeb = Platform.OS === 'web';
+
+  const [fontsLoaded] = useFonts({ Inter_400Regular, Inter_500Medium });
+
+  useEffect(() => {
+    if (fontsLoaded) SplashScreen.hideAsync().catch(() => {});
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) return null;
 
   return (
     <GestureHandlerRootView style={[styles.root, isWeb && styles.rootWeb]}>

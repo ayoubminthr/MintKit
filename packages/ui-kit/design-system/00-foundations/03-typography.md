@@ -8,16 +8,33 @@ import { fontFamily, fontSize, fontWeight, lineHeight, Text } from '@minthr-saas
 
 ## Font family
 
-React Native uses the platform system font — no web font loading, no Inter bundle. This keeps startup fast and text rendering native.
+The UI font is **Inter**, loaded via `@expo-google-fonts/inter`. React Native selects custom fonts by family *name*, not by the `fontWeight` property — so each weight is a distinct family. `mono` stays on the platform monospace font (no custom mono is bundled).
 
 ```ts
 export const fontFamily = {
-  sans: Platform.select({ ios: 'System', android: 'Roboto', default: 'System' }),
-  mono: Platform.select({ ios: 'Menlo',  android: 'monospace', default: 'monospace' }),
+  sans: 'Inter_400Regular',
+  sansMedium: 'Inter_500Medium',
+  mono: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }),
 };
+
+// Pick the family for a weight — never set `fontWeight` on a single family.
+export function sansForWeight(weight: string): string {
+  return weight === fontWeight.medium ? fontFamily.sansMedium : fontFamily.sans;
+}
 ```
 
-If the app later ships a custom font (e.g. Inter via `expo-font`), change it **only** in this token — every component reads `fontFamily.sans`.
+Because the weight lives in the family name, always resolve it with `sansForWeight(...)`. The `Text` component does this for you (including when a caller overrides `fontWeight` inline), so in product code you rarely touch these tokens directly.
+
+**Loading:** the consuming app must load both faces before first paint. The showcase does this in [`app/_layout.tsx`](../../../../apps/showcase/app/_layout.tsx):
+
+```tsx
+import { Inter_400Regular, Inter_500Medium, useFonts } from '@expo-google-fonts/inter';
+
+const [fontsLoaded] = useFonts({ Inter_400Regular, Inter_500Medium });
+if (!fontsLoaded) return null; // held behind the splash screen
+```
+
+To change the UI font, swap these two families in the token **and** the faces loaded in the app root — every component reads `fontFamily` / `sansForWeight`, so nothing else changes.
 
 ## Font weights — only 2
 

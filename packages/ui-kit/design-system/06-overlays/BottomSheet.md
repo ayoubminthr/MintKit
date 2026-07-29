@@ -39,6 +39,9 @@ The sheet **measures your body in a hidden pass**, then snaps to a single point 
 - **Keyboard-aware** — snaps to full height when the keyboard shows; restores on hide.
 - **Auto-close on navigation** — any React Navigation route change closes open sheets.
 - **Spring** — `damping: 80, mass: 0.5, stiffness: 500`.
+- **`key`** — pass a stable string to `open()` to get upsert semantics: calling `open()` again with the same `key` updates the existing sheet (header/footer swap if you pass new ones, params shallow-merge, moves it to the top of the stack) instead of stacking a duplicate. Omit it for an always-fresh, always-stacked sheet.
+- **Pull-to-refresh** — pass `onRefresh`/`isRefreshing` inside `params` to get a `RefreshControl` on the scrollable body for free (only applies when the body is scrolling — see `isScrollable`).
+- **Conditional footer** — a footer component can define a static `shouldShow(params)` predicate (`Footer.shouldShow = (params) => ...`) to hide itself for some param values without the caller needing a separate `footer` prop swap.
 
 ## Rules
 
@@ -59,6 +62,7 @@ export function SheetProvider(props: { children: ReactNode }): JSX.Element;
 export function useSheet(): {
   open: <P>(opts: OpenSheetOptions<P>) => SheetHandle<P>;
   closeAll: () => void;
+  opened: ReadonlyArray<{ id: string; key?: string }>; // reactive stack view — count, or diff to detect a close
 };
 
 export interface OpenSheetOptions<P = unknown> {
@@ -67,21 +71,23 @@ export interface OpenSheetOptions<P = unknown> {
   footer?: ComponentType<SheetFooterProps<P>>;
   isScrollable?: boolean;
   params?: P;
+  key?: string; // upsert identity — see "Behaviour" above
 }
 
 export interface SheetHandle<P = unknown> {
   id: string;
   close: () => void;
-  update: (params: P) => void;   // re-render the sheet with new params
+  update: (patch: Partial<P>) => void;   // shallow-merges into the current params
 }
 
 export interface SheetBodyProps<P = unknown> {
   params: P;
   handleClose?: () => void;              // undefined during hidden measurement pass
   onHeightUpdate?: (height: number) => void;
+  sheetId?: string;                      // undefined during the same hidden measurement pass
 }
-export interface SheetHeaderProps<P = unknown> { params: P; handleClose: () => void; }
-export interface SheetFooterProps<P = unknown> { params: P; handleClose: () => void; }
+export interface SheetHeaderProps<P = unknown> { params: P; handleClose: () => void; sheetId: string; }
+export interface SheetFooterProps<P = unknown> { params: P; handleClose: () => void; sheetId: string; }
 ```
 
 ### Sibling exports & SheetHost
@@ -156,6 +162,22 @@ sheet.open({ body: LongFormBody, isScrollable: true, params: { id } });
 ```tsx
 const { closeAll } = useSheet();
 closeAll(); // e.g. on sign-out
+```
+
+### 6. Re-opening the same sheet updates it in place
+```tsx
+function openRow(row: Row) {
+  // Pressing a different row's trigger while this sheet is already open
+  // updates its params and brings it back to the top instead of stacking
+  // a second copy of the same body.
+  sheet.open({ body: RowDetailsBody, params: { row }, key: 'row-details' });
+}
+```
+
+### 7. Count / detect a close from outside
+```tsx
+const { opened } = useSheet();
+const anySheetOpen = opened.length > 0; // e.g. to disable a swipe gesture underneath
 ```
 
 ## When NOT to use

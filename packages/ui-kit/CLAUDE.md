@@ -56,7 +56,7 @@ import {
   radius,         // sm:4, md:6, lg:8, xl:12, full:9999
   borders,        // hair: StyleSheet.hairlineWidth, thin: 1, thick: 2
   shadows,        // sm/md/lg/drawer cross-platform shadow objects (overlays only — Rule 1)
-  fontFamily,     // sans, mono
+  fontFamily,     // sans (Inter_400Regular), sansMedium (Inter_500Medium), mono. Use sansForWeight() to map a weight → family.
   fontSize,       // xs/sm/md/lg/xl/2xl
   fontWeight,     // regular: '400', medium: '500' (Rule 4 — these two only)
   lineHeight,     // tight: 1.2, normal: 1.4, relaxed: 1.6 (multipliers)

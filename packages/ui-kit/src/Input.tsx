@@ -5,6 +5,8 @@ import {
   TextInput,
   type TextInputProps,
   View,
+  type StyleProp,
+  type ViewStyle,
 } from 'react-native';
 
 import { borders } from './tokens/borders';
@@ -23,6 +25,8 @@ export interface InputProps extends TextInputProps {
   leftIcon?: ReactNode;
   /** Slot rendered inside the field on the end (trailing) edge. */
   rightIcon?: ReactNode;
+  /** Style override for the bordered field box (the element that owns focus/error/disabled styling) — `style` targets the inner text input instead. */
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 export function Input({
@@ -36,6 +40,7 @@ export function Input({
   onFocus,
   onBlur,
   style,
+  containerStyle,
   ...rest
 }: InputProps) {
   const [focused, setFocused] = useState(false);
@@ -50,6 +55,7 @@ export function Input({
           focused && styles.fieldWrapFocused,
           error ? styles.fieldWrapError : null,
           !isEditable && styles.fieldWrapDisabled,
+          containerStyle,
         ]}>
         {leftIcon ? <View style={styles.iconStart}>{leftIcon}</View> : null}
         <TextInput

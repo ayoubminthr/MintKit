@@ -4,8 +4,9 @@
  * @react-navigation/bottom-tabs, or wire up manually with local state.
  *
  * Items can be marked `kind: 'primary'` to render a brand-filled circular
- * action (FAB-style) in place of the regular icon — typically the center
- * "add" affordance in 5-tab layouts.
+ * action that sits inline in the row — typically the center "add" affordance
+ * in 5-tab layouts. It reads as the primary action through its brand fill
+ * alone; it is not lifted above the bar — no shadow (Rule 1).
  *
  * Usage:
  *   const [active, setActive] = useState<'home' | 'add' | 'profile'>('home');
@@ -57,9 +58,14 @@ export interface BottomTabBarProps<T extends string = string> {
   variant?: BottomTabBarVariant;
 }
 
-const ROW_HEIGHT = 56;
-const ICON_SIZE = 22;
-const PRIMARY_SIZE = 52;
+/** Default row (icon + label). Compact is icon-only, so it sits shorter. */
+const ROW_HEIGHT = 60;
+const COMPACT_ROW_HEIGHT = 56;
+const ICON_SIZE = 24;
+/** Centered square around each icon — a comfortable tap target and even breathing room. */
+const ICON_HIT = spacing[10];
+/** Inline brand-filled action — slightly larger than ICON_HIT so it reads as primary. */
+const PRIMARY_SIZE = 44;
 const PRIMARY_ICON_SIZE = 24;
 
 export function BottomTabBar<T extends string = string>({
@@ -127,51 +133,57 @@ export function BottomTabBarItemView<T extends string>({
         pressed && !isPrimary && styles.tabPressed,
         item.disabled && styles.tabDisabled,
       ]}>
-      {isPrimary ? (
-        <View style={styles.primaryWrap}>
-          <View style={styles.primaryCircle}>
-            <Feather
-              name={item.icon}
-              size={PRIMARY_ICON_SIZE}
-              color={lightColors.onBrand}
-            />
-          </View>
-          {hasNumericBadge ? (
-            <View style={styles.primaryBadgeCount}>
-              <Text style={styles.badgeCountLabel} numberOfLines={1}>
-                {(item.badge as number) > 99 ? '99+' : String(item.badge)}
-              </Text>
+      {({ pressed }) =>
+        isPrimary ? (
+          <View style={styles.primaryWrap}>
+            <View
+              style={[
+                styles.primaryCircle,
+                pressed && styles.primaryCirclePressed,
+              ]}>
+              <Feather
+                name={item.icon}
+                size={PRIMARY_ICON_SIZE}
+                color={lightColors.onBrand}
+              />
             </View>
-          ) : null}
-          {hasDotBadge ? <View style={styles.primaryBadgeDot} /> : null}
-        </View>
-      ) : (
-        <>
-          <View style={styles.iconWrap}>
-            <Feather name={item.icon} size={ICON_SIZE} color={tint} />
             {hasNumericBadge ? (
-              <View style={styles.badgeCount}>
+              <View style={styles.primaryBadgeCount}>
                 <Text style={styles.badgeCountLabel} numberOfLines={1}>
                   {(item.badge as number) > 99 ? '99+' : String(item.badge)}
                 </Text>
               </View>
             ) : null}
-            {hasDotBadge ? <View style={styles.badgeDot} /> : null}
+            {hasDotBadge ? <View style={styles.primaryBadgeDot} /> : null}
           </View>
-          {variant === 'default' ? (
-            <Text
-              variant="caption"
-              numberOfLines={1}
-              style={[
-                styles.label,
-                { color: tint },
-                active && styles.labelActive,
-              ]}>
-              {item.label}
-            </Text>
-          ) : null}
-        </>
-      )}
+        ) : (
+          <>
+            <View style={styles.iconWrap}>
+              <Feather name={item.icon} size={ICON_SIZE} color={tint} />
+              {hasNumericBadge ? (
+                <View style={styles.badgeCount}>
+                  <Text style={styles.badgeCountLabel} numberOfLines={1}>
+                    {(item.badge as number) > 99 ? '99+' : String(item.badge)}
+                  </Text>
+                </View>
+              ) : null}
+              {hasDotBadge ? <View style={styles.badgeDot} /> : null}
+            </View>
+            {variant === 'default' ? (
+              <Text
+                variant="caption"
+                numberOfLines={1}
+                style={[
+                  styles.label,
+                  { color: tint },
+                  active && styles.labelActive,
+                ]}>
+                {item.label}
+              </Text>
+            ) : null}
+          </>
+        )
+      }
     </Pressable>
   );
 }
@@ -188,7 +200,7 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
   },
   rowCompact: {
-    height: ROW_HEIGHT + spacing[2],
+    height: COMPACT_ROW_HEIGHT,
   },
   tab: {
     flex: 1,
@@ -204,8 +216,8 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   iconWrap: {
-    width: ICON_SIZE + spacing[3],
-    height: ICON_SIZE + spacing[1],
+    width: ICON_HIT,
+    height: ICON_HIT,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -217,8 +229,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.medium,
   },
   primaryWrap: {
-    width: PRIMARY_SIZE,
-    height: PRIMARY_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -230,15 +240,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  primaryCirclePressed: {
+    backgroundColor: lightColors.brandHover,
+  },
   badgeCount: {
     position: 'absolute',
-    top: -2,
-    end: -spacing[1],
-    minWidth: 16,
-    height: 16,
-    paddingHorizontal: 4,
+    top: spacing[1],
+    end: spacing[1],
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: spacing[1],
     borderRadius: radius.full,
     backgroundColor: lightColors.danger,
+    borderWidth: borders.thick,
+    borderColor: lightColors.surfacePrimary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -250,36 +265,38 @@ const styles = StyleSheet.create({
   },
   badgeDot: {
     position: 'absolute',
-    top: 0,
-    end: -2,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    top: spacing[1],
+    end: spacing[2],
+    width: 10,
+    height: 10,
+    borderRadius: radius.full,
     backgroundColor: lightColors.danger,
+    borderWidth: borders.thick,
+    borderColor: lightColors.surfacePrimary,
   },
   primaryBadgeCount: {
     position: 'absolute',
-    top: 2,
-    end: 2,
+    top: spacing[1],
+    end: spacing[1],
     minWidth: 18,
     height: 18,
-    paddingHorizontal: 4,
+    paddingHorizontal: spacing[1],
     borderRadius: radius.full,
     backgroundColor: lightColors.danger,
-    borderWidth: 2,
+    borderWidth: borders.thick,
     borderColor: lightColors.surfacePrimary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primaryBadgeDot: {
     position: 'absolute',
-    top: 4,
-    end: 4,
+    top: spacing[1],
+    end: spacing[1],
     width: 10,
     height: 10,
-    borderRadius: 5,
+    borderRadius: radius.full,
     backgroundColor: lightColors.danger,
-    borderWidth: 2,
+    borderWidth: borders.thick,
     borderColor: lightColors.surfacePrimary,
   },
 });

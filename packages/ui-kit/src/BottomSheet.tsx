@@ -17,6 +17,7 @@ import {
   Keyboard,
   LayoutChangeEvent,
   Platform,
+  RefreshControl,
   StyleSheet,
   useWindowDimensions,
   View,
@@ -39,12 +40,14 @@ interface SheetHandleProps {
   headerComponent?: React.ComponentType<any>;
   params?: any;
   handleClose?: () => void;
+  sheetId?: string;
 }
 
 const SheetHandle: React.FC<SheetHandleProps> = ({
   headerComponent: HeaderComponent,
   params,
   handleClose,
+  sheetId,
 }) => (
   <View
     style={[
@@ -57,13 +60,20 @@ const SheetHandle: React.FC<SheetHandleProps> = ({
     </View>
     {HeaderComponent && (
       <View style={styles.headerContent}>
-        <HeaderComponent params={params} handleClose={handleClose} />
+        <HeaderComponent params={params} handleClose={handleClose} sheetId={sheetId} />
       </View>
     )}
   </View>
 );
 
-const HybridContainer = ({ shouldScroll, style, children, hasFooter }: any) => {
+const HybridContainer = ({
+  shouldScroll,
+  style,
+  children,
+  hasFooter,
+  onRefresh,
+  isRefreshing = false,
+}: any) => {
   const [isScrolling, setIsScrolling] = useState(shouldScroll);
   const scrollViewRef = useRef(null);
 
@@ -88,6 +98,16 @@ const HybridContainer = ({ shouldScroll, style, children, hasFooter }: any) => {
         enableAutomaticScroll={true}
         extraHeight={Platform.OS === "ios" ? 80 : 120}
         keyboardOpeningTime={0}
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={onRefresh}
+              colors={[lightColors.brand]}
+              tintColor={lightColors.brand}
+            />
+          ) : undefined
+        }
       >
         {children}
       </KeyboardAwareScrollView>
@@ -185,6 +205,14 @@ const SheetItem = React.memo(
       onClose(index, SheetComponent);
     }, [onClose, index, SheetComponent]);
 
+    const shouldShowFooter = useMemo(() => {
+      if (!FooterComponent) return false;
+      if ((FooterComponent as any).shouldShow) {
+        return (FooterComponent as any).shouldShow(params);
+      }
+      return true;
+    }, [FooterComponent, params]);
+
     const renderFooter = useCallback(
       (props: BottomSheetFooterProps) => {
         if (!FooterComponent) return null;
@@ -202,12 +230,13 @@ const SheetItem = React.memo(
               <FooterComponent
                 params={params}
                 handleClose={handleClose}
+                sheetId={sheetId}
               />
             </View>
           </BottomSheetFooter>
         );
       },
-      [FooterComponent, params, handleClose]
+      [FooterComponent, params, handleClose, sheetId]
     );
 
     const renderBackdrop = useCallback(
@@ -251,6 +280,7 @@ const SheetItem = React.memo(
           <View style={{ padding: CONTENT_PADDING / 2 }}>
             <SheetComponent
               params={params}
+              sheetId={sheetId}
               onHeightUpdate={(height: number) =>
                 updateSheetHeight(index, height, hasFooter)
               }
@@ -264,6 +294,7 @@ const SheetItem = React.memo(
       <SheetComponent
         params={params}
         handleClose={handleClose}
+        sheetId={sheetId}
         onHeightUpdate={(height: number) =>
           updateSheetHeight(index, height, hasFooter)
         }
@@ -288,6 +319,7 @@ const SheetItem = React.memo(
               headerComponent={headerComponent}
               params={params}
               handleClose={handleClose}
+              sheetId={sheetId}
             />
           )}
           handleStyle={styles.handleStyle}
@@ -305,11 +337,13 @@ const SheetItem = React.memo(
               handleClose();
             }
           }}
-          footerComponent={FooterComponent ? renderFooter : undefined}
+          footerComponent={shouldShowFooter ? renderFooter : undefined}
         >
           <HybridContainer
             shouldScroll={shouldScroll}
             hasFooter={hasFooter}
+            onRefresh={params?.onRefresh}
+            isRefreshing={params?.isRefreshing}
             style={[
               styles.contentContainer,
               !shouldScroll &&

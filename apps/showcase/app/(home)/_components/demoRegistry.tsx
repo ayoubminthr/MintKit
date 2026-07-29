@@ -45,6 +45,7 @@ import { MultiSelectBody } from '../multi-select';
 import { NumberInputBody } from '../number-input';
 import { OtpInputBody } from '../otp-input';
 import { PageHeaderBody } from '../page-header';
+import { PageShellBody } from '../page-shell';
 import { PasswordStrengthBody } from '../password-strength';
 import { PhoneInputBody } from '../phone-input';
 import { ProfileHeaderBody } from '../profile-header';
@@ -109,6 +110,7 @@ export const demoRegistry: Record<string, DemoEntry> = {
   '/number-input': { Body: NumberInputBody },
   '/otp-input': { Body: OtpInputBody },
   '/page-header': { Body: PageHeaderBody },
+  '/page-shell': { Body: PageShellBody, framed: true },
   '/password-strength': { Body: PasswordStrengthBody },
   '/phone-input': { Body: PhoneInputBody },
   '/profile-header': { Body: ProfileHeaderBody },
