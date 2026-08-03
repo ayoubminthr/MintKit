@@ -14,7 +14,7 @@
  *   />
  */
 import { Feather } from '@expo/vector-icons';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Checkbox } from './Checkbox';
@@ -25,6 +25,7 @@ import { borders } from './tokens/borders';
 import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
+import { fontSize } from './tokens/typography';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -53,6 +54,9 @@ export interface MultiSelectProps {
   onCreate?: (newValue: string) => void;
 
   maxSelections?: number;
+
+  /** Render selected values as removable chips on the trigger instead of a "N selected" summary. */
+  chips?: boolean;
 
   required?: boolean;
   error?: string;
@@ -280,26 +284,44 @@ export function MultiSelect({
   allowCreate = false,
   onCreate,
   maxSelections,
+  chips = false,
   required,
   error,
   disabled,
 }: MultiSelectProps) {
   const sheet = useSheet();
   const [internalValues, setInternalValues] = useState<string[]>(defaultValues);
+  const [isOpen, setIsOpen] = useState(false);
+  const sheetIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!sheetIdRef.current) return;
+    const stillOpen = sheet.opened.some((s) => s.id === sheetIdRef.current);
+    if (!stillOpen) {
+      sheetIdRef.current = null;
+      setIsOpen(false);
+    }
+  }, [sheet.opened]);
 
   const currentValues = values !== undefined ? values : internalValues;
 
+  function commitValues(next: string[]) {
+    if (values === undefined) setInternalValues(next);
+    onChange?.(next);
+  }
+
+  function removeValue(val: string) {
+    commitValues(currentValues.filter((v) => v !== val));
+  }
+
   function handleOpen() {
-    sheet.open<MultiSelectSheetParams>({
+    const handle = sheet.open<MultiSelectSheetParams>({
       isScrollable: true,
       body: MultiSelectSheetBody,
       params: {
         options,
         initialValues: currentValues,
-        onValuesChange: (next) => {
-          if (values === undefined) setInternalValues(next);
-          onChange?.(next);
-        },
+        onValuesChange: commitValues,
         searchPlaceholder,
         emptyMessage,
         placeholder,
@@ -309,10 +331,63 @@ export function MultiSelect({
         maxSelections,
       },
     });
+    sheetIdRef.current = handle.id;
+    setIsOpen(true);
   }
 
   const triggerText =
     currentValues.length === 0 ? placeholder : summaryLabel(currentValues.length);
+
+  if (chips) {
+    return (
+      <Pressable
+        accessibilityRole="combobox"
+        accessibilityState={{ expanded: false, disabled }}
+        disabled={disabled}
+        onPress={handleOpen}
+        style={[
+          styles.chipsTrigger,
+          isOpen && styles.triggerActive,
+          disabled && styles.triggerDisabled,
+          error ? styles.triggerError : null,
+        ]}>
+        {currentValues.length === 0 ? (
+          <Text variant="body" tone="muted" style={styles.chipsPlaceholder}>
+            {placeholder}
+          </Text>
+        ) : (
+          <View style={styles.chipsWrap}>
+            {currentValues.map((val) => {
+              const option = options.find((o) => o.value === val);
+              if (!option) return null;
+              return (
+                <View key={val} style={styles.chip}>
+                  <Text variant="caption" numberOfLines={1} style={styles.chipText}>
+                    {option.label}
+                  </Text>
+                  {disabled ? null : (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Remove ${option.label}`}
+                      hitSlop={6}
+                      onPress={() => removeValue(val)}>
+                      <Feather name="x" size={12} color={lightColors.textSecondary} />
+                    </Pressable>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        )}
+        <Feather
+          name="chevron-down"
+          size={16}
+          color={disabled ? lightColors.textMuted : lightColors.textSecondary}
+          style={styles.chipsChevron}
+        />
+      </Pressable>
+    );
+  }
 
   return (
     <Pressable
@@ -322,6 +397,7 @@ export function MultiSelect({
       onPress={handleOpen}
       style={[
         styles.trigger,
+        isOpen && styles.triggerActive,
         disabled && styles.triggerDisabled,
         error ? styles.triggerError : null,
       ]}>
@@ -329,7 +405,7 @@ export function MultiSelect({
         variant="body"
         tone={currentValues.length > 0 ? (disabled ? 'muted' : 'primary') : 'muted'}
         numberOfLines={1}
-        style={{ flex: 1 }}>
+        style={currentValues.length > 0 ? styles.value : [styles.value, styles.placeholderText]}>
         {triggerText}
       </Text>
       <Feather
@@ -344,6 +420,45 @@ export function MultiSelect({
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
+  chipsTrigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 44,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    backgroundColor: lightColors.surfacePrimary,
+    borderRadius: radius.md,
+    borderWidth: borders.hair,
+    borderColor: lightColors.border,
+    gap: spacing[2],
+  },
+  chipsPlaceholder: {
+    flex: 1,
+    fontSize: fontSize.sm,
+  },
+  chipsWrap: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing[1],
+  },
+  chipsChevron: {
+    marginTop: 2,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    maxWidth: 160,
+    gap: spacing[1],
+    paddingStart: spacing[2],
+    paddingEnd: spacing[1],
+    paddingVertical: 4,
+    backgroundColor: lightColors.brandSubtle,
+    borderRadius: radius.full,
+  },
+  chipText: {
+    flexShrink: 1,
+  },
   trigger: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -352,8 +467,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[3],
     backgroundColor: lightColors.surfacePrimary,
     borderRadius: radius.md,
+    borderWidth: borders.hair,
+    borderColor: lightColors.border,
+  },
+  triggerActive: {
+    borderColor: lightColors.brand,
     borderWidth: borders.thin,
-    borderColor: lightColors.borderStrong,
   },
   triggerDisabled: {
     backgroundColor: lightColors.surfaceSubtle,
@@ -361,6 +480,7 @@ const styles = StyleSheet.create({
   },
   triggerError: {
     borderColor: lightColors.danger,
+    borderWidth: borders.thin,
   },
   sheetContent: {
     flex: 1,
@@ -409,6 +529,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: borders.hair,
     borderBottomColor: lightColors.border,
     marginBottom: spacing[1],
+  },
+  value: {
+    flex: 1,
+  },
+  placeholderText: {
+    fontSize: fontSize.sm,
   },
   footer: {
     flexDirection: 'row',

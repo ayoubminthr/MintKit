@@ -23,6 +23,7 @@ import { borders } from './tokens/borders';
 import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
+import { fontSize } from './tokens/typography';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -245,7 +246,7 @@ export function Combobox({
         variant="body"
         tone={selectedOption ? (disabled ? 'muted' : 'primary') : 'muted'}
         numberOfLines={1}
-        style={{ flex: 1 }}>
+        style={selectedOption ? styles.value : [styles.value, styles.placeholderText]}>
         {selectedOption ? selectedOption.label : placeholder}
       </Text>
       <Feather
@@ -320,5 +321,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
+  },
+  value: {
+    flex: 1,
+  },
+  placeholderText: {
+    fontSize: fontSize.sm,
   },
 });

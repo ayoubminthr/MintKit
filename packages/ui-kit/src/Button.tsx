@@ -7,6 +7,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
+import { Spinner, type SpinnerSize, type SpinnerTone } from './Spinner';
 import { borders } from './tokens/borders';
 import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
@@ -23,7 +24,24 @@ export interface ButtonProps extends Omit<PressableProps, 'style' | 'children'> 
   fullWidth?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  /** Shows a spinner in place of the label/icons and blocks presses. */
+  loading?: boolean;
 }
+
+const spinnerSizeBySize: Record<ButtonSize, SpinnerSize> = {
+  sm: 'sm',
+  md: 'md',
+  lg: 'md',
+};
+
+const spinnerToneByVariant: Record<ButtonVariant, SpinnerTone> = {
+  primary: 'inverse',
+  secondary: 'brand',
+  ghost: 'brand',
+  danger: 'inverse',
+  'danger-ghost': 'brand',
+  link: 'brand',
+};
 
 export function Button({
   label,
@@ -33,26 +51,35 @@ export function Button({
   leftIcon,
   rightIcon,
   disabled,
+  loading = false,
   ...rest
 }: ButtonProps) {
+  const isDisabled = disabled || loading;
+
   return (
     <Pressable
       {...rest}
-      disabled={disabled}
+      disabled={isDisabled}
       android_ripple={{ color: rippleColor[variant], borderless: false }}
       style={({ pressed }) => [
         baseStyles.button,
         sizeStyles[size],
         variantStyles[variant],
         fullWidth && baseStyles.fullWidth,
-        disabled && baseStyles.disabled,
+        disabled && !loading && baseStyles.disabled,
         pressed && pressedStyles[variant],
       ]}>
-      {leftIcon ? <View style={baseStyles.iconSlot}>{leftIcon}</View> : null}
-      <RNText style={[baseStyles.label, labelSizeStyles[size], labelVariantStyles[variant]]}>
-        {label}
-      </RNText>
-      {rightIcon ? <View style={baseStyles.iconSlot}>{rightIcon}</View> : null}
+      {loading ? (
+        <Spinner size={spinnerSizeBySize[size]} tone={spinnerToneByVariant[variant]} />
+      ) : (
+        <>
+          {leftIcon ? <View style={baseStyles.iconSlot}>{leftIcon}</View> : null}
+          <RNText style={[baseStyles.label, labelSizeStyles[size], labelVariantStyles[variant]]}>
+            {label}
+          </RNText>
+          {rightIcon ? <View style={baseStyles.iconSlot}>{rightIcon}</View> : null}
+        </>
+      )}
     </Pressable>
   );
 }

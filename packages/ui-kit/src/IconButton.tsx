@@ -5,7 +5,7 @@ import { borders } from './tokens/borders';
 import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 
-export type IconButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type IconButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'tint';
 export type IconButtonSize = 'sm' | 'md' | 'lg';
 
 export interface IconButtonProps extends Omit<PressableProps, 'style' | 'children'> {
@@ -99,5 +99,11 @@ const variantStyles: Record<
     pressed: { backgroundColor: '#B84A24' },
     iconColor: lightColors.onBrand,
     ripple: '#B84A24',
+  },
+  tint: {
+    container: { backgroundColor: lightColors.brandSubtle },
+    pressed: { backgroundColor: lightColors.brandSubtle },
+    iconColor: lightColors.brand,
+    ripple: lightColors.brand,
   },
 };

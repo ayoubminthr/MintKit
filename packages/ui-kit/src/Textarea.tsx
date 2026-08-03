@@ -29,15 +29,20 @@ export function Textarea({
   onFocus,
   onBlur,
   style,
+  value,
   ...rest
 }: TextareaProps) {
   const [focused, setFocused] = useState(false);
+  const isActive = focused || Boolean(value);
 
   return (
     <View style={styles.wrapper}>
-      {label ? <RNText style={styles.label}>{label}</RNText> : null}
+      {label ? (
+        <RNText style={[styles.label, isActive && styles.labelActive]}>{label}</RNText>
+      ) : null}
       <TextInput
         {...rest}
+        value={value}
         multiline
         textAlignVertical="top"
         placeholderTextColor={lightColors.textMuted}
@@ -52,7 +57,7 @@ export function Textarea({
         style={[
           styles.input,
           { textAlign: isRTL() ? 'right' : 'left' },
-          { minHeight: Math.max(rows, 1) * fontSize.md * lineHeight.normal + spacing[3] * 2 },
+          { minHeight: Math.max(rows, 1) * fontSize.sm * lineHeight.normal + spacing[3] * 2 },
           focused && styles.inputFocused,
           error ? styles.inputError : null,
           style,
@@ -75,7 +80,10 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
     fontWeight: fontWeight.medium,
-    color: lightColors.textSecondary,
+    color: lightColors.textMuted,
+  },
+  labelActive: {
+    color: lightColors.brand,
   },
   input: {
     paddingHorizontal: spacing[3],
@@ -85,10 +93,10 @@ const styles = StyleSheet.create({
     borderWidth: borders.hair,
     borderRadius: radius.md,
     fontFamily: fontFamily.sans,
-    fontSize: fontSize.md,
+    fontSize: fontSize.sm,
     fontWeight: fontWeight.regular,
     color: lightColors.textPrimary,
-    lineHeight: fontSize.md * lineHeight.normal,
+    lineHeight: fontSize.sm * lineHeight.normal,
   },
   inputFocused: {
     borderColor: lightColors.brand,

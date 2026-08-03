@@ -32,6 +32,7 @@ export function OtpInput({
 }: OtpInputProps) {
   const [focused, setFocused] = useState(false);
   const ref = useRef<TextInput>(null);
+  const isActive = focused || value.length > 0;
 
   useEffect(() => {
     if (value.length === length && onComplete) {
@@ -49,7 +50,7 @@ export function OtpInput({
   return (
     <View style={styles.wrapper}>
       {label ? (
-        <Text variant="caption" style={styles.label}>
+        <Text variant="caption" style={[styles.label, isActive && styles.labelActive]}>
           {label}
         </Text>
       ) : null}
@@ -104,7 +105,10 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: '500',
-    color: lightColors.textSecondary,
+    color: lightColors.textMuted,
+  },
+  labelActive: {
+    color: lightColors.brand,
   },
   cellsRow: {
     flexDirection: 'row',

@@ -18,7 +18,7 @@ export function ButtonBody() {
   return (
     <>
       <Text variant="body" tone="secondary">
-        Pressable action. 6 variants × 3 sizes, with disabled and full-width states.
+        Pressable action. 6 variants × 3 sizes, with disabled, full-width, and loading states.
       </Text>
 
       <Section label="Variants">
@@ -45,6 +45,14 @@ export function ButtonBody() {
           <Button label="Disabled primary" disabled onPress={() => {}} />
           <Button label="Disabled secondary" variant="secondary" disabled onPress={() => {}} />
           <Button label="Full width" fullWidth onPress={() => {}} />
+        </View>
+      </Section>
+
+      <Section label="Loading">
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+          <Button label="Primary" variant="primary" loading onPress={() => {}} />
+          <Button label="Secondary" variant="secondary" loading onPress={() => {}} />
+          <Button label="Danger" variant="danger" loading onPress={() => {}} />
         </View>
       </Section>
     </>

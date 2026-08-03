@@ -87,6 +87,17 @@ export function SelectBody() {
           disabled
         />
       </Section>
+
+      <Section label="Floating label (matches Input)">
+        <Select
+          options={departments}
+          value={dept}
+          onChange={setDept}
+          title="Choose department"
+          label="Department"
+          floating
+        />
+      </Section>
     </>
   );
 }

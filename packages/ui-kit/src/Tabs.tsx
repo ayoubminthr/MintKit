@@ -14,8 +14,10 @@ export interface TabsProps<T extends string = string> extends ViewProps {
   options: readonly TabOption<T>[];
   value: T;
   onChange: (value: T) => void;
-  /** Wrap many tabs into a horizontal scroller. Defaults to true. */
+  /** Wrap many tabs into a horizontal scroller. Defaults to true. Ignored when `fullWidth` is set. */
   scrollable?: boolean;
+  /** Stretch tabs to fill the available width, evenly spaced and centered. Disables scrolling. */
+  fullWidth?: boolean;
 }
 
 export function Tabs<T extends string = string>({
@@ -23,11 +25,12 @@ export function Tabs<T extends string = string>({
   value,
   onChange,
   scrollable = true,
+  fullWidth = false,
   style,
   ...rest
 }: TabsProps<T>) {
   const inner = (
-    <View style={styles.row}>
+    <View style={[styles.row, fullWidth && styles.rowFullWidth]}>
       {options.map((opt) => {
         const selected = opt.value === value;
         return (
@@ -36,11 +39,11 @@ export function Tabs<T extends string = string>({
             accessibilityRole="tab"
             accessibilityState={{ selected }}
             onPress={() => onChange(opt.value)}
-            style={[styles.tab, selected && styles.tabSelected]}>
+            style={[styles.tab, fullWidth && styles.tabFullWidth, selected && styles.tabSelected]}>
             <Text
               variant="body"
               tone={selected ? 'primary' : 'secondary'}
-              style={selected ? styles.labelSelected : undefined}>
+              style={[fullWidth && styles.labelCentered, selected && styles.labelSelected]}>
               {opt.label}
             </Text>
           </Pressable>
@@ -51,7 +54,7 @@ export function Tabs<T extends string = string>({
 
   return (
     <View {...rest} style={[styles.container, style]}>
-      {scrollable ? (
+      {scrollable && !fullWidth ? (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -77,6 +80,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing[1],
   },
+  rowFullWidth: {
+    width: '100%',
+  },
   baseline: {
     position: 'absolute',
     start: 0,
@@ -91,8 +97,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
   },
+  tabFullWidth: {
+    flex: 1,
+    alignItems: 'center',
+  },
   tabSelected: {
     borderBottomColor: lightColors.brand,
+  },
+  labelCentered: {
+    textAlign: 'center',
   },
   labelSelected: {
     fontWeight: '500',

@@ -23,6 +23,7 @@ export default function CalendarDemo() {
 export function CalendarBody() {
   const [single, setSingle] = useState<Date | null>(null);
   const [range, setRange] = useState<CalendarRange>({ start: null, end: null });
+  const [week, setWeek] = useState<CalendarRange>({ start: null, end: null });
   const [multi, setMulti] = useState<readonly Date[]>([]);
 
   const fmt = (d: Date | null) => (d ? d.toLocaleDateString() : '—');
@@ -41,7 +42,7 @@ export function CalendarBody() {
   return (
     <>
       <Text variant="body" tone="secondary">
-        Inline month-view date picker — single, range, or multi selection.
+        Inline month-view date picker — single, range, week, or multi selection.
         Use for scheduling, leave requests, and time-off bookings.
       </Text>
 
@@ -55,6 +56,12 @@ export function CalendarBody() {
         label="Range — start and end"
         description={`${fmt(range.start)} → ${fmt(range.end)}`}>
         <Calendar mode="range" value={range} onChange={setRange} />
+      </Section>
+
+      <Section
+        label="Week — tap any day to select its week"
+        description={`${fmt(week.start)} → ${fmt(week.end)}`}>
+        <Calendar mode="week" value={week} onChange={setWeek} />
       </Section>
 
       <Section

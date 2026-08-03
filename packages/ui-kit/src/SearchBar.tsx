@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     fontFamily: fontFamily.sans,
-    fontSize: fontSize.md,
+    fontSize: fontSize.sm,
     fontWeight: fontWeight.regular,
     color: lightColors.textPrimary,
     padding: 0,

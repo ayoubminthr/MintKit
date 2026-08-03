@@ -43,6 +43,12 @@ export function IconButtonBody() {
             variant="danger"
             onPress={() => {}}
           />
+          <IconButton
+            icon="arrow-left"
+            accessibilityLabel="Go back"
+            variant="tint"
+            onPress={() => {}}
+          />
         </View>
       </Section>
 

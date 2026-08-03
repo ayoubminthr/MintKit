@@ -26,9 +26,25 @@ export default function MultiSelectScreen() {
 export function MultiSelectBody() {
   const [values, setValues] = useState<string[]>([]);
   const [limitedValues, setLimitedValues] = useState<string[]>([]);
+  const [chipValues, setChipValues] = useState<string[]>(['react', 'vue']);
 
   return (
     <>
+      <View style={styles.section}>
+        <Text variant="subtitle">Chips trigger</Text>
+        <Text variant="body" tone="secondary">
+          Renders selected values as removable chips instead of a summary count.
+        </Text>
+        <MultiSelect
+          placeholder="Select technologies"
+          options={OPTIONS}
+          values={chipValues}
+          onChange={setChipValues}
+          allowSelectAll
+          chips
+        />
+      </View>
+
       <View style={styles.section}>
         <Text variant="subtitle">Basic MultiSelect</Text>
         <Text variant="body" tone="secondary">

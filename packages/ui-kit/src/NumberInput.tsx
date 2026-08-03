@@ -42,6 +42,7 @@ export function NumberInput({
   ...rest
 }: NumberInputProps) {
   const [focused, setFocused] = useState(false);
+  const isActive = focused || value !== null;
 
   const clamp = (n: number) => Math.min(max, Math.max(min, n));
   const inc = () => onChange(clamp((value ?? 0) + step));
@@ -53,7 +54,7 @@ export function NumberInput({
   return (
     <View style={styles.wrapper}>
       {label ? (
-        <Text variant="caption" style={styles.label}>
+        <Text variant="caption" style={[styles.label, isActive && styles.labelActive]}>
           {label}
         </Text>
       ) : null}
@@ -139,7 +140,10 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: '500',
-    color: lightColors.textSecondary,
+    color: lightColors.textMuted,
+  },
+  labelActive: {
+    color: lightColors.brand,
   },
   fieldWrap: {
     flexDirection: 'row',
@@ -176,7 +180,7 @@ const styles = StyleSheet.create({
     height: '100%',
     paddingHorizontal: spacing[3],
     fontFamily: fontFamily.sans,
-    fontSize: fontSize.md,
+    fontSize: fontSize.sm,
     fontWeight: fontWeight.regular,
     color: lightColors.textPrimary,
     textAlign: 'center',

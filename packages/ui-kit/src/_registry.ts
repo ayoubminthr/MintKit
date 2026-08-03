@@ -59,7 +59,7 @@ export const kitComponents: readonly KitComponentEntry[] = [
     path: '/input',
     category: 'Forms',
     status: 'ready',
-    description: 'Single-line text field with optional label, hint, and error state.',
+    description: 'Single-line text field with a floating notched label, hint/error state, and a built-in password show/hide toggle.',
   },
   {
     name: 'Avatar',
@@ -332,14 +332,14 @@ export const kitComponents: readonly KitComponentEntry[] = [
     path: '/date-picker',
     category: 'Forms',
     status: 'ready',
-    description: 'Date selection input using native pickers.',
+    description: 'Date input with a floating label — opens a BottomSheet calendar for single, range, week, or month selection.',
   },
   {
     name: 'TimePicker',
     path: '/time-picker',
     category: 'Forms',
     status: 'ready',
-    description: 'Time selection input using native pickers.',
+    description: 'Time input with a floating label — opens a BottomSheet with scrollable hour/minute columns for single or start/end range selection.',
   },
   {
     name: 'FileUpload',
@@ -409,7 +409,14 @@ export const kitComponents: readonly KitComponentEntry[] = [
     path: '/calendar',
     category: 'Forms',
     status: 'ready',
-    description: 'Inline month-view date picker — single / range / multi selection, today highlight, min/max bounds, disabled dates.',
+    description: 'Inline month-view date picker — single / range / week / multi selection, today highlight, min/max bounds, disabled dates.',
+  },
+  {
+    name: 'MonthPicker',
+    path: '/month-picker',
+    category: 'Forms',
+    status: 'ready',
+    description: 'Month + year grid picker for reporting periods and monthly filters. Pairs with DatePicker mode="month".',
   },
   {
     name: 'SelectableCard',

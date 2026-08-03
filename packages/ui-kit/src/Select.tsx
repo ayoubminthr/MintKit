@@ -1,12 +1,14 @@
 import { Feather } from '@expo/vector-icons';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Pressable, StyleSheet, View } from 'react-native';
 
 import { type SheetBodyProps, useSheet } from './SheetHost';
+import { Text } from './Text';
 import { borders } from './tokens/borders';
 import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
-import { Text } from './Text';
+import { fontFamily, fontSize } from './tokens/typography';
 
 export interface SelectOption<T extends string = string> {
   value: T;
@@ -23,6 +25,13 @@ export interface SelectProps<T extends string = string> {
   title?: string;
   disabled?: boolean;
   error?: string;
+  /**
+   * Label that animates like `Input`'s floating label: resting inside the
+   * field when empty and closed, floating above the border (brand-colored)
+   * once a value is selected or the picker sheet is open. Requires `label`.
+   */
+  floating?: boolean;
+  label?: string;
 }
 
 interface SelectSheetParams {
@@ -81,12 +90,39 @@ export function Select<T extends string = string>({
   title = 'Choose',
   disabled,
   error,
+  floating,
+  label,
 }: SelectProps<T>) {
   const sheet = useSheet();
   const selected = options.find((o) => o.value === value);
+  const hasValue = !!selected;
+
+  const [isOpen, setIsOpen] = useState(false);
+  const sheetIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!sheetIdRef.current) return;
+    const stillOpen = sheet.opened.some((s) => s.id === sheetIdRef.current);
+    if (!stillOpen) {
+      sheetIdRef.current = null;
+      setIsOpen(false);
+    }
+  }, [sheet.opened]);
+
+  const showFloating = floating && !!label;
+  const animRef = useRef(new Animated.Value(hasValue ? 1 : 0));
+
+  useEffect(() => {
+    if (!showFloating) return;
+    Animated.timing(animRef.current, {
+      toValue: hasValue || isOpen ? 1 : 0,
+      duration: 150,
+      useNativeDriver: false,
+    }).start();
+  }, [showFloating, hasValue, isOpen]);
 
   function handleOpen() {
-    sheet.open<SelectSheetParams>({
+    const handle = sheet.open<SelectSheetParams>({
       body: SelectSheetBody,
       params: {
         options: options as readonly SelectOption<string>[],
@@ -95,9 +131,11 @@ export function Select<T extends string = string>({
         title,
       },
     });
+    sheetIdRef.current = handle.id;
+    setIsOpen(true);
   }
 
-  return (
+  const field = (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={title}
@@ -105,6 +143,7 @@ export function Select<T extends string = string>({
       onPress={handleOpen}
       style={({ pressed }) => [
         styles.field,
+        isOpen && styles.fieldActive,
         error ? styles.fieldError : null,
         disabled && styles.fieldDisabled,
         pressed && styles.fieldPressed,
@@ -113,15 +152,48 @@ export function Select<T extends string = string>({
         variant="body"
         tone={selected ? 'primary' : 'muted'}
         numberOfLines={1}
-        style={styles.value}>
-        {selected ? selected.label : placeholder}
+        style={[styles.value, !selected && styles.placeholderText]}>
+        {selected ? selected.label : showFloating ? '' : placeholder}
       </Text>
       <Feather name="chevron-down" size={16} color={lightColors.textSecondary} />
     </Pressable>
   );
+
+  if (!showFloating) return field;
+
+  return (
+    <View style={styles.floatingWrapper}>
+      <Animated.Text
+        style={[
+          styles.floatingLabel,
+          {
+            top: animRef.current.interpolate({ inputRange: [0, 1], outputRange: [11, -8] }),
+            color: animRef.current.interpolate({
+              inputRange: [0, 1],
+              outputRange: [lightColors.textMuted, lightColors.brand],
+            }),
+          },
+        ]}>
+        {label}
+      </Animated.Text>
+      {field}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
+  floatingWrapper: {
+    position: 'relative',
+  },
+  floatingLabel: {
+    position: 'absolute',
+    start: 8,
+    zIndex: 999,
+    paddingHorizontal: 5,
+    backgroundColor: lightColors.surfacePrimary,
+    fontSize: fontSize.sm,
+    fontFamily: fontFamily.sansMedium,
+  },
   field: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -133,6 +205,10 @@ const styles = StyleSheet.create({
     borderWidth: borders.hair,
     borderRadius: radius.md,
     gap: spacing[2],
+  },
+  fieldActive: {
+    borderColor: lightColors.brand,
+    borderWidth: borders.thin,
   },
   fieldError: {
     borderColor: lightColors.danger,
@@ -146,6 +222,9 @@ const styles = StyleSheet.create({
   },
   value: {
     flex: 1,
+  },
+  placeholderText: {
+    fontSize: fontSize.sm,
   },
 });
 

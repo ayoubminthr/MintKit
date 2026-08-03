@@ -60,4 +60,5 @@ export * from './Spinner';
 export * from './Menu';
 export * from './Banner';
 export * from './Calendar';
+export * from './MonthPicker';
 export * from './SelectableCard';

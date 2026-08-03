@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   label: {
-    color: lightColors.textSecondary,
+    color: lightColors.textMuted,
     fontWeight: '500',
   },
 });

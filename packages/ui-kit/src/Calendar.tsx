@@ -14,18 +14,18 @@
  *   <Calendar mode="range" value={range} onChange={setRange} />
  */
 import { Feather } from '@expo/vector-icons';
-import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Pressable, StyleSheet, TextInput, View, type ViewProps } from 'react-native';
 
 import { Text } from './Text';
 import { borders } from './tokens/borders';
 import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
-import { fontWeight } from './tokens/typography';
+import { fontFamily, fontSize, fontWeight } from './tokens/typography';
 import { backChevron, forwardChevron } from './utils/rtl';
 
-export type CalendarMode = 'single' | 'range' | 'multi';
+export type CalendarMode = 'single' | 'range' | 'multi' | 'week';
 
 export type CalendarRange = { start: Date | null; end: Date | null };
 
@@ -37,6 +37,18 @@ interface CalendarBaseProps extends ViewProps {
   initialMonth?: Date;
   /** 0 = Sunday (default), 1 = Monday. */
   firstDayOfWeek?: 0 | 1;
+  /** Overrides the (English-default) month labels — pass localized names. */
+  monthNames?: readonly string[];
+  /** Overrides the (English-default) weekday labels — pass localized names, in the same order as `firstDayOfWeek`. */
+  weekdayNames?: readonly string[];
+  /** Bounds for the header's editable year field. Unbounded if omitted. */
+  minYear?: number;
+  maxYear?: number;
+  /**
+   * Per-date disable predicate, checked alongside `minDate`/`maxDate`/`disabledDates`.
+   * Use for rules a finite date list can't express (e.g. "every Sunday").
+   */
+  isDateDisabled?: (date: Date) => boolean;
 }
 
 interface CalendarSingleProps extends CalendarBaseProps {
@@ -57,7 +69,18 @@ interface CalendarMultiProps extends CalendarBaseProps {
   onChange: (value: readonly Date[]) => void;
 }
 
-export type CalendarProps = CalendarSingleProps | CalendarRangeProps | CalendarMultiProps;
+interface CalendarWeekProps extends CalendarBaseProps {
+  mode: 'week';
+  /** The bounds of the selected week — always 7 days apart. */
+  value: CalendarRange;
+  onChange: (value: CalendarRange) => void;
+}
+
+export type CalendarProps =
+  | CalendarSingleProps
+  | CalendarRangeProps
+  | CalendarMultiProps
+  | CalendarWeekProps;
 
 // ─── Date helpers (no external deps) ──────────────────────────────────────────
 
@@ -98,7 +121,18 @@ const WEEKDAY_NAMES_MON = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const CELL_SIZE = 40;
 
 export function Calendar(props: CalendarProps) {
-  const { minDate, maxDate, disabledDates, initialMonth, firstDayOfWeek = 0 } = props;
+  const {
+    minDate,
+    maxDate,
+    disabledDates,
+    initialMonth,
+    firstDayOfWeek = 0,
+    monthNames,
+    weekdayNames,
+    minYear,
+    maxYear,
+    isDateDisabled,
+  } = props;
   const restViewProps: ViewProps = {
     style: props.style,
     accessibilityLabel: props.accessibilityLabel,
@@ -114,6 +148,7 @@ export function Calendar(props: CalendarProps) {
     if (minDate && d < stripTime(minDate)) return true;
     if (maxDate && d > stripTime(maxDate)) return true;
     if (disabledDates && disabledDates.some((dd) => isSameDay(dd, d))) return true;
+    if (isDateDisabled?.(d)) return true;
     return false;
   };
 
@@ -131,7 +166,7 @@ export function Calendar(props: CalendarProps) {
   }, [visibleMonth, firstDayOfWeek]);
 
   const isSelected = (d: Date): boolean => {
-    if (props.mode === 'range') {
+    if (props.mode === 'range' || props.mode === 'week') {
       const { start, end } = props.value;
       return Boolean(
         (start && isSameDay(d, start)) || (end && isSameDay(d, end)),
@@ -144,7 +179,7 @@ export function Calendar(props: CalendarProps) {
   };
 
   const isInRange = (d: Date): boolean => {
-    if (props.mode !== 'range') return false;
+    if (props.mode !== 'range' && props.mode !== 'week') return false;
     const { start, end } = props.value;
     if (!start || !end) return false;
     const t = stripTime(d).getTime();
@@ -152,6 +187,14 @@ export function Calendar(props: CalendarProps) {
   };
 
   const handlePress = (d: Date) => {
+    if (props.mode === 'week') {
+      const dayOfWeek = d.getDay();
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const start = new Date(d.getFullYear(), d.getMonth(), d.getDate() + mondayOffset);
+      const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+      props.onChange({ start, end });
+      return;
+    }
     if (props.mode === 'range') {
       const { start, end } = props.value;
       if (!start || (start && end)) {
@@ -174,8 +217,8 @@ export function Calendar(props: CalendarProps) {
     props.onChange(d);
   };
 
-  const weekdays = firstDayOfWeek === 0 ? WEEKDAY_NAMES_SUN : WEEKDAY_NAMES_MON;
-  const monthLabel = `${MONTH_NAMES[visibleMonth.getMonth()]} ${visibleMonth.getFullYear()}`;
+  const weekdays = weekdayNames ?? (firstDayOfWeek === 0 ? WEEKDAY_NAMES_SUN : WEEKDAY_NAMES_MON);
+  const monthName = (monthNames ?? MONTH_NAMES)[visibleMonth.getMonth()];
 
   return (
     <View {...restViewProps} style={[styles.root, props.style]}>
@@ -185,9 +228,15 @@ export function Calendar(props: CalendarProps) {
           label="Previous month"
           onPress={() => setVisibleMonth(addMonths(visibleMonth, -1))}
         />
-        <Text variant="subtitle" style={styles.monthLabel}>
-          {monthLabel}
-        </Text>
+        <View style={styles.monthYearGroup}>
+          <Text variant="subtitle">{monthName}</Text>
+          <YearInput
+            year={visibleMonth.getFullYear()}
+            minYear={minYear}
+            maxYear={maxYear}
+            onChangeYear={(year) => setVisibleMonth(new Date(year, visibleMonth.getMonth(), 1))}
+          />
+        </View>
         <NavButton
           icon={forwardChevron()}
           label="Next month"
@@ -232,6 +281,55 @@ export function Calendar(props: CalendarProps) {
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
+
+function YearInput({
+  year,
+  minYear,
+  maxYear,
+  onChangeYear,
+}: {
+  year: number;
+  minYear?: number;
+  maxYear?: number;
+  onChangeYear: (year: number) => void;
+}) {
+  const [text, setText] = useState(String(year));
+  const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    if (!focused) setText(String(year));
+  }, [year, focused]);
+
+  const isInBounds = (n: number) =>
+    (minYear === undefined || n >= minYear) && (maxYear === undefined || n <= maxYear);
+
+  return (
+    <TextInput
+      value={text}
+      onChangeText={(raw) => {
+        const numeric = raw.replace(/[^0-9]/g, '');
+        setText(numeric);
+        if (numeric.length === 4) {
+          const parsed = parseInt(numeric, 10);
+          if (isInBounds(parsed)) onChangeYear(parsed);
+        }
+      }}
+      onFocus={() => setFocused(true)}
+      onBlur={() => {
+        setFocused(false);
+        const parsed = parseInt(text, 10);
+        if (text.length !== 4 || Number.isNaN(parsed) || !isInBounds(parsed)) {
+          setText(String(year));
+        }
+      }}
+      keyboardType="number-pad"
+      maxLength={4}
+      selectTextOnFocus
+      accessibilityLabel="Year"
+      style={styles.yearInput}
+    />
+  );
+}
 
 function NavButton({
   icon,
@@ -319,9 +417,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[2],
   },
-  monthLabel: {
+  monthYearGroup: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[1],
+  },
+  yearInput: {
+    minWidth: 44,
+    paddingHorizontal: spacing[1],
+    fontFamily: fontFamily.sansMedium,
+    fontSize: fontSize.md,
+    color: lightColors.textPrimary,
     textAlign: 'center',
+    borderBottomWidth: borders.thin,
+    borderBottomColor: lightColors.brand,
   },
   navButton: {
     width: 36,

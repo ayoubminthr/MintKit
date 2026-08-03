@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { Input, Text, lightColors, spacing } from '@minthr-saas/mobile-ui-kit';
 
@@ -23,13 +23,15 @@ export function InputBody() {
   const [email, setEmail] = useState('');
   const [search, setSearch] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [floatingValue, setFloatingValue] = useState('');
 
   return (
     <>
       <Text variant="body" tone="secondary">
         Single-line text field. Optional label, hint, error, and `leftIcon` / `rightIcon` slots.
-        Border switches to brand on focus.
+        Border switches to brand on focus. `label` renders as a notch above the border; add
+        `floating` to animate it between a resting placeholder-like position and the notch.
+        `secureTextEntry` gets a built-in show/hide toggle for free.
       </Text>
 
       <Section label="Plain">
@@ -67,27 +69,23 @@ export function InputBody() {
         />
       </Section>
 
-      <Section label="Password (with right icon toggle)">
+      <Section label="Password (built-in show/hide toggle)">
         <Input
           label="Password"
           placeholder="••••••••"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry={!showPassword}
+          secureTextEntry
           autoCapitalize="none"
-          rightIcon={
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
-              hitSlop={6}
-              onPress={() => setShowPassword((v) => !v)}>
-              <Feather
-                name={showPassword ? 'eye-off' : 'eye'}
-                size={14}
-                color={lightColors.textMuted}
-              />
-            </Pressable>
-          }
+        />
+      </Section>
+
+      <Section label="Floating label">
+        <Input
+          label="Job title"
+          value={floatingValue}
+          onChangeText={setFloatingValue}
+          floating
         />
       </Section>
 
@@ -108,6 +106,15 @@ export function InputBody() {
         <View style={{ gap: spacing[2] }}>
           <Input label="Department" value="Operations" editable={false} />
         </View>
+      </Section>
+
+      <Section label="Multiline">
+        <Input
+          label="Notes"
+          placeholder="Add any additional context..."
+          multiline
+          numberOfLines={4}
+        />
       </Section>
     </>
   );
