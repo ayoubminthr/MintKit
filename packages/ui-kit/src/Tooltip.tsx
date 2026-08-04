@@ -3,6 +3,7 @@ import {
   isValidElement,
   type ReactElement,
   type ReactNode,
+  useMemo,
   useState,
 } from 'react';
 import {
@@ -14,12 +15,13 @@ import {
   type ViewProps,
 } from 'react-native';
 
+import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors, palette } from './tokens/colors';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { shadows } from './tokens/shadows';
 import { spacing } from './tokens/spacing';
-import { Text } from './Text';
 
 export interface TooltipProps {
   label: string;
@@ -36,6 +38,13 @@ export interface TooltipProps {
  * canonical disclosure gesture.
  */
 export function Tooltip({ label, children }: TooltipProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      label: { color: colors.textInverse },
+    }),
+    [colors],
+  );
   const [open, setOpen] = useState(false);
 
   const trigger = isValidElement(children)
@@ -55,7 +64,7 @@ export function Tooltip({ label, children }: TooltipProps) {
         <TouchableWithoutFeedback onPress={() => setOpen(false)}>
           <View style={styles.backdrop}>
             <View style={[styles.bubble, shadows.md]}>
-              <Text variant="caption" tone="inverse" style={styles.label}>
+              <Text variant="caption" tone="inverse" style={dynamicStyles.label}>
                 {label}
               </Text>
             </View>
@@ -99,8 +108,5 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[2],
     borderWidth: borders.hair,
     borderColor: palette.gray[700],
-  },
-  label: {
-    color: lightColors.textInverse,
   },
 });

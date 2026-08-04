@@ -1,10 +1,10 @@
-import { createContext, type ReactNode, useContext } from 'react';
+import { createContext, type ReactNode, useContext, useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
-import { spacing } from './tokens/spacing';
 import { Text } from './Text';
+import { useTheme } from './Theme';
+import { borders } from './tokens/borders';
+import { spacing } from './tokens/spacing';
 
 const RING_SIZE = 18;
 const DOT_SIZE = 8;
@@ -53,12 +53,22 @@ export interface RadioProps {
 }
 
 export function Radio({ value, label, description, disabled: localDisabled }: RadioProps) {
+  const { colors } = useTheme();
   const ctx = useContext(RadioGroupContext);
   if (!ctx) {
     throw new Error('Radio must be used inside a RadioGroup.');
   }
   const selected = ctx.value === value;
   const disabled = localDisabled || ctx.disabled;
+
+  const dynamicStyles = useMemo(
+    () => ({
+      ringEmpty: { backgroundColor: colors.surfacePrimary, borderColor: colors.borderStrong },
+      ringSelected: { backgroundColor: colors.surfacePrimary, borderColor: colors.brand },
+      dot: { backgroundColor: colors.brand },
+    }),
+    [colors],
+  );
 
   return (
     <Pressable
@@ -69,8 +79,13 @@ export function Radio({ value, label, description, disabled: localDisabled }: Ra
         ctx.onChange(value);
       }}
       style={[styles.row, disabled && styles.rowDisabled]}>
-      <View style={[styles.ring, selected ? styles.ringSelected : styles.ringEmpty]}>
-        {selected ? <View style={styles.dot} /> : null}
+      <View
+        style={[
+          styles.ring,
+          selected ? styles.ringSelected : styles.ringEmpty,
+          selected ? dynamicStyles.ringSelected : dynamicStyles.ringEmpty,
+        ]}>
+        {selected ? <View style={[styles.dot, dynamicStyles.dot]} /> : null}
       </View>
       {label || description ? (
         <View style={styles.textBlock}>
@@ -114,20 +129,15 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   ringEmpty: {
-    backgroundColor: lightColors.surfacePrimary,
     borderWidth: borders.thin,
-    borderColor: lightColors.borderStrong,
   },
   ringSelected: {
-    backgroundColor: lightColors.surfacePrimary,
     borderWidth: borders.thin,
-    borderColor: lightColors.brand,
   },
   dot: {
     width: DOT_SIZE,
     height: DOT_SIZE,
     borderRadius: DOT_SIZE / 2,
-    backgroundColor: lightColors.brand,
   },
   textBlock: {
     flexShrink: 1,

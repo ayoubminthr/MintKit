@@ -6,7 +6,7 @@
  *   <SearchBar value={q} onChangeText={setQ} showCancel onCancel={handleCancel} />
  */
 import { Feather } from '@expo/vector-icons';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   Keyboard,
   Pressable,
@@ -17,8 +17,8 @@ import {
 } from 'react-native';
 
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize, fontWeight } from './tokens/typography';
@@ -49,6 +49,15 @@ export function SearchBar({
   onBlur,
   ...rest
 }: SearchBarProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      fieldWrap: { backgroundColor: colors.surfaceSubtle, borderColor: colors.border },
+      fieldWrapFocused: { borderColor: colors.brand, backgroundColor: colors.surfacePrimary },
+      input: { color: colors.textPrimary },
+    }),
+    [colors],
+  );
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const showCancelButton = showCancel && (focused || value.length > 0);
@@ -73,11 +82,12 @@ export function SearchBar({
       <View
         style={[
           styles.fieldWrap,
-          focused && styles.fieldWrapFocused,
+          dynamicStyles.fieldWrap,
+          focused && [styles.fieldWrapFocused, dynamicStyles.fieldWrapFocused],
           disabled && styles.fieldWrapDisabled,
         ]}>
         <View style={styles.iconStart}>
-          <Feather name="search" size={16} color={lightColors.textMuted} />
+          <Feather name="search" size={16} color={colors.textMuted} />
         </View>
         <TextInput
           {...rest}
@@ -85,7 +95,7 @@ export function SearchBar({
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={lightColors.textMuted}
+          placeholderTextColor={colors.textMuted}
           editable={!disabled}
           returnKeyType="search"
           clearButtonMode="never"
@@ -99,7 +109,7 @@ export function SearchBar({
             setFocused(false);
             onBlur?.(e);
           }}
-          style={[styles.input, { textAlign: isRTL() ? 'right' : 'left' }]}
+          style={[styles.input, dynamicStyles.input, { textAlign: isRTL() ? 'right' : 'left' }]}
         />
         {value.length > 0 ? (
           <Pressable
@@ -108,7 +118,7 @@ export function SearchBar({
             onPress={handleClear}
             hitSlop={6}
             style={styles.iconEnd}>
-            <Feather name="x-circle" size={16} color={lightColors.textMuted} />
+            <Feather name="x-circle" size={16} color={colors.textMuted} />
           </Pressable>
         ) : null}
       </View>
@@ -140,17 +150,13 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: lightColors.surfaceSubtle,
-    borderColor: lightColors.border,
     borderWidth: borders.hair,
     borderRadius: radius.lg,
     height: FIELD_HEIGHT,
     paddingHorizontal: spacing[2],
   },
   fieldWrapFocused: {
-    borderColor: lightColors.brand,
     borderWidth: borders.thin,
-    backgroundColor: lightColors.surfacePrimary,
   },
   fieldWrapDisabled: {
     opacity: 0.5,
@@ -172,7 +178,6 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
     fontWeight: fontWeight.regular,
-    color: lightColors.textPrimary,
     padding: 0,
   },
   cancelButton: {

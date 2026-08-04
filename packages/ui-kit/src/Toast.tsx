@@ -12,12 +12,13 @@ import {
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors, palette } from './tokens/colors';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { shadows } from './tokens/shadows';
 import { spacing } from './tokens/spacing';
-import { Text } from './Text';
 
 export type ToastVariant = 'info' | 'success' | 'warning' | 'danger';
 
@@ -131,6 +132,52 @@ function ToastView({
   entry: ToastEntry;
   onDismiss: (id: string) => void;
 }) {
+  const { colors } = useTheme();
+  const variantStyles = useMemo<
+    Record<
+      ToastVariant,
+      {
+        container: object;
+        icon: React.ComponentProps<typeof Feather>['name'];
+        iconColor: string;
+        titleColor: string;
+        descColor: string;
+      }
+    >
+  >(
+    () => ({
+      info: {
+        container: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+        icon: 'info',
+        iconColor: palette.info[500],
+        titleColor: colors.textPrimary,
+        descColor: colors.textSecondary,
+      },
+      success: {
+        container: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+        icon: 'check-circle',
+        iconColor: palette.success[500],
+        titleColor: colors.textPrimary,
+        descColor: colors.textSecondary,
+      },
+      warning: {
+        container: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+        icon: 'alert-triangle',
+        iconColor: palette.warning[500],
+        titleColor: colors.textPrimary,
+        descColor: colors.textSecondary,
+      },
+      danger: {
+        container: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+        icon: 'alert-octagon',
+        iconColor: palette.danger[500],
+        titleColor: colors.textPrimary,
+        descColor: colors.textSecondary,
+      },
+    }),
+    [colors],
+  );
+
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(-16)).current;
 
@@ -218,43 +265,3 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
 });
-
-const variantStyles: Record<
-  ToastVariant,
-  {
-    container: object;
-    icon: React.ComponentProps<typeof Feather>['name'];
-    iconColor: string;
-    titleColor: string;
-    descColor: string;
-  }
-> = {
-  info: {
-    container: { backgroundColor: lightColors.surfacePrimary, borderColor: lightColors.border },
-    icon: 'info',
-    iconColor: palette.info[500],
-    titleColor: lightColors.textPrimary,
-    descColor: lightColors.textSecondary,
-  },
-  success: {
-    container: { backgroundColor: lightColors.surfacePrimary, borderColor: lightColors.border },
-    icon: 'check-circle',
-    iconColor: palette.success[500],
-    titleColor: lightColors.textPrimary,
-    descColor: lightColors.textSecondary,
-  },
-  warning: {
-    container: { backgroundColor: lightColors.surfacePrimary, borderColor: lightColors.border },
-    icon: 'alert-triangle',
-    iconColor: palette.warning[500],
-    titleColor: lightColors.textPrimary,
-    descColor: lightColors.textSecondary,
-  },
-  danger: {
-    container: { backgroundColor: lightColors.surfacePrimary, borderColor: lightColors.border },
-    icon: 'alert-octagon',
-    iconColor: palette.danger[500],
-    titleColor: lightColors.textPrimary,
-    descColor: lightColors.textSecondary,
-  },
-};

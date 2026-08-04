@@ -10,7 +10,7 @@
  *   <TimePicker mode="range" value={range} onChange={setRange} label="Working hours" floating />
  */
 import { Feather } from '@expo/vector-icons';
-import { type RefObject, useEffect, useRef, useState } from 'react';
+import { type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Button } from './Button';
@@ -18,8 +18,8 @@ import { type SheetBodyProps, useSheet } from './SheetHost';
 import { SheetHeader } from './SheetHeader';
 import { Tabs } from './Tabs';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize } from './tokens/typography';
@@ -231,12 +231,22 @@ function TimeColumn({
   formatValue: (value: number) => string;
   label: string;
 }) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      columnScrollWrap: { backgroundColor: colors.surfaceSubtle },
+      rowPressed: { backgroundColor: colors.surfacePrimary },
+      rowSelected: { backgroundColor: colors.brand },
+    }),
+    [colors],
+  );
+
   return (
     <View style={sheetStyles.column}>
       <Text variant="caption" tone="muted" style={sheetStyles.columnLabel}>
         {label}
       </Text>
-      <View style={sheetStyles.columnScrollWrap}>
+      <View style={[sheetStyles.columnScrollWrap, dynamicStyles.columnScrollWrap]}>
         <ScrollView ref={scrollRef} showsVerticalScrollIndicator={false}>
           {values.map((v) => {
             const isSelected = v === selected;
@@ -246,15 +256,15 @@ function TimeColumn({
                 accessibilityRole="button"
                 accessibilityState={{ selected: isSelected }}
                 onPress={() => onSelect(v)}
-                android_ripple={{ color: lightColors.surfaceSubtle }}
+                android_ripple={{ color: colors.surfaceSubtle }}
                 style={({ pressed }) => [
                   sheetStyles.row,
-                  isSelected && sheetStyles.rowSelected,
-                  pressed && !isSelected && sheetStyles.rowPressed,
+                  isSelected && dynamicStyles.rowSelected,
+                  pressed && !isSelected && dynamicStyles.rowPressed,
                 ]}>
                 <Text
                   variant="body"
-                  style={{ color: isSelected ? lightColors.onBrand : lightColors.textPrimary }}>
+                  style={{ color: isSelected ? colors.onBrand : colors.textPrimary }}>
                   {formatValue(v)}
                 </Text>
               </Pressable>
@@ -270,6 +280,18 @@ function TimeColumn({
 
 export function TimePicker(props: TimePickerProps) {
   const { label, floating, placeholder = 'Select a time', title, disabled, error, hint } = props;
+
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      floatingLabel: { backgroundColor: colors.surfacePrimary },
+      field: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+      fieldActive: { borderColor: colors.brand },
+      fieldError: { borderColor: colors.danger },
+      fieldPressed: { backgroundColor: colors.surfaceSubtle },
+    }),
+    [colors],
+  );
 
   const sheet = useSheet();
   const [isOpen, setIsOpen] = useState(false);
@@ -316,10 +338,13 @@ export function TimePicker(props: TimePickerProps) {
       onPress={handleOpen}
       style={({ pressed }) => [
         styles.field,
+        dynamicStyles.field,
         isOpen && styles.fieldActive,
+        isOpen && dynamicStyles.fieldActive,
         error ? styles.fieldError : null,
+        error ? dynamicStyles.fieldError : null,
         disabled && styles.fieldDisabled,
-        pressed && styles.fieldPressed,
+        pressed && dynamicStyles.fieldPressed,
       ]}>
       <Text
         variant="body"
@@ -331,7 +356,7 @@ export function TimePicker(props: TimePickerProps) {
       <Feather
         name="clock"
         size={16}
-        color={disabled ? lightColors.textMuted : lightColors.textSecondary}
+        color={disabled ? colors.textMuted : colors.textSecondary}
       />
     </Pressable>
   );
@@ -349,11 +374,12 @@ export function TimePicker(props: TimePickerProps) {
           <Animated.Text
             style={[
               styles.floatingLabel,
+              dynamicStyles.floatingLabel,
               {
                 top: animRef.current.interpolate({ inputRange: [0, 1], outputRange: [11, -8] }),
                 color: animRef.current.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [lightColors.textMuted, lightColors.brand],
+                  outputRange: [colors.textMuted, colors.brand],
                 }),
               },
             ]}>
@@ -395,7 +421,6 @@ const styles = StyleSheet.create({
     start: 8,
     zIndex: 999,
     paddingHorizontal: 5,
-    backgroundColor: lightColors.surfacePrimary,
     fontSize: fontSize.sm,
     fontFamily: fontFamily.sansMedium,
   },
@@ -405,25 +430,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     height: 40,
     paddingHorizontal: spacing[3],
-    backgroundColor: lightColors.surfacePrimary,
-    borderColor: lightColors.border,
     borderWidth: borders.hair,
     borderRadius: radius.md,
     gap: spacing[2],
   },
   fieldActive: {
-    borderColor: lightColors.brand,
     borderWidth: borders.thin,
   },
   fieldError: {
-    borderColor: lightColors.danger,
     borderWidth: borders.thin,
   },
   fieldDisabled: {
     opacity: 0.5,
-  },
-  fieldPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
   },
   value: {
     flex: 1,
@@ -457,7 +475,6 @@ const sheetStyles = StyleSheet.create({
     height: COLUMN_HEIGHT,
     width: '100%',
     borderRadius: radius.md,
-    backgroundColor: lightColors.surfaceSubtle,
   },
   row: {
     height: ROW_HEIGHT,
@@ -466,12 +483,6 @@ const sheetStyles = StyleSheet.create({
     marginHorizontal: spacing[2],
     marginVertical: 2,
     borderRadius: radius.md,
-  },
-  rowPressed: {
-    backgroundColor: lightColors.surfacePrimary,
-  },
-  rowSelected: {
-    backgroundColor: lightColors.brand,
   },
   footer: {
     // Same fixed buffer as DatePicker's sheet footer, for visual consistency

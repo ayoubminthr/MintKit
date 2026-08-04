@@ -1,11 +1,11 @@
 import { Feather } from '@expo/vector-icons';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 
 import { type SheetBodyProps, useSheet } from './SheetHost';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize } from './tokens/typography';
@@ -42,10 +42,20 @@ interface SelectSheetParams {
 }
 
 function SelectSheetBody({ params, handleClose = () => {} }: SheetBodyProps<SelectSheetParams>) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      titleWrap: { borderBottomColor: colors.border },
+      optionDivider: { borderTopColor: colors.border },
+      optionPressed: { backgroundColor: colors.surfaceSubtle },
+    }),
+    [colors],
+  );
+
   return (
     <View style={sheetStyles.container}>
       {params.title ? (
-        <View style={sheetStyles.titleWrap}>
+        <View style={[sheetStyles.titleWrap, dynamicStyles.titleWrap]}>
           <Text variant="subtitle">{params.title}</Text>
         </View>
       ) : null}
@@ -62,7 +72,8 @@ function SelectSheetBody({ params, handleClose = () => {} }: SheetBodyProps<Sele
             style={({ pressed }) => [
               sheetStyles.option,
               idx > 0 && sheetStyles.optionDivider,
-              pressed && sheetStyles.optionPressed,
+              idx > 0 && dynamicStyles.optionDivider,
+              pressed && dynamicStyles.optionPressed,
             ]}>
             <View style={sheetStyles.optionText}>
               <Text variant="body">{opt.label}</Text>
@@ -73,7 +84,7 @@ function SelectSheetBody({ params, handleClose = () => {} }: SheetBodyProps<Sele
               ) : null}
             </View>
             {isSelected ? (
-              <Feather name="check" size={16} color={lightColors.brand} />
+              <Feather name="check" size={16} color={colors.brand} />
             ) : null}
           </Pressable>
         );
@@ -93,6 +104,17 @@ export function Select<T extends string = string>({
   floating,
   label,
 }: SelectProps<T>) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      floatingLabel: { backgroundColor: colors.surfacePrimary },
+      field: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+      fieldActive: { borderColor: colors.brand },
+      fieldError: { borderColor: colors.danger },
+      fieldPressed: { backgroundColor: colors.surfaceSubtle },
+    }),
+    [colors],
+  );
   const sheet = useSheet();
   const selected = options.find((o) => o.value === value);
   const hasValue = !!selected;
@@ -143,10 +165,13 @@ export function Select<T extends string = string>({
       onPress={handleOpen}
       style={({ pressed }) => [
         styles.field,
+        dynamicStyles.field,
         isOpen && styles.fieldActive,
+        isOpen && dynamicStyles.fieldActive,
         error ? styles.fieldError : null,
+        error ? dynamicStyles.fieldError : null,
         disabled && styles.fieldDisabled,
-        pressed && styles.fieldPressed,
+        pressed && dynamicStyles.fieldPressed,
       ]}>
       <Text
         variant="body"
@@ -155,7 +180,7 @@ export function Select<T extends string = string>({
         style={[styles.value, !selected && styles.placeholderText]}>
         {selected ? selected.label : showFloating ? '' : placeholder}
       </Text>
-      <Feather name="chevron-down" size={16} color={lightColors.textSecondary} />
+      <Feather name="chevron-down" size={16} color={colors.textSecondary} />
     </Pressable>
   );
 
@@ -166,11 +191,12 @@ export function Select<T extends string = string>({
       <Animated.Text
         style={[
           styles.floatingLabel,
+          dynamicStyles.floatingLabel,
           {
             top: animRef.current.interpolate({ inputRange: [0, 1], outputRange: [11, -8] }),
             color: animRef.current.interpolate({
               inputRange: [0, 1],
-              outputRange: [lightColors.textMuted, lightColors.brand],
+              outputRange: [colors.textMuted, colors.brand],
             }),
           },
         ]}>
@@ -190,7 +216,6 @@ const styles = StyleSheet.create({
     start: 8,
     zIndex: 999,
     paddingHorizontal: 5,
-    backgroundColor: lightColors.surfacePrimary,
     fontSize: fontSize.sm,
     fontFamily: fontFamily.sansMedium,
   },
@@ -200,25 +225,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     height: 40,
     paddingHorizontal: spacing[3],
-    backgroundColor: lightColors.surfacePrimary,
-    borderColor: lightColors.border,
     borderWidth: borders.hair,
     borderRadius: radius.md,
     gap: spacing[2],
   },
   fieldActive: {
-    borderColor: lightColors.brand,
     borderWidth: borders.thin,
   },
   fieldError: {
-    borderColor: lightColors.danger,
     borderWidth: borders.thin,
   },
   fieldDisabled: {
     opacity: 0.5,
-  },
-  fieldPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
   },
   value: {
     flex: 1,
@@ -236,7 +254,6 @@ const sheetStyles = StyleSheet.create({
   titleWrap: {
     paddingVertical: spacing[3],
     borderBottomWidth: borders.hair,
-    borderBottomColor: lightColors.border,
     marginBottom: spacing[2],
   },
   option: {
@@ -248,10 +265,6 @@ const sheetStyles = StyleSheet.create({
   },
   optionDivider: {
     borderTopWidth: borders.hair,
-    borderTopColor: lightColors.border,
-  },
-  optionPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
   },
   optionText: {
     flex: 1,

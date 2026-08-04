@@ -3,7 +3,7 @@ import { type ReactNode } from 'react';
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Text } from './Text';
-import { lightColors } from './tokens/colors';
+import { useTheme } from './Theme';
 import { spacing } from './tokens/spacing';
 import { fontWeight } from './tokens/typography';
 
@@ -32,6 +32,8 @@ export function SheetHeader({
   leftAccessory,
   style,
 }: SheetHeaderComponentProps) {
+  const { colors } = useTheme();
+
   return (
     <View style={[styles.wrapper, style]}>
       <View style={styles.content}>
@@ -67,7 +69,7 @@ export function SheetHeader({
               accessibilityLabel="Close"
               hitSlop={spacing[2]}
               onPress={onClose}>
-              <Feather name="x" size={20} color={lightColors.textSecondary} />
+              <Feather name="x" size={20} color={colors.textSecondary} />
             </Pressable>
           ) : null}
         </View>

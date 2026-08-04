@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   Text as RNText,
   type TextProps as RNTextProps,
@@ -5,8 +6,8 @@ import {
   StyleSheet,
 } from 'react-native';
 
+import { useTheme } from './Theme';
 import { fontFamily, fontSize, fontWeight, lineHeight, sansForWeight, scaleFont } from './tokens/typography';
-import { lightColors } from './tokens/colors';
 
 export type TextVariant = 'title' | 'subtitle' | 'body' | 'caption' | 'mono';
 export type TextTone = 'primary' | 'secondary' | 'muted' | 'inverse' | 'brand' | 'danger';
@@ -38,6 +39,20 @@ const variantLineHeight: Record<TextVariant, number> = {
 };
 
 export function Text({ variant = 'body', tone = 'primary', scaled = true, style, ...rest }: TextProps) {
+  const { colors } = useTheme();
+
+  const toneStyles = useMemo<Record<TextTone, TextStyle>>(
+    () => ({
+      primary: { color: colors.textPrimary },
+      secondary: { color: colors.textSecondary },
+      muted: { color: colors.textMuted },
+      inverse: { color: colors.textInverse },
+      brand: { color: colors.brand },
+      danger: { color: colors.danger },
+    }),
+    [colors],
+  );
+
   // Custom fonts select by family name, not fontWeight. If a caller overrides
   // the weight inline (e.g. a medium value in a body row) without naming a
   // family, remap to the matching Inter face so the weight actually renders.
@@ -99,13 +114,4 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.regular,
     lineHeight: fontSize.sm * lineHeight.normal,
   },
-});
-
-const toneStyles = StyleSheet.create({
-  primary: { color: lightColors.textPrimary },
-  secondary: { color: lightColors.textSecondary },
-  muted: { color: lightColors.textMuted },
-  inverse: { color: lightColors.textInverse },
-  brand: { color: lightColors.brand },
-  danger: { color: lightColors.danger },
 });

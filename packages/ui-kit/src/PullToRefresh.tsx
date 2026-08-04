@@ -19,23 +19,24 @@ import {
   type ScrollViewProps,
 } from 'react-native';
 
-import { lightColors } from './tokens/colors';
+import { useTheme } from './Theme';
 
 export interface KitRefreshControlProps
   extends Omit<RefreshControlProps, 'tintColor' | 'colors' | 'progressBackgroundColor'> {
-  /** Override the spinner / progress color. Defaults to lightColors.brand. */
+  /** Override the spinner / progress color. Defaults to colors.brand. */
   tint?: string;
 }
 
 /** Pre-styled RefreshControl. Pass to `refreshControl` on ScrollView / FlatList. */
 export function KitRefreshControl({ tint, ...rest }: KitRefreshControlProps) {
-  const color = tint ?? lightColors.brand;
+  const { colors } = useTheme();
+  const color = tint ?? colors.brand;
   return (
     <RefreshControl
       {...rest}
       tintColor={color}
       colors={[color]}
-      progressBackgroundColor={lightColors.surfacePrimary}
+      progressBackgroundColor={colors.surfacePrimary}
     />
   );
 }
@@ -43,7 +44,7 @@ export function KitRefreshControl({ tint, ...rest }: KitRefreshControlProps) {
 export interface PullToRefreshProps extends Omit<ScrollViewProps, 'refreshControl'> {
   refreshing: boolean;
   onRefresh: () => void;
-  /** Override the spinner / progress color. Defaults to lightColors.brand. */
+  /** Override the spinner / progress color. Defaults to colors.brand. */
   tint?: string;
 }
 

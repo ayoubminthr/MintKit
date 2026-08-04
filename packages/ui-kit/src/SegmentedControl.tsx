@@ -1,10 +1,12 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 
+import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors, palette } from './tokens/colors';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
-import { Text } from './Text';
 
 export interface SegmentedOption<T extends string = string> {
   value: T;
@@ -28,6 +30,14 @@ export function SegmentedControl<T extends string = string>({
   style,
   ...rest
 }: SegmentedControlProps<T>) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      segmentSelected: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+    }),
+    [colors],
+  );
+
   return (
     <View
       {...rest}
@@ -41,7 +51,12 @@ export function SegmentedControl<T extends string = string>({
             accessibilityState={{ selected, disabled }}
             disabled={disabled}
             onPress={() => onChange(opt.value)}
-            style={[styles.segment, fullWidth && styles.segmentFlex, selected && styles.segmentSelected]}>
+            style={[
+              styles.segment,
+              fullWidth && styles.segmentFlex,
+              selected && styles.segmentSelected,
+              selected && dynamicStyles.segmentSelected,
+            ]}>
             <Text
               variant="caption"
               tone={selected ? 'primary' : 'secondary'}
@@ -81,9 +96,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   segmentSelected: {
-    backgroundColor: lightColors.surfacePrimary,
     borderWidth: borders.hair,
-    borderColor: lightColors.border,
   },
   labelSelected: {
     fontWeight: '500',

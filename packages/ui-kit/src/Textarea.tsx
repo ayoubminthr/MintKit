@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   StyleSheet,
   Text as RNText,
@@ -7,8 +7,8 @@ import {
   View,
 } from 'react-native';
 
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize, fontWeight, lineHeight } from './tokens/typography';
@@ -32,20 +32,40 @@ export function Textarea({
   value,
   ...rest
 }: TextareaProps) {
+  const { colors } = useTheme();
   const [focused, setFocused] = useState(false);
   const isActive = focused || Boolean(value);
+
+  const dynamicStyles = useMemo(
+    () => ({
+      label: { color: colors.textMuted },
+      labelActive: { color: colors.brand },
+      input: {
+        backgroundColor: colors.surfacePrimary,
+        borderColor: colors.border,
+        color: colors.textPrimary,
+      },
+      inputFocused: { borderColor: colors.brand },
+      inputError: { borderColor: colors.danger },
+      hint: { color: colors.textMuted },
+      error: { color: colors.danger },
+    }),
+    [colors],
+  );
 
   return (
     <View style={styles.wrapper}>
       {label ? (
-        <RNText style={[styles.label, isActive && styles.labelActive]}>{label}</RNText>
+        <RNText style={[styles.label, dynamicStyles.label, isActive && dynamicStyles.labelActive]}>
+          {label}
+        </RNText>
       ) : null}
       <TextInput
         {...rest}
         value={value}
         multiline
         textAlignVertical="top"
-        placeholderTextColor={lightColors.textMuted}
+        placeholderTextColor={colors.textMuted}
         onFocus={(e) => {
           setFocused(true);
           onFocus?.(e);
@@ -56,17 +76,18 @@ export function Textarea({
         }}
         style={[
           styles.input,
+          dynamicStyles.input,
           { textAlign: isRTL() ? 'right' : 'left' },
           { minHeight: Math.max(rows, 1) * fontSize.sm * lineHeight.normal + spacing[3] * 2 },
-          focused && styles.inputFocused,
-          error ? styles.inputError : null,
+          focused && [styles.inputFocused, dynamicStyles.inputFocused],
+          error ? [styles.inputError, dynamicStyles.inputError] : null,
           style,
         ]}
       />
       {error ? (
-        <RNText style={styles.error}>{error}</RNText>
+        <RNText style={[styles.error, dynamicStyles.error]}>{error}</RNText>
       ) : hint ? (
-        <RNText style={styles.hint}>{hint}</RNText>
+        <RNText style={[styles.hint, dynamicStyles.hint]}>{hint}</RNText>
       ) : null}
     </View>
   );
@@ -80,40 +101,29 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
     fontWeight: fontWeight.medium,
-    color: lightColors.textMuted,
-  },
-  labelActive: {
-    color: lightColors.brand,
   },
   input: {
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[3],
-    backgroundColor: lightColors.surfacePrimary,
-    borderColor: lightColors.border,
     borderWidth: borders.hair,
     borderRadius: radius.md,
     fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
     fontWeight: fontWeight.regular,
-    color: lightColors.textPrimary,
     lineHeight: fontSize.sm * lineHeight.normal,
   },
   inputFocused: {
-    borderColor: lightColors.brand,
     borderWidth: borders.thin,
   },
   inputError: {
-    borderColor: lightColors.danger,
     borderWidth: borders.thin,
   },
   hint: {
     fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
-    color: lightColors.textMuted,
   },
   error: {
     fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
-    color: lightColors.danger,
   },
 });
