@@ -27,10 +27,10 @@ export const fontSize = {
   xs: 10,
   sm: 11,
   md: 12,
-  lg: 14,
-  xl: 16,
-  '2xl': 18,
-  '3xl': 22,
+  lg: 13,
+  xl: 15,
+  '2xl': 16,
+  '3xl': 20,
   display: 80,
 } as const;
 
@@ -49,9 +49,9 @@ export function sansForWeight(weight: string): string {
 }
 
 export const lineHeight = {
-  tight: 1.2,
-  normal: 1.4,
-  relaxed: 1.6,
+  tight: 1.15,
+  normal: 1.25,
+  relaxed: 1.4,
 } as const;
 
 /**

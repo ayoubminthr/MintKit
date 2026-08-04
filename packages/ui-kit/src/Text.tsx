@@ -31,11 +31,11 @@ const variantFontSize: Record<TextVariant, number> = {
 };
 
 const variantLineHeight: Record<TextVariant, number> = {
-  title: fontSize['2xl'] * lineHeight.tight,
-  subtitle: fontSize.lg * lineHeight.tight,
-  body: fontSize.md * lineHeight.normal,
-  caption: fontSize.sm * lineHeight.normal,
-  mono: fontSize.sm * lineHeight.normal,
+  title: Math.round(fontSize['2xl'] * lineHeight.tight),
+  subtitle: Math.round(fontSize.lg * lineHeight.tight),
+  body: Math.round(fontSize.md * lineHeight.normal),
+  caption: Math.round(fontSize.sm * lineHeight.normal),
+  mono: Math.round(fontSize.sm * lineHeight.normal),
 };
 
 export function Text({ variant = 'body', tone = 'primary', scaled = true, style, ...rest }: TextProps) {
@@ -88,30 +88,30 @@ const styles = StyleSheet.create({
     fontFamily: sansForWeight(fontWeight.medium),
     fontSize: fontSize['2xl'],
     fontWeight: fontWeight.medium,
-    lineHeight: fontSize['2xl'] * lineHeight.tight,
+    lineHeight: variantLineHeight.title,
   },
   subtitle: {
     fontFamily: sansForWeight(fontWeight.medium),
     fontSize: fontSize.lg,
     fontWeight: fontWeight.medium,
-    lineHeight: fontSize.lg * lineHeight.tight,
+    lineHeight: variantLineHeight.subtitle,
   },
   body: {
     fontFamily: sansForWeight(fontWeight.regular),
     fontSize: fontSize.md,
     fontWeight: fontWeight.regular,
-    lineHeight: fontSize.md * lineHeight.normal,
+    lineHeight: variantLineHeight.body,
   },
   caption: {
     fontFamily: sansForWeight(fontWeight.regular),
     fontSize: fontSize.sm,
     fontWeight: fontWeight.regular,
-    lineHeight: fontSize.sm * lineHeight.normal,
+    lineHeight: variantLineHeight.caption,
   },
   mono: {
     fontFamily: fontFamily.mono,
     fontSize: fontSize.sm,
     fontWeight: fontWeight.regular,
-    lineHeight: fontSize.sm * lineHeight.normal,
+    lineHeight: variantLineHeight.mono,
   },
 });
