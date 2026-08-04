@@ -8,15 +8,15 @@
  *   <FAB variant="extended" icon="plus" label="New" onPress={...} />
  */
 import { Feather } from '@expo/vector-icons';
-import { type ComponentProps } from 'react';
+import { useMemo, type ComponentProps } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { shadows } from './tokens/shadows';
 import { spacing } from './tokens/spacing';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 
 export type FABVariant = 'regular' | 'mini' | 'extended';
 export type FABPosition = 'bottom-end' | 'bottom-start' | 'bottom-center';
@@ -49,8 +49,18 @@ export function FAB({
   disabled,
   offsetBottom,
 }: FABProps) {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const bottomInset = offsetBottom ?? insets.bottom + spacing[5];
+
+  const dynamicStyles = useMemo(
+    () => ({
+      base: { backgroundColor: colors.brand },
+      pressed: { backgroundColor: colors.brandHover },
+      label: { color: colors.onBrand },
+    }),
+    [colors]
+  );
 
   const sizeStyle =
     variant === 'mini'
@@ -77,19 +87,20 @@ export function FAB({
         accessibilityState={{ disabled: !!disabled }}
         disabled={disabled}
         onPress={onPress}
-        android_ripple={{ color: lightColors.brandStrong, borderless: false }}
+        android_ripple={{ color: colors.brandStrong, borderless: false }}
         style={({ pressed }) => [
           styles.base,
+          dynamicStyles.base,
           sizeStyle,
           shadows.md,
-          pressed && styles.pressed,
+          pressed && dynamicStyles.pressed,
           disabled && styles.disabled,
         ]}>
-        <Feather name={icon} size={iconSize} color={lightColors.onBrand} />
+        <Feather name={icon} size={iconSize} color={colors.onBrand} />
         {variant === 'extended' && label ? (
           <Text
             variant="body"
-            style={styles.label}>
+            style={[styles.label, dynamicStyles.label]}>
             {label}
           </Text>
         ) : null}
@@ -109,7 +120,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   base: {
-    backgroundColor: lightColors.brand,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
@@ -130,14 +140,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     gap: spacing[2],
   },
-  pressed: {
-    backgroundColor: lightColors.brandHover,
-  },
   disabled: {
     opacity: 0.5,
   },
   label: {
-    color: lightColors.onBrand,
     fontWeight: '500',
   },
 });

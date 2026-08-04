@@ -4,10 +4,11 @@
  * Wraps RN's ActivityIndicator with kit token colors and a discrete
  * size scale. For determinate / linear progress, use ProgressBar instead.
  */
+import { useMemo } from 'react';
 import { ActivityIndicator, StyleSheet, View, type ViewProps } from 'react-native';
 
 import { Text } from './Text';
-import { lightColors } from './tokens/colors';
+import { useTheme } from './Theme';
 import { spacing } from './tokens/spacing';
 
 export type SpinnerSize = 'sm' | 'md' | 'lg';
@@ -26,12 +27,6 @@ const scaleBySize: Record<SpinnerSize, number> = {
   lg: 1.4,
 };
 
-const colorByTone: Record<SpinnerTone, string> = {
-  brand: lightColors.brand,
-  neutral: lightColors.textMuted,
-  inverse: lightColors.textInverse,
-};
-
 export function Spinner({
   size = 'md',
   tone = 'brand',
@@ -39,6 +34,17 @@ export function Spinner({
   style,
   ...rest
 }: SpinnerProps) {
+  const { colors } = useTheme();
+
+  const colorByTone = useMemo<Record<SpinnerTone, string>>(
+    () => ({
+      brand: colors.brand,
+      neutral: colors.textMuted,
+      inverse: colors.textInverse,
+    }),
+    [colors]
+  );
+
   return (
     <View {...rest} style={[styles.root, style]}>
       <ActivityIndicator

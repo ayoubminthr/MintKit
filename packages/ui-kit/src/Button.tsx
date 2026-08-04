@@ -1,15 +1,17 @@
+import { useMemo } from 'react';
 import {
   Pressable,
   type PressableProps,
   StyleSheet,
   Text as RNText,
+  type TextStyle,
   View,
   type ViewStyle,
 } from 'react-native';
 
 import { Spinner, type SpinnerSize, type SpinnerTone } from './Spinner';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize, fontWeight } from './tokens/typography';
@@ -54,7 +56,60 @@ export function Button({
   loading = false,
   ...rest
 }: ButtonProps) {
+  const { colors } = useTheme();
   const isDisabled = disabled || loading;
+
+  const variantStyles = useMemo<Record<ButtonVariant, ViewStyle>>(
+    () => ({
+      primary: { backgroundColor: colors.brand },
+      secondary: {
+        backgroundColor: colors.surfacePrimary,
+        borderWidth: borders.hair,
+        borderColor: colors.border,
+      },
+      ghost: { backgroundColor: 'transparent' },
+      danger: { backgroundColor: colors.danger },
+      'danger-ghost': { backgroundColor: 'transparent' },
+      link: { backgroundColor: 'transparent', paddingHorizontal: 0 },
+    }),
+    [colors]
+  );
+
+  const pressedStyles = useMemo<Record<ButtonVariant, ViewStyle>>(
+    () => ({
+      primary: { backgroundColor: colors.brandHover },
+      secondary: { backgroundColor: colors.surfaceSubtle },
+      ghost: { backgroundColor: colors.surfaceSubtle },
+      danger: { backgroundColor: '#B84A24' },
+      'danger-ghost': { backgroundColor: colors.dangerSubtle },
+      link: { backgroundColor: 'transparent', opacity: 0.7 },
+    }),
+    [colors]
+  );
+
+  const labelVariantStyles = useMemo<Record<ButtonVariant, TextStyle>>(
+    () => ({
+      primary: { color: colors.onBrand },
+      secondary: { color: colors.textPrimary },
+      ghost: { color: colors.textPrimary },
+      danger: { color: colors.onBrand },
+      'danger-ghost': { color: colors.danger },
+      link: { color: colors.brand, textDecorationLine: 'underline' },
+    }),
+    [colors]
+  );
+
+  const rippleColor = useMemo<Record<ButtonVariant, string>>(
+    () => ({
+      primary: colors.brandStrong,
+      secondary: colors.surfaceSubtle,
+      ghost: colors.surfaceSubtle,
+      danger: '#B84A24',
+      'danger-ghost': colors.dangerSubtle,
+      link: 'transparent',
+    }),
+    [colors]
+  );
 
   return (
     <Pressable
@@ -113,43 +168,3 @@ const labelSizeStyles = StyleSheet.create({
   md: { fontSize: fontSize.md },
   lg: { fontSize: fontSize.md },
 });
-
-const variantStyles: Record<ButtonVariant, ViewStyle> = {
-  primary: { backgroundColor: lightColors.brand },
-  secondary: {
-    backgroundColor: lightColors.surfacePrimary,
-    borderWidth: borders.hair,
-    borderColor: lightColors.border,
-  },
-  ghost: { backgroundColor: 'transparent' },
-  danger: { backgroundColor: lightColors.danger },
-  'danger-ghost': { backgroundColor: 'transparent' },
-  link: { backgroundColor: 'transparent', paddingHorizontal: 0 },
-};
-
-const pressedStyles: Record<ButtonVariant, ViewStyle> = {
-  primary: { backgroundColor: lightColors.brandHover },
-  secondary: { backgroundColor: lightColors.surfaceSubtle },
-  ghost: { backgroundColor: lightColors.surfaceSubtle },
-  danger: { backgroundColor: '#B84A24' },
-  'danger-ghost': { backgroundColor: lightColors.dangerSubtle },
-  link: { backgroundColor: 'transparent', opacity: 0.7 },
-};
-
-const labelVariantStyles = StyleSheet.create({
-  primary: { color: lightColors.onBrand },
-  secondary: { color: lightColors.textPrimary },
-  ghost: { color: lightColors.textPrimary },
-  danger: { color: lightColors.onBrand },
-  'danger-ghost': { color: lightColors.danger },
-  link: { color: lightColors.brand, textDecorationLine: 'underline' },
-});
-
-const rippleColor: Record<ButtonVariant, string> = {
-  primary: lightColors.brandStrong,
-  secondary: lightColors.surfaceSubtle,
-  ghost: lightColors.surfaceSubtle,
-  danger: '#B84A24',
-  'danger-ghost': lightColors.dangerSubtle,
-  link: 'transparent',
-};

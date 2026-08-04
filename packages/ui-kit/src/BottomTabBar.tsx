@@ -25,13 +25,13 @@
  *   />
  */
 import { Feather } from '@expo/vector-icons';
-import { type ComponentProps } from 'react';
+import { type ComponentProps, useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontSize, fontWeight } from './tokens/typography';
@@ -75,10 +75,17 @@ export function BottomTabBar<T extends string = string>({
   variant = 'default',
 }: BottomTabBarProps<T>) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      container: { backgroundColor: colors.surfacePrimary, borderTopColor: colors.border },
+    }),
+    [colors]
+  );
 
   return (
     <View
-      style={[styles.container, { paddingBottom: insets.bottom }]}
+      style={[styles.container, dynamicStyles.container, { paddingBottom: insets.bottom }]}
       accessibilityRole="tablist">
       <View style={[styles.row, variant === 'compact' && styles.rowCompact]}>
         {items.map((item) => {
@@ -111,10 +118,24 @@ export function BottomTabBarItemView<T extends string>({
   variant,
   onPress,
 }: BottomTabBarItemViewProps<T>) {
+  const { colors } = useTheme();
   const isPrimary = item.kind === 'primary';
-  const tint = active ? lightColors.brand : lightColors.textSecondary;
+  const tint = active ? colors.brand : colors.textSecondary;
   const hasNumericBadge = typeof item.badge === 'number' && item.badge > 0;
   const hasDotBadge = item.badge === true;
+  const dynamicStyles = useMemo(
+    () => ({
+      tabPressed: { backgroundColor: colors.surfaceSubtle },
+      primaryCircle: { backgroundColor: colors.brand },
+      primaryCirclePressed: { backgroundColor: colors.brandHover },
+      badgeCount: { backgroundColor: colors.danger, borderColor: colors.surfacePrimary },
+      badgeCountLabel: { color: colors.onBrand },
+      badgeDot: { backgroundColor: colors.danger, borderColor: colors.surfacePrimary },
+      primaryBadgeCount: { backgroundColor: colors.danger, borderColor: colors.surfacePrimary },
+      primaryBadgeDot: { backgroundColor: colors.danger, borderColor: colors.surfacePrimary },
+    }),
+    [colors]
+  );
 
   return (
     <Pressable
@@ -125,12 +146,12 @@ export function BottomTabBarItemView<T extends string>({
       onPress={onPress}
       android_ripple={
         isPrimary
-          ? { color: lightColors.brandStrong, borderless: true }
-          : { color: lightColors.surfaceSubtle, borderless: true }
+          ? { color: colors.brandStrong, borderless: true }
+          : { color: colors.surfaceSubtle, borderless: true }
       }
       style={({ pressed }) => [
         styles.tab,
-        pressed && !isPrimary && styles.tabPressed,
+        pressed && !isPrimary && dynamicStyles.tabPressed,
         item.disabled && styles.tabDisabled,
       ]}>
       {({ pressed }) =>
@@ -139,35 +160,36 @@ export function BottomTabBarItemView<T extends string>({
             <View
               style={[
                 styles.primaryCircle,
-                pressed && styles.primaryCirclePressed,
+                dynamicStyles.primaryCircle,
+                pressed && dynamicStyles.primaryCirclePressed,
               ]}>
               <Feather
                 name={item.icon}
                 size={PRIMARY_ICON_SIZE}
-                color={lightColors.onBrand}
+                color={colors.onBrand}
               />
             </View>
             {hasNumericBadge ? (
-              <View style={styles.primaryBadgeCount}>
-                <Text style={styles.badgeCountLabel} numberOfLines={1}>
+              <View style={[styles.primaryBadgeCount, dynamicStyles.primaryBadgeCount]}>
+                <Text style={[styles.badgeCountLabel, dynamicStyles.badgeCountLabel]} numberOfLines={1}>
                   {(item.badge as number) > 99 ? '99+' : String(item.badge)}
                 </Text>
               </View>
             ) : null}
-            {hasDotBadge ? <View style={styles.primaryBadgeDot} /> : null}
+            {hasDotBadge ? <View style={[styles.primaryBadgeDot, dynamicStyles.primaryBadgeDot]} /> : null}
           </View>
         ) : (
           <>
             <View style={styles.iconWrap}>
               <Feather name={item.icon} size={ICON_SIZE} color={tint} />
               {hasNumericBadge ? (
-                <View style={styles.badgeCount}>
-                  <Text style={styles.badgeCountLabel} numberOfLines={1}>
+                <View style={[styles.badgeCount, dynamicStyles.badgeCount]}>
+                  <Text style={[styles.badgeCountLabel, dynamicStyles.badgeCountLabel]} numberOfLines={1}>
                     {(item.badge as number) > 99 ? '99+' : String(item.badge)}
                   </Text>
                 </View>
               ) : null}
-              {hasDotBadge ? <View style={styles.badgeDot} /> : null}
+              {hasDotBadge ? <View style={[styles.badgeDot, dynamicStyles.badgeDot]} /> : null}
             </View>
             {variant === 'default' ? (
               <Text
@@ -190,9 +212,7 @@ export function BottomTabBarItemView<T extends string>({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: lightColors.surfacePrimary,
     borderTopWidth: borders.hair,
-    borderTopColor: lightColors.border,
   },
   row: {
     height: ROW_HEIGHT,
@@ -208,9 +228,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing[1],
     paddingVertical: spacing[1],
-  },
-  tabPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
   },
   tabDisabled: {
     opacity: 0.4,
@@ -236,12 +253,8 @@ const styles = StyleSheet.create({
     width: PRIMARY_SIZE,
     height: PRIMARY_SIZE,
     borderRadius: PRIMARY_SIZE / 2,
-    backgroundColor: lightColors.brand,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  primaryCirclePressed: {
-    backgroundColor: lightColors.brandHover,
   },
   badgeCount: {
     position: 'absolute',
@@ -251,14 +264,11 @@ const styles = StyleSheet.create({
     height: 18,
     paddingHorizontal: spacing[1],
     borderRadius: radius.full,
-    backgroundColor: lightColors.danger,
     borderWidth: borders.thick,
-    borderColor: lightColors.surfacePrimary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   badgeCountLabel: {
-    color: lightColors.onBrand,
     fontSize: 10,
     fontWeight: fontWeight.medium,
     lineHeight: 12,
@@ -270,9 +280,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: radius.full,
-    backgroundColor: lightColors.danger,
     borderWidth: borders.thick,
-    borderColor: lightColors.surfacePrimary,
   },
   primaryBadgeCount: {
     position: 'absolute',
@@ -282,9 +290,7 @@ const styles = StyleSheet.create({
     height: 18,
     paddingHorizontal: spacing[1],
     borderRadius: radius.full,
-    backgroundColor: lightColors.danger,
     borderWidth: borders.thick,
-    borderColor: lightColors.surfacePrimary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -295,8 +301,6 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: radius.full,
-    backgroundColor: lightColors.danger,
     borderWidth: borders.thick,
-    borderColor: lightColors.surfacePrimary,
   },
 });

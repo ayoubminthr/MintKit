@@ -1,12 +1,13 @@
 import { Feather } from '@expo/vector-icons';
-import { Fragment } from 'react';
+import { Fragment, useMemo } from 'react';
 import { StyleSheet, Text as RNText, View, type ViewProps } from 'react-native';
 
 import { borders } from './tokens/borders';
-import { lightColors, palette } from './tokens/colors';
+import { palette } from './tokens/colors';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize, fontWeight } from './tokens/typography';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 
 export interface StepperStep {
   label: string;
@@ -22,6 +23,20 @@ export interface StepperProps extends ViewProps {
 const CIRCLE_SIZE = 24;
 
 export function Stepper({ steps, currentStep, style, ...rest }: StepperProps) {
+  const { colors } = useTheme();
+
+  const dynamicStyles = useMemo(
+    () => ({
+      circleComplete: { backgroundColor: colors.brand },
+      circleCurrent: { backgroundColor: colors.surfacePrimary, borderColor: colors.brand },
+      circleUpcoming: { backgroundColor: colors.surfacePrimary, borderColor: colors.borderStrong },
+      circleLabelCurrent: { color: colors.brand },
+      circleLabelUpcoming: { color: colors.textMuted },
+      connectorComplete: { backgroundColor: colors.brand },
+    }),
+    [colors]
+  );
+
   return (
     <View {...rest} style={[styles.container, style]}>
       {steps.map((step, idx) => {
@@ -32,18 +47,20 @@ export function Stepper({ steps, currentStep, style, ...rest }: StepperProps) {
               <View
                 style={[
                   styles.circle,
-                  status === 'complete' && styles.circleComplete,
                   status === 'current' && styles.circleCurrent,
                   status === 'upcoming' && styles.circleUpcoming,
+                  status === 'complete' && dynamicStyles.circleComplete,
+                  status === 'current' && dynamicStyles.circleCurrent,
+                  status === 'upcoming' && dynamicStyles.circleUpcoming,
                 ]}>
                 {status === 'complete' ? (
-                  <Feather name="check" size={14} color={lightColors.onBrand} />
+                  <Feather name="check" size={14} color={colors.onBrand} />
                 ) : (
                   <RNText
                     style={[
                       styles.circleLabel,
-                      status === 'current' && styles.circleLabelCurrent,
-                      status === 'upcoming' && styles.circleLabelUpcoming,
+                      status === 'current' && dynamicStyles.circleLabelCurrent,
+                      status === 'upcoming' && dynamicStyles.circleLabelUpcoming,
                     ]}>
                     {idx + 1}
                   </RNText>
@@ -67,7 +84,7 @@ export function Stepper({ steps, currentStep, style, ...rest }: StepperProps) {
               <View
                 style={[
                   styles.connector,
-                  idx < currentStep ? styles.connectorComplete : styles.connectorUpcoming,
+                  idx < currentStep ? dynamicStyles.connectorComplete : styles.connectorUpcoming,
                 ]}
               />
             ) : null}
@@ -95,29 +112,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 1,
   },
-  circleComplete: {
-    backgroundColor: lightColors.brand,
-  },
   circleCurrent: {
-    backgroundColor: lightColors.surfacePrimary,
     borderWidth: borders.thin,
-    borderColor: lightColors.brand,
   },
   circleUpcoming: {
-    backgroundColor: lightColors.surfacePrimary,
     borderWidth: borders.thin,
-    borderColor: lightColors.borderStrong,
   },
   circleLabel: {
     fontFamily: fontFamily.sans,
     fontSize: fontSize.xs,
     fontWeight: fontWeight.medium,
-  },
-  circleLabelCurrent: {
-    color: lightColors.brand,
-  },
-  circleLabelUpcoming: {
-    color: lightColors.textMuted,
   },
   text: {
     flex: 1,
@@ -133,9 +137,6 @@ const styles = StyleSheet.create({
     width: 1,
     height: spacing[3],
     marginVertical: -spacing[1],
-  },
-  connectorComplete: {
-    backgroundColor: lightColors.brand,
   },
   connectorUpcoming: {
     backgroundColor: palette.gray[200],

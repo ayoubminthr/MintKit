@@ -1,13 +1,13 @@
 import { Feather } from '@expo/vector-icons';
-import { type ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View, type ViewProps } from 'react-native';
 
 import { Tag } from './Tag';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 
 export interface ActiveFilter {
   key: string;
@@ -33,18 +33,40 @@ export function FilterBar({
   style,
   ...rest
 }: FilterBarProps) {
+  const { colors } = useTheme();
   const hasFilters = filters.length > 0;
 
+  const dynamicStyles = useMemo(
+    () => ({
+      container: {
+        backgroundColor: colors.surfacePrimary,
+        borderColor: colors.border,
+      },
+      addButton: {
+        borderColor: colors.border,
+        backgroundColor: colors.surfacePrimary,
+      },
+      addButtonPressed: {
+        backgroundColor: colors.surfaceSubtle,
+      },
+    }),
+    [colors]
+  );
+
   return (
-    <View {...rest} style={[styles.container, style]}>
+    <View {...rest} style={[styles.container, dynamicStyles.container, style]}>
       <View style={styles.row}>
         {onAdd ? (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Add filter"
             onPress={onAdd}
-            style={({ pressed }) => [styles.addButton, pressed && styles.addButtonPressed]}>
-            <Feather name="filter" size={14} color={lightColors.textPrimary} />
+            style={({ pressed }) => [
+              styles.addButton,
+              dynamicStyles.addButton,
+              pressed && dynamicStyles.addButtonPressed,
+            ]}>
+            <Feather name="filter" size={14} color={colors.textPrimary} />
             <Text variant="caption" style={styles.addLabel}>
               Filter
             </Text>
@@ -84,12 +106,10 @@ export function FilterBar({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: lightColors.surfacePrimary,
     borderRadius: radius.md,
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[2],
     borderWidth: borders.hair,
-    borderColor: lightColors.border,
   },
   row: {
     flexDirection: 'row',
@@ -104,11 +124,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[1],
     borderRadius: radius.md,
     borderWidth: borders.hair,
-    borderColor: lightColors.border,
-    backgroundColor: lightColors.surfacePrimary,
-  },
-  addButtonPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
   },
   addLabel: {
     fontWeight: '500',

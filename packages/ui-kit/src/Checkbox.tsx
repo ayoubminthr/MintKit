@@ -1,11 +1,12 @@
 import { Feather } from '@expo/vector-icons';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
-import { Text } from './Text';
 
 export type CheckboxState = 'checked' | 'unchecked' | 'indeterminate';
 
@@ -20,6 +21,15 @@ export interface CheckboxProps {
 const BOX_SIZE = 18;
 
 export function Checkbox({ checked, onChange, disabled, label, description }: CheckboxProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      boxEmpty: { backgroundColor: colors.surfacePrimary, borderColor: colors.borderStrong },
+      boxFilled: { backgroundColor: colors.brand, borderColor: colors.brand },
+    }),
+    [colors],
+  );
+
   const state: CheckboxState =
     checked === 'indeterminate' ? 'indeterminate' : checked ? 'checked' : 'unchecked';
   const filled = state !== 'unchecked';
@@ -36,12 +46,12 @@ export function Checkbox({ checked, onChange, disabled, label, description }: Ch
       <View
         style={[
           styles.box,
-          filled ? styles.boxFilled : styles.boxEmpty,
+          filled ? dynamicStyles.boxFilled : dynamicStyles.boxEmpty,
         ]}>
         {state === 'checked' ? (
-          <Feather name="check" size={14} color={lightColors.onBrand} />
+          <Feather name="check" size={14} color={colors.onBrand} />
         ) : state === 'indeterminate' ? (
-          <Feather name="minus" size={14} color={lightColors.onBrand} />
+          <Feather name="minus" size={14} color={colors.onBrand} />
         ) : null}
       </View>
       {label || description ? (
@@ -74,16 +84,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 1,
-  },
-  boxEmpty: {
-    backgroundColor: lightColors.surfacePrimary,
     borderWidth: borders.thin,
-    borderColor: lightColors.borderStrong,
-  },
-  boxFilled: {
-    backgroundColor: lightColors.brand,
-    borderWidth: borders.thin,
-    borderColor: lightColors.brand,
   },
   textBlock: {
     flexShrink: 1,

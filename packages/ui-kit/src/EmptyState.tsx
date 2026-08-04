@@ -1,10 +1,10 @@
 import { Feather } from '@expo/vector-icons';
-import { type ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
-import { lightColors } from './tokens/colors';
 import { spacing } from './tokens/spacing';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 
 export interface EmptyStateProps extends ViewProps {
   icon?: React.ComponentProps<typeof Feather>['name'];
@@ -21,10 +21,18 @@ export function EmptyState({
   style,
   ...rest
 }: EmptyStateProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      iconBubble: { backgroundColor: colors.surfaceSubtle },
+    }),
+    [colors]
+  );
+
   return (
     <View {...rest} style={[styles.container, style]}>
-      <View style={styles.iconBubble}>
-        <Feather name={icon} size={20} color={lightColors.textMuted} />
+      <View style={[styles.iconBubble, dynamicStyles.iconBubble]}>
+        <Feather name={icon} size={20} color={colors.textMuted} />
       </View>
       <View style={styles.text}>
         <Text variant="subtitle">{title}</Text>
@@ -50,7 +58,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: lightColors.surfaceSubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },

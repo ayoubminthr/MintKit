@@ -1,9 +1,9 @@
 import { Feather } from '@expo/vector-icons';
-import { type ComponentProps, type ReactNode } from 'react';
+import { type ComponentProps, type ReactNode, useMemo } from 'react';
 import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 
 import { Text } from './Text';
-import { lightColors } from './tokens/colors';
+import { useTheme } from './Theme';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { backChevron } from './utils/rtl';
@@ -31,6 +31,16 @@ export function PageHeader({
   style,
   ...rest
 }: PageHeaderProps) {
+  const { colors } = useTheme();
+
+  const dynamicStyles = useMemo(
+    () => ({
+      backButtonPressed: { backgroundColor: colors.surfaceSubtle },
+      iconBubble: { backgroundColor: colors.brandSubtle },
+    }),
+    [colors]
+  );
+
   return (
     <View {...rest} style={[styles.container, style]}>
       {onBack ? (
@@ -39,19 +49,19 @@ export function PageHeader({
           accessibilityLabel="Back"
           hitSlop={spacing[2]}
           onPress={onBack}
-          android_ripple={{ color: lightColors.surfaceSubtle, borderless: true }}
+          android_ripple={{ color: colors.surfaceSubtle, borderless: true }}
           style={({ pressed }) => [
             styles.backButton,
-            pressed && styles.backButtonPressed,
+            pressed && dynamicStyles.backButtonPressed,
           ]}>
-          <Feather name={backChevron()} size={24} color={lightColors.textPrimary} />
+          <Feather name={backChevron()} size={24} color={colors.textPrimary} />
         </Pressable>
       ) : null}
 
       <View style={styles.titleRow}>
         {icon ? (
-          <View style={styles.iconBubble}>
-            <Feather name={icon} size={16} color={lightColors.brand} />
+          <View style={[styles.iconBubble, dynamicStyles.iconBubble]}>
+            <Feather name={icon} size={16} color={colors.brand} />
           </View>
         ) : null}
         <View style={styles.titleStack}>
@@ -83,9 +93,6 @@ const styles = StyleSheet.create({
     marginStart: -spacing[2],
     borderRadius: radius.full,
   },
-  backButtonPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
-  },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -95,7 +102,6 @@ const styles = StyleSheet.create({
     width: ICON_BUBBLE,
     height: ICON_BUBBLE,
     borderRadius: radius.lg,
-    backgroundColor: lightColors.brandSubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },

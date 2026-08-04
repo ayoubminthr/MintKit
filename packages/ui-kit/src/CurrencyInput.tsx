@@ -17,9 +17,9 @@ import { Input } from './Input';
 import { NumberInput, type NumberInputProps } from './NumberInput';
 import { type SheetBodyProps, useSheet } from './SheetHost';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { CURRENCIES, type Currency } from './data/currencies';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 
@@ -52,7 +52,18 @@ function CurrencyInputSheetBody({
   params,
   handleClose = () => {},
 }: SheetBodyProps<CurrencyInputSheetParams>) {
+  const { colors } = useTheme();
   const [search, setSearch] = useState('');
+
+  const dynamicStyles = useMemo(
+    () => ({
+      titleWrap: { borderBottomColor: colors.border },
+      searchWrap: { borderBottomColor: colors.border },
+      optionPressed: { backgroundColor: colors.surfaceSubtle },
+      optionSelected: { backgroundColor: colors.brandSubtle },
+    }),
+    [colors],
+  );
 
   const filteredCurrencies = useMemo(() => {
     if (!search) return params.availableCurrencies;
@@ -71,16 +82,16 @@ function CurrencyInputSheetBody({
 
   return (
     <View style={styles.sheetContent}>
-      <View style={styles.titleWrap}>
+      <View style={[styles.titleWrap, dynamicStyles.titleWrap]}>
         <Text variant="subtitle">Select currency</Text>
       </View>
-      <View style={styles.searchWrap}>
+      <View style={[styles.searchWrap, dynamicStyles.searchWrap]}>
         <Input
           placeholder="Search currencies…"
           value={search}
           onChangeText={setSearch}
           autoFocus
-          leftIcon={<Feather name="search" size={16} color={lightColors.textSecondary} />}
+          leftIcon={<Feather name="search" size={16} color={colors.textSecondary} />}
         />
       </View>
 
@@ -98,11 +109,11 @@ function CurrencyInputSheetBody({
               <Pressable
                 key={item.code}
                 onPress={() => handlePick(item)}
-                android_ripple={{ color: lightColors.surfaceSubtle }}
+                android_ripple={{ color: colors.surfaceSubtle }}
                 style={({ pressed }) => [
                   styles.option,
-                  pressed && styles.optionPressed,
-                  isSelected && styles.optionSelected,
+                  pressed && dynamicStyles.optionPressed,
+                  isSelected && dynamicStyles.optionSelected,
                 ]}>
                 <View style={styles.symbolCol}>
                   <Text variant="body" tone={isSelected ? 'brand' : 'primary'} style={{ fontWeight: '500' }}>
@@ -121,7 +132,7 @@ function CurrencyInputSheetBody({
                   ) : null}
                 </View>
                 {isSelected ? (
-                  <Feather name="check" size={16} color={lightColors.brand} />
+                  <Feather name="check" size={16} color={colors.brand} />
                 ) : null}
               </Pressable>
             );
@@ -144,9 +155,19 @@ export function CurrencyInput({
   error,
   ...rest
 }: CurrencyInputProps) {
+  const { colors } = useTheme();
   const sheet = useSheet();
   const [internalCurrency, setInternalCurrency] = useState<Currency>(
     resolveCurrency(currencyProp),
+  );
+
+  const dynamicStyles = useMemo(
+    () => ({
+      indicator: { backgroundColor: colors.surfaceSubtle },
+      indicatorStart: { borderEndColor: colors.border },
+      indicatorEnd: { borderStartColor: colors.border },
+    }),
+    [colors],
   );
 
   const currentCurrency =
@@ -177,8 +198,10 @@ export function CurrencyInput({
       onPress={handleOpen}
       style={[
         styles.indicator,
+        dynamicStyles.indicator,
         !switchable && styles.indicatorStatic,
         symbolPosition === 'start' ? styles.indicatorStart : styles.indicatorEnd,
+        symbolPosition === 'start' ? dynamicStyles.indicatorStart : dynamicStyles.indicatorEnd,
       ]}>
       <Text
         variant="body"
@@ -190,7 +213,7 @@ export function CurrencyInput({
         <Feather
           name="chevron-down"
           size={14}
-          color={lightColors.textSecondary}
+          color={colors.textSecondary}
           style={{ marginStart: spacing[1] }}
         />
       ) : null}
@@ -216,21 +239,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing[3],
     height: '100%',
-    backgroundColor: lightColors.surfaceSubtle,
   },
   indicatorStatic: {
     backgroundColor: 'transparent',
   },
   indicatorStart: {
     borderEndWidth: borders.hair,
-    borderEndColor: lightColors.border,
     marginEnd: spacing[2],
     borderTopStartRadius: radius.md - 1,
     borderBottomStartRadius: radius.md - 1,
   },
   indicatorEnd: {
     borderStartWidth: borders.hair,
-    borderStartColor: lightColors.border,
     marginStart: spacing[2],
     borderTopEndRadius: radius.md - 1,
     borderBottomEndRadius: radius.md - 1,
@@ -242,13 +262,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingBottom: spacing[3],
     borderBottomWidth: borders.hair,
-    borderBottomColor: lightColors.border,
   },
   searchWrap: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     borderBottomWidth: borders.hair,
-    borderBottomColor: lightColors.border,
   },
   list: {
     paddingVertical: spacing[2],
@@ -262,12 +280,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[4],
-  },
-  optionPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
-  },
-  optionSelected: {
-    backgroundColor: lightColors.brandSubtle,
   },
   symbolCol: {
     width: 40,

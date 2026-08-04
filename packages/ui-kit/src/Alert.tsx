@@ -1,11 +1,13 @@
 import { Feather } from '@expo/vector-icons';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 
 import { borders } from './tokens/borders';
-import { lightColors, palette } from './tokens/colors';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 
 export type AlertVariant = 'info' | 'success' | 'warning' | 'danger';
 
@@ -31,6 +33,48 @@ export function Alert({
   style,
   ...rest
 }: AlertProps) {
+  const { colors } = useTheme();
+
+  const variantStyles = useMemo<
+    Record<
+      AlertVariant,
+      {
+        container: object;
+        iconColor: string;
+        titleColor: string;
+        descColor: string;
+      }
+    >
+  >(
+    () => ({
+      info: {
+        container: { backgroundColor: colors.infoSubtle, borderColor: palette.info[100] },
+        iconColor: palette.info[500],
+        titleColor: palette.info[900],
+        descColor: palette.info[700],
+      },
+      success: {
+        container: { backgroundColor: colors.successSubtle, borderColor: palette.success[100] },
+        iconColor: palette.success[500],
+        titleColor: palette.success[900],
+        descColor: palette.success[700],
+      },
+      warning: {
+        container: { backgroundColor: colors.warningSubtle, borderColor: palette.warning[100] },
+        iconColor: palette.warning[500],
+        titleColor: palette.warning[900],
+        descColor: palette.warning[700],
+      },
+      danger: {
+        container: { backgroundColor: colors.dangerSubtle, borderColor: palette.danger[100] },
+        iconColor: palette.danger[500],
+        titleColor: palette.danger[900],
+        descColor: palette.danger[700],
+      },
+    }),
+    [colors]
+  );
+
   const v = variantStyles[variant];
   return (
     <View {...rest} style={[styles.container, v.container, style]}>
@@ -91,38 +135,3 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
 });
-
-const variantStyles: Record<
-  AlertVariant,
-  {
-    container: object;
-    iconColor: string;
-    titleColor: string;
-    descColor: string;
-  }
-> = {
-  info: {
-    container: { backgroundColor: lightColors.infoSubtle, borderColor: palette.info[100] },
-    iconColor: palette.info[500],
-    titleColor: palette.info[900],
-    descColor: palette.info[700],
-  },
-  success: {
-    container: { backgroundColor: lightColors.successSubtle, borderColor: palette.success[100] },
-    iconColor: palette.success[500],
-    titleColor: palette.success[900],
-    descColor: palette.success[700],
-  },
-  warning: {
-    container: { backgroundColor: lightColors.warningSubtle, borderColor: palette.warning[100] },
-    iconColor: palette.warning[500],
-    titleColor: palette.warning[900],
-    descColor: palette.warning[700],
-  },
-  danger: {
-    container: { backgroundColor: lightColors.dangerSubtle, borderColor: palette.danger[100] },
-    iconColor: palette.danger[500],
-    titleColor: palette.danger[900],
-    descColor: palette.danger[700],
-  },
-};

@@ -11,12 +11,13 @@
  */
 import { Feather } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { IconButton } from './IconButton';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 
@@ -45,6 +46,35 @@ export function FileUpload({
   description = 'Supports PDF, PNG, JPG',
   maxFiles,
 }: FileUploadProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      dropzone: {
+        borderColor: colors.border,
+        backgroundColor: colors.surfacePrimary,
+      },
+      dropzonePressed: {
+        backgroundColor: colors.surfaceSubtle,
+      },
+      dropzoneDisabled: {
+        backgroundColor: colors.surfaceSubtle,
+        borderColor: colors.borderStrong,
+      },
+      dropzoneError: {
+        borderColor: colors.danger,
+        backgroundColor: colors.dangerSubtle,
+      },
+      iconWrap: {
+        backgroundColor: colors.surfaceSubtle,
+      },
+      fileItem: {
+        backgroundColor: colors.surfacePrimary,
+        borderColor: colors.border,
+      },
+    }),
+    [colors]
+  );
+
   const handlePick = async () => {
     if (disabled) return;
 
@@ -80,15 +110,16 @@ export function FileUpload({
           onPress={handlePick}
           style={({ pressed }) => [
             styles.dropzone,
-            pressed && styles.dropzonePressed,
-            disabled && styles.dropzoneDisabled,
-            error ? styles.dropzoneError : null,
+            dynamicStyles.dropzone,
+            pressed && dynamicStyles.dropzonePressed,
+            disabled && dynamicStyles.dropzoneDisabled,
+            error ? dynamicStyles.dropzoneError : null,
           ]}>
-          <View style={styles.iconWrap}>
+          <View style={[styles.iconWrap, dynamicStyles.iconWrap]}>
             <Feather
               name="upload-cloud"
               size={24}
-              color={disabled ? lightColors.textMuted : lightColors.textSecondary}
+              color={disabled ? colors.textMuted : colors.textSecondary}
             />
           </View>
           <Text variant="body" tone={disabled ? 'muted' : 'primary'} style={{ fontWeight: '500' }}>
@@ -106,11 +137,11 @@ export function FileUpload({
       {values.length > 0 ? (
         <View style={styles.fileList}>
           {values.map((file, i) => (
-            <View key={file.uri + i} style={styles.fileItem}>
+            <View key={file.uri + i} style={[styles.fileItem, dynamicStyles.fileItem]}>
               <Feather
                 name={file.mimeType?.includes('image') ? 'image' : 'file'}
                 size={20}
-                color={lightColors.textSecondary}
+                color={colors.textSecondary}
               />
               <View style={styles.fileInfo}>
                 <Text variant="body" numberOfLines={1}>
@@ -147,30 +178,16 @@ const styles = StyleSheet.create({
   },
   dropzone: {
     borderWidth: 1.5,
-    borderColor: lightColors.border,
     borderStyle: 'dashed',
     borderRadius: radius.md,
-    backgroundColor: lightColors.surfacePrimary,
     padding: spacing[5],
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  dropzonePressed: {
-    backgroundColor: lightColors.surfaceSubtle,
-  },
-  dropzoneDisabled: {
-    backgroundColor: lightColors.surfaceSubtle,
-    borderColor: lightColors.borderStrong,
-  },
-  dropzoneError: {
-    borderColor: lightColors.danger,
-    backgroundColor: lightColors.dangerSubtle,
   },
   iconWrap: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: lightColors.surfaceSubtle,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing[3],
@@ -182,10 +199,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing[3],
-    backgroundColor: lightColors.surfacePrimary,
     borderRadius: radius.md,
     borderWidth: borders.thin,
-    borderColor: lightColors.border,
   },
   fileInfo: {
     flex: 1,

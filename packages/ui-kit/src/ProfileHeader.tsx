@@ -17,12 +17,12 @@
  *   />
  */
 import { Feather } from '@expo/vector-icons';
-import { type ReactNode } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontWeight } from './tokens/typography';
@@ -68,14 +68,24 @@ export function ProfileHeader({
   style,
   ...rest
 }: ProfileHeaderProps) {
+  const { colors } = useTheme();
   const isCompact = density === 'compact';
   const hasActionsRow = Boolean(quickActions) || Boolean(onOverflowPress);
+
+  const dynamicStyles = useMemo(
+    () => ({
+      root: { backgroundColor: colors.surfacePrimary, borderBottomColor: colors.border },
+      overflowPressed: { backgroundColor: colors.surfaceSubtle },
+    }),
+    [colors]
+  );
 
   return (
     <View
       {...rest}
       style={[
         styles.root,
+        dynamicStyles.root,
         isCompact ? styles.rootCompact : styles.rootDefault,
         style,
       ]}>
@@ -120,15 +130,15 @@ export function ProfileHeader({
               accessibilityRole="button"
               accessibilityLabel="More actions"
               hitSlop={spacing[2]}
-              android_ripple={{ color: lightColors.surfaceSubtle, borderless: true }}
+              android_ripple={{ color: colors.surfaceSubtle, borderless: true }}
               style={({ pressed }) => [
                 styles.overflowButton,
-                pressed && styles.overflowPressed,
+                pressed && dynamicStyles.overflowPressed,
               ]}>
               <Feather
                 name="more-horizontal"
                 size={20}
-                color={lightColors.textSecondary}
+                color={colors.textSecondary}
               />
             </Pressable>
           ) : null}
@@ -144,9 +154,7 @@ export function ProfileHeader({
 
 const styles = StyleSheet.create({
   root: {
-    backgroundColor: lightColors.surfacePrimary,
     borderBottomWidth: borders.hair,
-    borderBottomColor: lightColors.border,
     alignItems: 'center',
   },
   rootDefault: {
@@ -208,9 +216,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.full,
-  },
-  overflowPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
   },
   extension: {
     alignSelf: 'stretch',

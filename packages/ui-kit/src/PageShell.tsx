@@ -20,7 +20,7 @@
  *   </PageShell>
  */
 import { Feather } from '@expo/vector-icons';
-import { type ComponentProps, type ReactNode } from 'react';
+import { type ComponentProps, type ReactNode, useMemo } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -33,8 +33,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, type ButtonVariant } from './Button';
 import { PageHeader } from './PageHeader';
 import { KitRefreshControl } from './PullToRefresh';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { spacing } from './tokens/spacing';
 
 /** Primary footer action, rendered as a full-width kit Button. */
@@ -84,22 +84,7 @@ export interface PageShellProps {
   testID?: string;
 }
 
-const BACKGROUNDS: Record<PageShellBackground, string | undefined> = {
-  page: lightColors.surfacePage,
-  subtle: lightColors.surfaceSubtle,
-  plain: undefined,
-};
-
 const DEFAULT_EDGES: readonly PageShellEdge[] = ['top', 'bottom'];
-
-const ACTION_ICON_COLOR: Record<ButtonVariant, string> = {
-  primary: lightColors.onBrand,
-  secondary: lightColors.textPrimary,
-  ghost: lightColors.textPrimary,
-  danger: lightColors.onBrand,
-  'danger-ghost': lightColors.danger,
-  link: lightColors.brand,
-};
 
 export function PageShell({
   children,
@@ -121,9 +106,31 @@ export function PageShell({
   style,
   testID,
 }: PageShellProps) {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const insetTop = edges.includes('top') ? insets.top : 0;
   const insetBottom = edges.includes('bottom') ? insets.bottom : 0;
+
+  const backgroundColors = useMemo<Record<PageShellBackground, string | undefined>>(
+    () => ({
+      page: colors.surfacePage,
+      subtle: colors.surfaceSubtle,
+      plain: undefined,
+    }),
+    [colors]
+  );
+
+  const actionIconColor = useMemo<Record<ButtonVariant, string>>(
+    () => ({
+      primary: colors.onBrand,
+      secondary: colors.textPrimary,
+      ghost: colors.textPrimary,
+      danger: colors.onBrand,
+      'danger-ghost': colors.danger,
+      link: colors.brand,
+    }),
+    [colors]
+  );
 
   const primaryActionButton = primaryAction ? (
     <Button
@@ -137,7 +144,7 @@ export function PageShell({
           <Feather
             name={primaryAction.icon}
             size={14}
-            color={ACTION_ICON_COLOR[primaryAction.variant ?? 'primary']}
+            color={actionIconColor[primaryAction.variant ?? 'primary']}
           />
         ) : undefined
       }
@@ -191,7 +198,7 @@ export function PageShell({
       testID={testID}
       style={[
         styles.container,
-        { backgroundColor: BACKGROUNDS[background] },
+        { backgroundColor: backgroundColors[background] },
         { paddingTop: insetTop },
         style,
       ]}>
@@ -204,7 +211,11 @@ export function PageShell({
       {body}
 
       {footerNode ? (
-        <View style={[styles.footer, { paddingBottom: insetBottom + spacing[3] }]}>
+        <View
+          style={[
+            styles.footer,
+            { borderTopColor: colors.border, paddingBottom: insetBottom + spacing[3] },
+          ]}>
           {footerNode}
         </View>
       ) : (
@@ -231,6 +242,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingTop: spacing[3],
     borderTopWidth: borders.hair,
-    borderTopColor: lightColors.border,
   },
 });

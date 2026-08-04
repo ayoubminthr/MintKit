@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import {
   Animated,
   Pressable,
@@ -12,9 +12,9 @@ import {
   type ViewStyle,
 } from 'react-native';
 
+import { useTheme } from './Theme';
 import { useFloatingLabel } from './hooks/useFloatingLabel';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize, fontWeight } from './tokens/typography';
@@ -61,6 +61,7 @@ export function Input({
   value,
   ...rest
 }: InputProps) {
+  const { colors } = useTheme();
   const [focused, setFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const isEditable = editable !== false && !disabled;
@@ -70,9 +71,47 @@ export function Input({
   const showFloating = Boolean(floating) && !!label;
   const floatingLabel = useFloatingLabel(showFloating && isActive);
 
+  const dynamicStyles = useMemo(
+    () => ({
+      label: {
+        backgroundColor: colors.surfacePrimary,
+        color: colors.textMuted,
+      },
+      labelActive: {
+        color: colors.brand,
+      },
+      fieldWrap: {
+        backgroundColor: colors.surfacePrimary,
+        borderColor: colors.border,
+      },
+      fieldWrapFocused: {
+        borderColor: colors.brand,
+      },
+      fieldWrapError: {
+        borderColor: colors.danger,
+      },
+      fieldWrapDisabled: {
+        backgroundColor: colors.surfaceSubtle,
+      },
+      input: {
+        color: colors.textPrimary,
+      },
+      inputDisabled: {
+        color: colors.textSecondary,
+      },
+      hint: {
+        color: colors.textMuted,
+      },
+      error: {
+        color: colors.danger,
+      },
+    }),
+    [colors],
+  );
+
   const passwordToggle = secureTextEntry ? (
     <Pressable onPress={() => setShowPassword((prev) => !prev)}>
-      <Feather name={showPassword ? 'eye' : 'eye-off'} size={18} color={lightColors.textSecondary} />
+      <Feather name={showPassword ? 'eye' : 'eye-off'} size={18} color={colors.textSecondary} />
     </Pressable>
   ) : null;
   const resolvedRightIcon = secureTextEntry ? passwordToggle : rightIcon;
@@ -85,12 +124,19 @@ export function Input({
             <Animated.Text
               style={[
                 styles.label,
+                dynamicStyles.label,
                 { top: floatingLabel.top, color: floatingLabel.color },
               ]}>
               {label}
             </Animated.Text>
           ) : (
-            <RNText style={[styles.label, { top: -8 }, isActive && styles.labelActive]}>
+            <RNText
+              style={[
+                styles.label,
+                dynamicStyles.label,
+                { top: -8 },
+                isActive && dynamicStyles.labelActive,
+              ]}>
               {label}
             </RNText>
           )
@@ -98,10 +144,14 @@ export function Input({
         <View
           style={[
             styles.fieldWrap,
+            dynamicStyles.fieldWrap,
             multiline && styles.fieldWrapMultiline,
             focused && styles.fieldWrapFocused,
+            focused && dynamicStyles.fieldWrapFocused,
             error ? styles.fieldWrapError : null,
+            error ? dynamicStyles.fieldWrapError : null,
             !isEditable && styles.fieldWrapDisabled,
+            !isEditable && dynamicStyles.fieldWrapDisabled,
             containerStyle,
           ]}>
           {leftIcon ? <View style={styles.iconStart}>{leftIcon}</View> : null}
@@ -111,7 +161,7 @@ export function Input({
             multiline={multiline}
             editable={isEditable}
             placeholder={showFloating ? undefined : placeholder}
-            placeholderTextColor={placeholderTextColor ?? lightColors.textMuted}
+            placeholderTextColor={placeholderTextColor ?? colors.textMuted}
             secureTextEntry={Boolean(secureTextEntry) && !showPassword}
             onFocus={(e) => {
               setFocused(true);
@@ -123,11 +173,12 @@ export function Input({
             }}
             style={[
               styles.input,
+              dynamicStyles.input,
               multiline && styles.inputMultiline,
               { textAlign: isRTL() ? 'right' : 'left' },
               leftIcon ? styles.inputWithLeftIcon : null,
               resolvedRightIcon ? styles.inputWithRightIcon : null,
-              !isEditable && styles.inputDisabled,
+              !isEditable && dynamicStyles.inputDisabled,
               style,
             ]}
           />
@@ -135,9 +186,9 @@ export function Input({
         </View>
       </View>
       {error ? (
-        <RNText style={styles.error}>{error}</RNText>
+        <RNText style={[styles.error, dynamicStyles.error]}>{error}</RNText>
       ) : hint ? (
-        <RNText style={styles.hint}>{hint}</RNText>
+        <RNText style={[styles.hint, dynamicStyles.hint]}>{hint}</RNText>
       ) : null}
     </View>
   );
@@ -158,43 +209,30 @@ const styles = StyleSheet.create({
     start: 8,
     zIndex: 999,
     paddingHorizontal: 5,
-    backgroundColor: lightColors.surfacePrimary,
     fontFamily: fontFamily.sansMedium,
     fontSize: fontSize.sm,
     fontWeight: fontWeight.medium,
-    color: lightColors.textMuted,
-  },
-  labelActive: {
-    color: lightColors.brand,
   },
   fieldWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: lightColors.surfacePrimary,
-    borderColor: lightColors.border,
     borderWidth: borders.hair,
     borderRadius: radius.md,
     height: FIELD_HEIGHT,
   },
   fieldWrapFocused: {
-    borderColor: lightColors.brand,
     borderWidth: borders.thin,
   },
   fieldWrapError: {
-    borderColor: lightColors.danger,
     borderWidth: borders.thin,
   },
   fieldWrapDisabled: {
-    backgroundColor: lightColors.surfaceSubtle,
     opacity: 0.7,
   },
   fieldWrapMultiline: {
     height: undefined,
     minHeight: MULTILINE_MIN_HEIGHT,
     alignItems: 'flex-start',
-  },
-  inputDisabled: {
-    color: lightColors.textSecondary,
   },
   iconStart: {
     paddingStart: spacing[3],
@@ -213,7 +251,6 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
     fontWeight: fontWeight.regular,
-    color: lightColors.textPrimary,
   },
   inputWithLeftIcon: {
     paddingStart: spacing[2],
@@ -229,11 +266,9 @@ const styles = StyleSheet.create({
   hint: {
     fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
-    color: lightColors.textMuted,
   },
   error: {
     fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
-    color: lightColors.danger,
   },
 });

@@ -18,8 +18,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View, type ViewProps } from 'react-native';
 
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize, fontWeight } from './tokens/typography';
@@ -139,6 +139,14 @@ export function Calendar(props: CalendarProps) {
     testID: props.testID,
   };
 
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      root: { backgroundColor: colors.surfacePrimary },
+    }),
+    [colors],
+  );
+
   const today = useMemo(() => stripTime(new Date()), []);
   const [visibleMonth, setVisibleMonth] = useState(() =>
     startOfMonth(initialMonth ?? new Date()),
@@ -221,7 +229,7 @@ export function Calendar(props: CalendarProps) {
   const monthName = (monthNames ?? MONTH_NAMES)[visibleMonth.getMonth()];
 
   return (
-    <View {...restViewProps} style={[styles.root, props.style]}>
+    <View {...restViewProps} style={[styles.root, dynamicStyles.root, props.style]}>
       <View style={styles.header}>
         <NavButton
           icon={backChevron()}
@@ -293,6 +301,14 @@ function YearInput({
   maxYear?: number;
   onChangeYear: (year: number) => void;
 }) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      yearInput: { color: colors.textPrimary, borderBottomColor: colors.brand },
+    }),
+    [colors],
+  );
+
   const [text, setText] = useState(String(year));
   const [focused, setFocused] = useState(false);
 
@@ -326,7 +342,7 @@ function YearInput({
       maxLength={4}
       selectTextOnFocus
       accessibilityLabel="Year"
-      style={styles.yearInput}
+      style={[styles.yearInput, dynamicStyles.yearInput]}
     />
   );
 }
@@ -340,18 +356,26 @@ function NavButton({
   label: string;
   onPress: () => void;
 }) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      navButtonPressed: { backgroundColor: colors.surfaceSubtle },
+    }),
+    [colors],
+  );
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       hitSlop={spacing[2]}
       onPress={onPress}
-      android_ripple={{ color: lightColors.surfaceSubtle, borderless: true }}
+      android_ripple={{ color: colors.surfaceSubtle, borderless: true }}
       style={({ pressed }) => [
         styles.navButton,
-        pressed && styles.navButtonPressed,
+        pressed && dynamicStyles.navButtonPressed,
       ]}>
-      <Feather name={icon} size={20} color={lightColors.textPrimary} />
+      <Feather name={icon} size={20} color={colors.textPrimary} />
     </Pressable>
   );
 }
@@ -371,15 +395,26 @@ function DayCell({
   isToday: boolean;
   onPress: (d: Date) => void;
 }) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      rangeFill: { backgroundColor: colors.brandSubtle },
+      dayPressed: { backgroundColor: colors.surfaceSubtle },
+      daySelected: { backgroundColor: colors.brand },
+      dayToday: { borderColor: colors.brand },
+    }),
+    [colors],
+  );
+
   const textColor = disabled
-    ? lightColors.textMuted
+    ? colors.textMuted
     : selected
-      ? lightColors.onBrand
-      : lightColors.textPrimary;
+      ? colors.onBrand
+      : colors.textPrimary;
 
   return (
     <View style={styles.cell}>
-      {inRange ? <View style={styles.rangeFill} /> : null}
+      {inRange ? <View style={[styles.rangeFill, dynamicStyles.rangeFill]} /> : null}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={date.toDateString()}
@@ -388,9 +423,9 @@ function DayCell({
         onPress={() => onPress(date)}
         style={({ pressed }) => [
           styles.dayPress,
-          selected && styles.daySelected,
-          isToday && !selected && styles.dayToday,
-          pressed && !selected && styles.dayPressed,
+          selected && dynamicStyles.daySelected,
+          isToday && !selected && [styles.dayToday, dynamicStyles.dayToday],
+          pressed && !selected && dynamicStyles.dayPressed,
         ]}>
         <Text
           variant="body"
@@ -407,7 +442,6 @@ function DayCell({
 
 const styles = StyleSheet.create({
   root: {
-    backgroundColor: lightColors.surfacePrimary,
     gap: spacing[2],
   },
   header: {
@@ -429,10 +463,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[1],
     fontFamily: fontFamily.sansMedium,
     fontSize: fontSize.md,
-    color: lightColors.textPrimary,
     textAlign: 'center',
     borderBottomWidth: borders.thin,
-    borderBottomColor: lightColors.brand,
   },
   navButton: {
     width: 36,
@@ -440,9 +472,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.full,
-  },
-  navButtonPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
   },
   weekdays: {
     flexDirection: 'row',
@@ -464,7 +493,6 @@ const styles = StyleSheet.create({
   },
   rangeFill: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: lightColors.brandSubtle,
   },
   dayPress: {
     width: CELL_SIZE - spacing[1],
@@ -473,14 +501,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: radius.full,
   },
-  dayPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
-  },
-  daySelected: {
-    backgroundColor: lightColors.brand,
-  },
   dayToday: {
     borderWidth: borders.thin,
-    borderColor: lightColors.brand,
   },
 });

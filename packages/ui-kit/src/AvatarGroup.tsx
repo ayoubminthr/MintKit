@@ -1,8 +1,9 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text as RNText, View, type ViewProps } from 'react-native';
 
 import { Avatar, type AvatarSize } from './Avatar';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontWeight } from './tokens/typography';
 
@@ -37,10 +38,20 @@ const sizeBoxMap: Record<AvatarSize, number> = {
 };
 
 export function AvatarGroup({ items, size = 'md', max = 4, style, ...rest }: AvatarGroupProps) {
+  const { colors } = useTheme();
   const visible = items.slice(0, max);
   const overflow = items.length - visible.length;
   const overlap = overlapMap[size];
   const box = sizeBoxMap[size];
+
+  const themedStyles = useMemo(
+    () => ({
+      ring: { backgroundColor: colors.surfacePrimary },
+      overflow: { backgroundColor: colors.surfaceSubtle, borderColor: colors.border },
+      overflowText: { color: colors.textSecondary },
+    }),
+    [colors]
+  );
 
   return (
     <View {...rest} style={[styles.container, style]}>
@@ -48,7 +59,7 @@ export function AvatarGroup({ items, size = 'md', max = 4, style, ...rest }: Ava
         <View
           key={`${idx}-${item.name}`}
           style={[styles.ringWrap, idx > 0 && { marginStart: -overlap }]}>
-          <View style={[styles.ring, { borderRadius: (box + 2) / 2 }]}>
+          <View style={[styles.ring, themedStyles.ring, { borderRadius: (box + 2) / 2 }]}>
             <Avatar name={item.name} imageUri={item.imageUri} size={size} />
           </View>
         </View>
@@ -62,6 +73,7 @@ export function AvatarGroup({ items, size = 'md', max = 4, style, ...rest }: Ava
           <View
             style={[
               styles.overflow,
+              themedStyles.overflow,
               {
                 width: box,
                 height: box,
@@ -69,7 +81,7 @@ export function AvatarGroup({ items, size = 'md', max = 4, style, ...rest }: Ava
               },
             ]}>
             <RNText
-              style={[styles.overflowText, { fontSize: Math.max(10, box * 0.32) }]}
+              style={[styles.overflowText, themedStyles.overflowText, { fontSize: Math.max(10, box * 0.32) }]}
               allowFontScaling={false}>
               +{overflow}
             </RNText>
@@ -90,18 +102,14 @@ const styles = StyleSheet.create({
   },
   ring: {
     padding: 1,
-    backgroundColor: lightColors.surfacePrimary,
   },
   overflow: {
-    backgroundColor: lightColors.surfaceSubtle,
     borderWidth: borders.hair,
-    borderColor: lightColors.border,
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing[1],
   },
   overflowText: {
-    color: lightColors.textSecondary,
     fontFamily: fontFamily.sans,
     fontWeight: fontWeight.medium,
   },

@@ -24,11 +24,12 @@ import {
   Text as RNText,
   View,
 } from 'react-native';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors, palette } from './tokens/colors';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { shadows } from './tokens/shadows';
 import { spacing } from './tokens/spacing';
@@ -59,8 +60,21 @@ export function SelectionBar({
   actions,
   onClear,
 }: SelectionBarProps) {
+  const { colors } = useTheme();
   const translateY = useRef(new Animated.Value(80)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+
+  const dynamicStyles = useMemo(
+    () => ({
+      bar: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+      countPill: { backgroundColor: colors.brand },
+      countText: { color: colors.onBrand },
+      divider: { backgroundColor: colors.border },
+      actionPressed: { backgroundColor: colors.surfaceSubtle },
+      actionPressedDanger: { backgroundColor: colors.dangerSubtle },
+    }),
+    [colors]
+  );
 
   useEffect(() => {
     if (count > 0) {
@@ -99,6 +113,7 @@ export function SelectionBar({
     <Animated.View
       style={[
         styles.bar,
+        dynamicStyles.bar,
         shadows.lg,
         { transform: [{ translateY }], opacity },
       ]}
@@ -106,8 +121,8 @@ export function SelectionBar({
       accessibilityLabel="Bulk actions">
       {/* Count pill + label */}
       <View style={styles.countSection}>
-        <View style={styles.countPill}>
-          <RNText style={styles.countText}>{count}</RNText>
+        <View style={[styles.countPill, dynamicStyles.countPill]}>
+          <RNText style={[styles.countText, dynamicStyles.countText]}>{count}</RNText>
         </View>
         <Text variant="caption" style={{ fontWeight: fontWeight.medium }}>
           {label}
@@ -115,7 +130,7 @@ export function SelectionBar({
       </View>
 
       {/* Divider */}
-      <View style={styles.divider} />
+      <View style={[styles.divider, dynamicStyles.divider]} />
 
       {/* Actions */}
       <View style={styles.actionsRow}>
@@ -127,19 +142,19 @@ export function SelectionBar({
               onPress={action.onPress}
               disabled={action.disabled}
               android_ripple={{
-                color: isDanger ? lightColors.dangerSubtle : lightColors.surfaceSubtle,
+                color: isDanger ? colors.dangerSubtle : colors.surfaceSubtle,
                 borderless: false,
               }}
               style={({ pressed }) => [
                 styles.actionButton,
-                pressed && (isDanger ? styles.actionPressedDanger : styles.actionPressed),
+                pressed && (isDanger ? dynamicStyles.actionPressedDanger : dynamicStyles.actionPressed),
                 action.disabled && styles.actionDisabled,
               ]}>
               {action.icon ? (
                 <Feather
                   name={action.icon}
                   size={14}
-                  color={isDanger ? lightColors.danger : lightColors.textPrimary}
+                  color={isDanger ? colors.danger : colors.textPrimary}
                 />
               ) : null}
               <Text
@@ -156,18 +171,18 @@ export function SelectionBar({
       {/* Clear button */}
       {onClear ? (
         <>
-          <View style={styles.divider} />
+          <View style={[styles.divider, dynamicStyles.divider]} />
           <Pressable
             onPress={onClear}
             accessibilityRole="button"
             accessibilityLabel="Clear selection"
             hitSlop={4}
-            android_ripple={{ color: lightColors.surfaceSubtle, borderless: false }}
+            android_ripple={{ color: colors.surfaceSubtle, borderless: false }}
             style={({ pressed }) => [
               styles.clearButton,
-              pressed && styles.actionPressed,
+              pressed && dynamicStyles.actionPressed,
             ]}>
-            <Feather name="x" size={14} color={lightColors.textMuted} />
+            <Feather name="x" size={14} color={colors.textMuted} />
           </Pressable>
         </>
       ) : null}
@@ -187,10 +202,8 @@ const styles = StyleSheet.create({
     gap: spacing[3],
     height: 40,
     paddingHorizontal: spacing[3],
-    backgroundColor: lightColors.surfacePrimary,
     borderRadius: 9999,
     borderWidth: borders.hair,
-    borderColor: lightColors.border,
   },
   countSection: {
     flexDirection: 'row',
@@ -201,12 +214,10 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: lightColors.brand,
     alignItems: 'center',
     justifyContent: 'center',
   },
   countText: {
-    color: lightColors.onBrand,
     fontFamily: fontFamily.sans,
     fontSize: 11,
     fontWeight: fontWeight.medium,
@@ -215,7 +226,6 @@ const styles = StyleSheet.create({
   divider: {
     width: borders.hair,
     height: 18,
-    backgroundColor: lightColors.border,
   },
   actionsRow: {
     flexDirection: 'row',
@@ -229,12 +239,6 @@ const styles = StyleSheet.create({
     height: 30,
     paddingHorizontal: spacing[2],
     borderRadius: radius.md,
-  },
-  actionPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
-  },
-  actionPressedDanger: {
-    backgroundColor: lightColors.dangerSubtle,
   },
   actionDisabled: {
     opacity: 0.5,

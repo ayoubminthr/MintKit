@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -8,8 +8,8 @@ import {
   View,
 } from 'react-native';
 
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize, fontWeight } from './tokens/typography';
@@ -41,8 +41,22 @@ export function NumberInput({
   onBlur,
   ...rest
 }: NumberInputProps) {
+  const { colors } = useTheme();
   const [focused, setFocused] = useState(false);
   const isActive = focused || value !== null;
+
+  const dynamicStyles = useMemo(
+    () => ({
+      label: { color: colors.textMuted },
+      labelActive: { color: colors.brand },
+      fieldWrap: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+      fieldWrapFocused: { borderColor: colors.brand },
+      fieldWrapError: { borderColor: colors.danger },
+      stepButtonPressed: { backgroundColor: colors.surfaceSubtle },
+      input: { color: colors.textPrimary, borderColor: colors.border },
+    }),
+    [colors]
+  );
 
   const clamp = (n: number) => Math.min(max, Math.max(min, n));
   const inc = () => onChange(clamp((value ?? 0) + step));
@@ -54,15 +68,20 @@ export function NumberInput({
   return (
     <View style={styles.wrapper}>
       {label ? (
-        <Text variant="caption" style={[styles.label, isActive && styles.labelActive]}>
+        <Text
+          variant="caption"
+          style={[styles.label, dynamicStyles.label, isActive && dynamicStyles.labelActive]}>
           {label}
         </Text>
       ) : null}
       <View
         style={[
           styles.fieldWrap,
+          dynamicStyles.fieldWrap,
           focused && styles.fieldWrapFocused,
+          focused && dynamicStyles.fieldWrapFocused,
           error ? styles.fieldWrapError : null,
+          error ? dynamicStyles.fieldWrapError : null,
         ]}>
         <Pressable
           accessibilityRole="button"
@@ -71,13 +90,13 @@ export function NumberInput({
           onPress={dec}
           style={({ pressed }) => [
             styles.stepButton,
-            pressed && !decDisabled && styles.stepButtonPressed,
+            pressed && !decDisabled && dynamicStyles.stepButtonPressed,
             decDisabled && styles.stepButtonDisabled,
           ]}>
           <Feather
             name="minus"
             size={14}
-            color={decDisabled ? lightColors.textMuted : lightColors.textPrimary}
+            color={decDisabled ? colors.textMuted : colors.textPrimary}
           />
         </Pressable>
         <TextInput
@@ -98,8 +117,8 @@ export function NumberInput({
             setFocused(false);
             onBlur?.(e);
           }}
-          style={styles.input}
-          placeholderTextColor={lightColors.textMuted}
+          style={[styles.input, dynamicStyles.input]}
+          placeholderTextColor={colors.textMuted}
         />
         <Pressable
           accessibilityRole="button"
@@ -108,13 +127,13 @@ export function NumberInput({
           onPress={inc}
           style={({ pressed }) => [
             styles.stepButton,
-            pressed && !incDisabled && styles.stepButtonPressed,
+            pressed && !incDisabled && dynamicStyles.stepButtonPressed,
             incDisabled && styles.stepButtonDisabled,
           ]}>
           <Feather
             name="plus"
             size={14}
-            color={incDisabled ? lightColors.textMuted : lightColors.textPrimary}
+            color={incDisabled ? colors.textMuted : colors.textPrimary}
           />
         </Pressable>
       </View>
@@ -140,27 +159,19 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: '500',
-    color: lightColors.textMuted,
-  },
-  labelActive: {
-    color: lightColors.brand,
   },
   fieldWrap: {
     flexDirection: 'row',
     alignItems: 'center',
     height: FIELD_HEIGHT,
-    backgroundColor: lightColors.surfacePrimary,
-    borderColor: lightColors.border,
     borderWidth: borders.hair,
     borderRadius: radius.md,
     overflow: 'hidden',
   },
   fieldWrapFocused: {
-    borderColor: lightColors.brand,
     borderWidth: borders.thin,
   },
   fieldWrapError: {
-    borderColor: lightColors.danger,
     borderWidth: borders.thin,
   },
   stepButton: {
@@ -168,9 +179,6 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  stepButtonPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
   },
   stepButtonDisabled: {
     opacity: 0.5,
@@ -182,10 +190,8 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
     fontWeight: fontWeight.regular,
-    color: lightColors.textPrimary,
     textAlign: 'center',
     borderStartWidth: borders.hair,
     borderEndWidth: borders.hair,
-    borderColor: lightColors.border,
   },
 });

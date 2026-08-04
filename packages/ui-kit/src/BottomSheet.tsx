@@ -26,7 +26,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { lightColors, palette } from "./tokens/colors";
+import { useTheme } from "./Theme";
+import { palette } from "./tokens/colors";
 
 const CONTENT_PADDING = 0;
 const MIN_SHEET_HEIGHT = 150;
@@ -48,23 +49,34 @@ const SheetHandle: React.FC<SheetHandleProps> = ({
   params,
   handleClose,
   sheetId,
-}) => (
-  <View
-    style={[
-      styles.handleContainer,
-      !HeaderComponent && styles.handleContainerNoHeader,
-    ]}
-  >
-    <View style={styles.handleWrapper}>
-      <View style={styles.handle} />
-    </View>
-    {HeaderComponent && (
-      <View style={styles.headerContent}>
-        <HeaderComponent params={params} handleClose={handleClose} sheetId={sheetId} />
+}) => {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      handleContainer: { backgroundColor: colors.surfacePrimary },
+    }),
+    [colors]
+  );
+
+  return (
+    <View
+      style={[
+        styles.handleContainer,
+        dynamicStyles.handleContainer,
+        !HeaderComponent && styles.handleContainerNoHeader,
+      ]}
+    >
+      <View style={styles.handleWrapper}>
+        <View style={styles.handle} />
       </View>
-    )}
-  </View>
-);
+      {HeaderComponent && (
+        <View style={styles.headerContent}>
+          <HeaderComponent params={params} handleClose={handleClose} sheetId={sheetId} />
+        </View>
+      )}
+    </View>
+  );
+};
 
 const HybridContainer = ({
   shouldScroll,
@@ -74,6 +86,7 @@ const HybridContainer = ({
   onRefresh,
   isRefreshing = false,
 }: any) => {
+  const { colors } = useTheme();
   const [isScrolling, setIsScrolling] = useState(shouldScroll);
   const scrollViewRef = useRef(null);
 
@@ -103,8 +116,8 @@ const HybridContainer = ({
             <RefreshControl
               refreshing={isRefreshing}
               onRefresh={onRefresh}
-              colors={[lightColors.brand]}
-              tintColor={lightColors.brand}
+              colors={[colors.brand]}
+              tintColor={colors.brand}
             />
           ) : undefined
         }
@@ -166,10 +179,18 @@ const SheetItem = React.memo(
     onClose,
     setRef,
   }: SheetItemProps) => {
+    const { colors } = useTheme();
     const hasFooter = !!FooterComponent;
     const hasHeader = !!headerComponent;
     const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
     const bottomSheetRef = useRef<BottomSheet | null>(null);
+    const dynamicStyles = useMemo(
+      () => ({
+        sheetBackground: { backgroundColor: colors.surfacePrimary },
+        footerContainer: { backgroundColor: colors.surfacePrimary },
+      }),
+      [colors]
+    );
 
     useEffect(() => {
       const keyboardShowListener = Keyboard.addListener(
@@ -221,6 +242,7 @@ const SheetItem = React.memo(
             <View
               style={[
                 styles.footerContainer,
+                dynamicStyles.footerContainer,
                 {
                   bottom: 0,
                   paddingBottom: Platform.OS === "ios" ? 24 : 16,
@@ -236,7 +258,7 @@ const SheetItem = React.memo(
           </BottomSheetFooter>
         );
       },
-      [FooterComponent, params, handleClose, sheetId]
+      [FooterComponent, params, handleClose, sheetId, dynamicStyles]
     );
 
     const renderBackdrop = useCallback(
@@ -329,7 +351,7 @@ const SheetItem = React.memo(
             mass: 0.5,
             stiffness: 500,
           }}
-          backgroundStyle={styles.sheetBackground}
+          backgroundStyle={dynamicStyles.sheetBackground}
           enableDynamicSizing={!shouldScroll}
           bottomInset={insets.bottom}
           onChange={(sheetIndex) => {
@@ -583,9 +605,6 @@ const styles = StyleSheet.create({
     zIndex: -1,
     width: "100%",
   },
-  sheetBackground: {
-    backgroundColor: lightColors.surfacePrimary,
-  },
   contentContainer: {
     flex: 1,
     paddingTop: 10,
@@ -597,7 +616,6 @@ const styles = StyleSheet.create({
     height: 65,
     width: "100%",
     zIndex: 2,
-    backgroundColor: lightColors.surfacePrimary,
     overflow: "hidden",
     flexDirection: "column",
     alignItems: "center",
@@ -636,7 +654,6 @@ const styles = StyleSheet.create({
     end: 0,
     bottom: 0,
     zIndex: 1000,
-    backgroundColor: lightColors.surfacePrimary,
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: "rgba(0,0,0,0.05)",

@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import { Image } from 'react-native';
 import { StyleSheet, Text as RNText, View, type ViewProps } from 'react-native';
 
-import { lightColors, palette } from './tokens/colors';
+import { useTheme } from './Theme';
+import { palette } from './tokens/colors';
 import { fontFamily, fontWeight } from './tokens/typography';
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
@@ -21,12 +23,6 @@ const sizeMap: Record<AvatarSize, { box: number; font: number; presence: number 
   lg: { box: 40, font: 14, presence: 12 },
   xl: { box: 48, font: 18, presence: 14 },
   '2xl': { box: 64, font: 24, presence: 18 },
-};
-
-const presenceColors: Record<AvatarPresence, string> = {
-  online: lightColors.success,
-  away: lightColors.warning,
-  offline: lightColors.textMuted,
 };
 
 const initialsBgPalette = [
@@ -57,8 +53,26 @@ function getInitials(name: string): string {
 }
 
 export function Avatar({ name, imageUri, size = 'md', presence, style, ...rest }: AvatarProps) {
+  const { colors } = useTheme();
   const dims = sizeMap[size];
   const bg = initialsBgPalette[deterministicHash(name) % initialsBgPalette.length];
+
+  const presenceColors = useMemo<Record<AvatarPresence, string>>(
+    () => ({
+      online: colors.success,
+      away: colors.warning,
+      offline: colors.textMuted,
+    }),
+    [colors]
+  );
+
+  const themedStyles = useMemo(
+    () => ({
+      initialsText: { color: colors.textInverse },
+      presence: { borderColor: colors.surfacePrimary },
+    }),
+    [colors]
+  );
 
   return (
     <View
@@ -80,7 +94,7 @@ export function Avatar({ name, imageUri, size = 'md', presence, style, ...rest }
             { backgroundColor: bg, width: dims.box, height: dims.box, borderRadius: dims.box / 2 },
           ]}>
           <RNText
-            style={[styles.initialsText, { fontSize: dims.font }]}
+            style={[styles.initialsText, themedStyles.initialsText, { fontSize: dims.font }]}
             numberOfLines={1}
             allowFontScaling={false}>
             {getInitials(name)}
@@ -91,6 +105,7 @@ export function Avatar({ name, imageUri, size = 'md', presence, style, ...rest }
         <View
           style={[
             styles.presence,
+            themedStyles.presence,
             {
               width: dims.presence,
               height: dims.presence,
@@ -114,7 +129,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   initialsText: {
-    color: lightColors.textInverse,
     fontFamily: fontFamily.sans,
     fontWeight: fontWeight.medium,
   },
@@ -123,6 +137,5 @@ const styles = StyleSheet.create({
     bottom: 0,
     end: 0,
     borderWidth: 1.5,
-    borderColor: lightColors.surfacePrimary,
   },
 });

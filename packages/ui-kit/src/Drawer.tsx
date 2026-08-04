@@ -11,7 +11,7 @@
  *   </Drawer>
  */
 import { Feather } from '@expo/vector-icons';
-import { type ReactNode, useEffect, useRef } from 'react';
+import { type ReactNode, useEffect, useMemo, useRef } from 'react';
 import {
   Animated,
   Dimensions,
@@ -23,8 +23,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { shadows } from './tokens/shadows';
 import { spacing } from './tokens/spacing';
 import { rtlSign } from './utils/rtl';
@@ -74,10 +74,22 @@ export function Drawer({
   dismissOnBackdrop = true,
   hideDefaultHeader = false,
 }: DrawerProps) {
+  const { colors } = useTheme();
   const drawerWidth = sizeWidths[size];
   const insets = useSafeAreaInsets();
   const slideAnim = useRef(new Animated.Value(drawerWidth)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
+
+  const dynamicStyles = useMemo(
+    () => ({
+      drawer: { backgroundColor: colors.surfacePrimary },
+      drawerStart: { borderEndColor: colors.border },
+      drawerEnd: { borderStartColor: colors.border },
+      header: { borderBottomColor: colors.border },
+      footer: { borderTopColor: colors.border },
+    }),
+    [colors],
+  );
 
   useEffect(() => {
     if (visible) {
@@ -141,6 +153,7 @@ export function Drawer({
         <Animated.View
           style={[
             styles.drawer,
+            dynamicStyles.drawer,
             shadows.drawer,
             {
               width: drawerWidth,
@@ -149,10 +162,11 @@ export function Drawer({
               transform: [{ translateX }],
             },
             side === 'start' ? styles.drawerStart : styles.drawerEnd,
+            side === 'start' ? dynamicStyles.drawerStart : dynamicStyles.drawerEnd,
           ]}>
           {/* Header */}
           {hideDefaultHeader ? null : (
-            <View style={styles.header}>
+            <View style={[styles.header, dynamicStyles.header]}>
               {typeof title === 'string' ? (
                 <Text variant="subtitle" style={{ flex: 1 }} numberOfLines={1}>
                   {title}
@@ -167,7 +181,7 @@ export function Drawer({
                 accessibilityLabel="Close drawer"
                 hitSlop={8}
                 onPress={onClose}>
-                <Feather name="x" size={18} color={lightColors.textSecondary} />
+                <Feather name="x" size={18} color={colors.textSecondary} />
               </Pressable>
             </View>
           )}
@@ -177,7 +191,7 @@ export function Drawer({
 
           {/* Footer */}
           {footer ? (
-            <View style={styles.footer}>{footer}</View>
+            <View style={[styles.footer, dynamicStyles.footer]}>{footer}</View>
           ) : null}
         </Animated.View>
       </View>
@@ -199,17 +213,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     bottom: 0,
-    backgroundColor: lightColors.surfacePrimary,
   },
   drawerStart: {
     start: 0,
     borderEndWidth: borders.hair,
-    borderEndColor: lightColors.border,
   },
   drawerEnd: {
     end: 0,
     borderStartWidth: borders.hair,
-    borderStartColor: lightColors.border,
   },
   header: {
     flexDirection: 'row',
@@ -218,7 +229,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     borderBottomWidth: borders.hair,
-    borderBottomColor: lightColors.border,
   },
   body: {
     flex: 1,
@@ -232,6 +242,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     borderTopWidth: borders.hair,
-    borderTopColor: lightColors.border,
   },
 });

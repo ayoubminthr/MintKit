@@ -15,12 +15,13 @@
  *   />
  */
 import { Feather } from '@expo/vector-icons';
-import { type ComponentProps } from 'react';
+import { type ComponentProps, useMemo } from 'react';
 import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors, palette } from './tokens/colors';
+import { palette } from './tokens/colors';
 import { spacing } from './tokens/spacing';
 import { fontWeight } from './tokens/typography';
 
@@ -49,37 +50,6 @@ interface BannerTheme {
   action: string;
 }
 
-const themeByVariant: Record<BannerVariant, BannerTheme> = {
-  info: {
-    background: lightColors.infoSubtle,
-    border: palette.info[100],
-    icon: palette.info[500],
-    text: palette.info[900],
-    action: palette.info[700],
-  },
-  success: {
-    background: lightColors.successSubtle,
-    border: palette.success[100],
-    icon: palette.success[500],
-    text: palette.success[900],
-    action: palette.success[700],
-  },
-  warning: {
-    background: lightColors.warningSubtle,
-    border: palette.warning[100],
-    icon: palette.warning[500],
-    text: palette.warning[900],
-    action: palette.warning[700],
-  },
-  danger: {
-    background: lightColors.dangerSubtle,
-    border: palette.danger[100],
-    icon: palette.danger[500],
-    text: palette.danger[900],
-    action: palette.danger[700],
-  },
-};
-
 export function Banner({
   variant = 'info',
   message,
@@ -89,6 +59,40 @@ export function Banner({
   style,
   ...rest
 }: BannerProps) {
+  const { colors } = useTheme();
+  const themeByVariant = useMemo<Record<BannerVariant, BannerTheme>>(
+    () => ({
+      info: {
+        background: colors.infoSubtle,
+        border: palette.info[100],
+        icon: palette.info[500],
+        text: palette.info[900],
+        action: palette.info[700],
+      },
+      success: {
+        background: colors.successSubtle,
+        border: palette.success[100],
+        icon: palette.success[500],
+        text: palette.success[900],
+        action: palette.success[700],
+      },
+      warning: {
+        background: colors.warningSubtle,
+        border: palette.warning[100],
+        icon: palette.warning[500],
+        text: palette.warning[900],
+        action: palette.warning[700],
+      },
+      danger: {
+        background: colors.dangerSubtle,
+        border: palette.danger[100],
+        icon: palette.danger[500],
+        text: palette.danger[900],
+        action: palette.danger[700],
+      },
+    }),
+    [colors]
+  );
   const theme = themeByVariant[variant];
 
   return (

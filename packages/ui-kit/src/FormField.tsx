@@ -1,9 +1,9 @@
-import { type ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
-import { lightColors } from './tokens/colors';
 import { spacing } from './tokens/spacing';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 
 export interface FormFieldProps extends ViewProps {
   label?: string;
@@ -30,11 +30,19 @@ export function FormField({
   style,
   ...rest
 }: FormFieldProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      label: { color: colors.textMuted },
+    }),
+    [colors]
+  );
+
   return (
     <View {...rest} style={[styles.wrapper, style]}>
       {label ? (
         <View style={styles.labelRow}>
-          <Text variant="caption" style={styles.label}>
+          <Text variant="caption" style={[styles.label, dynamicStyles.label]}>
             {label}
           </Text>
           {required ? (
@@ -68,7 +76,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   label: {
-    color: lightColors.textMuted,
     fontWeight: '500',
   },
 });

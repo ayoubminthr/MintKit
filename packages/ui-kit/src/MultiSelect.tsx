@@ -21,8 +21,8 @@ import { Checkbox } from './Checkbox';
 import { Input } from './Input';
 import { type SheetBodyProps, useSheet } from './SheetHost';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontSize } from './tokens/typography';
@@ -82,8 +82,21 @@ function MultiSelectSheetBody({
   params,
   handleClose = () => {},
 }: SheetBodyProps<MultiSelectSheetParams>) {
+  const { colors } = useTheme();
   const [search, setSearch] = useState('');
   const [currentValues, setCurrentValues] = useState<string[]>(params.initialValues);
+
+  const dynamicStyles = useMemo(
+    () => ({
+      titleWrap: { borderBottomColor: colors.border },
+      searchWrap: { borderBottomColor: colors.border },
+      optionPressed: { backgroundColor: colors.surfaceSubtle },
+      optionSelected: { backgroundColor: colors.brandSubtle },
+      selectAllBorder: { borderBottomColor: colors.border },
+      footer: { borderTopColor: colors.border },
+    }),
+    [colors]
+  );
 
   const filteredOptions = useMemo(() => {
     if (!search) return params.options;
@@ -145,16 +158,16 @@ function MultiSelectSheetBody({
 
   return (
     <View style={styles.sheetContent}>
-      <View style={styles.titleWrap}>
+      <View style={[styles.titleWrap, dynamicStyles.titleWrap]}>
         <Text variant="subtitle">{params.placeholder}</Text>
       </View>
-      <View style={styles.searchWrap}>
+      <View style={[styles.searchWrap, dynamicStyles.searchWrap]}>
         <Input
           placeholder={params.searchPlaceholder}
           value={search}
           onChangeText={setSearch}
           autoFocus
-          leftIcon={<Feather name="search" size={16} color={lightColors.textSecondary} />}
+          leftIcon={<Feather name="search" size={16} color={colors.textSecondary} />}
         />
       </View>
 
@@ -164,8 +177,9 @@ function MultiSelectSheetBody({
             onPress={toggleAll}
             style={({ pressed }) => [
               styles.option,
-              pressed && styles.optionPressed,
+              pressed && dynamicStyles.optionPressed,
               styles.selectAllBorder,
+              dynamicStyles.selectAllBorder,
             ]}>
             <Checkbox
               checked={allSelected ? true : someSelected ? 'indeterminate' : false}
@@ -193,11 +207,11 @@ function MultiSelectSheetBody({
                 key={item.value}
                 disabled={isDisabled}
                 onPress={() => toggleValue(item.value)}
-                android_ripple={{ color: lightColors.surfaceSubtle }}
+                android_ripple={{ color: colors.surfaceSubtle }}
                 style={({ pressed }) => [
                   styles.option,
-                  pressed && styles.optionPressed,
-                  isSelected && styles.optionSelected,
+                  pressed && dynamicStyles.optionPressed,
+                  isSelected && dynamicStyles.optionSelected,
                   isDisabled && styles.optionDisabled,
                 ]}>
                 <Checkbox
@@ -210,7 +224,7 @@ function MultiSelectSheetBody({
                     <Feather
                       name={item.icon}
                       size={16}
-                      color={lightColors.textSecondary}
+                      color={colors.textSecondary}
                       style={{ marginEnd: spacing[2] }}
                     />
                   ) : null}
@@ -235,13 +249,13 @@ function MultiSelectSheetBody({
             onPress={handleCreate}
             style={({ pressed }) => [
               styles.option,
-              pressed && styles.optionPressed,
-              { borderTopWidth: borders.hair, borderTopColor: lightColors.border },
+              pressed && dynamicStyles.optionPressed,
+              { borderTopWidth: borders.hair, borderTopColor: colors.border },
             ]}>
             <Feather
               name="plus"
               size={16}
-              color={lightColors.brand}
+              color={colors.brand}
               style={{ marginEnd: spacing[2] }}
             />
             <Text variant="body" tone="brand">
@@ -252,7 +266,7 @@ function MultiSelectSheetBody({
       </View>
 
       {(currentValues.length > 0 || params.maxSelections != null) && (
-        <View style={styles.footer}>
+        <View style={[styles.footer, dynamicStyles.footer]}>
           <Text variant="caption" tone="secondary">
             {params.maxSelections != null
               ? `${currentValues.length} of ${params.maxSelections} selected`
@@ -289,10 +303,23 @@ export function MultiSelect({
   error,
   disabled,
 }: MultiSelectProps) {
+  const { colors } = useTheme();
   const sheet = useSheet();
   const [internalValues, setInternalValues] = useState<string[]>(defaultValues);
   const [isOpen, setIsOpen] = useState(false);
   const sheetIdRef = useRef<string | null>(null);
+
+  const dynamicStyles = useMemo(
+    () => ({
+      chipsTrigger: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+      chip: { backgroundColor: colors.brandSubtle },
+      trigger: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+      triggerActive: { borderColor: colors.brand },
+      triggerDisabled: { backgroundColor: colors.surfaceSubtle, borderColor: colors.border },
+      triggerError: { borderColor: colors.danger },
+    }),
+    [colors]
+  );
 
   useEffect(() => {
     if (!sheetIdRef.current) return;
@@ -347,9 +374,12 @@ export function MultiSelect({
         onPress={handleOpen}
         style={[
           styles.chipsTrigger,
+          dynamicStyles.chipsTrigger,
           isOpen && styles.triggerActive,
-          disabled && styles.triggerDisabled,
+          isOpen && dynamicStyles.triggerActive,
+          disabled && dynamicStyles.triggerDisabled,
           error ? styles.triggerError : null,
+          error ? dynamicStyles.triggerError : null,
         ]}>
         {currentValues.length === 0 ? (
           <Text variant="body" tone="muted" style={styles.chipsPlaceholder}>
@@ -361,7 +391,7 @@ export function MultiSelect({
               const option = options.find((o) => o.value === val);
               if (!option) return null;
               return (
-                <View key={val} style={styles.chip}>
+                <View key={val} style={[styles.chip, dynamicStyles.chip]}>
                   <Text variant="caption" numberOfLines={1} style={styles.chipText}>
                     {option.label}
                   </Text>
@@ -371,7 +401,7 @@ export function MultiSelect({
                       accessibilityLabel={`Remove ${option.label}`}
                       hitSlop={6}
                       onPress={() => removeValue(val)}>
-                      <Feather name="x" size={12} color={lightColors.textSecondary} />
+                      <Feather name="x" size={12} color={colors.textSecondary} />
                     </Pressable>
                   )}
                 </View>
@@ -382,7 +412,7 @@ export function MultiSelect({
         <Feather
           name="chevron-down"
           size={16}
-          color={disabled ? lightColors.textMuted : lightColors.textSecondary}
+          color={disabled ? colors.textMuted : colors.textSecondary}
           style={styles.chipsChevron}
         />
       </Pressable>
@@ -397,9 +427,12 @@ export function MultiSelect({
       onPress={handleOpen}
       style={[
         styles.trigger,
+        dynamicStyles.trigger,
         isOpen && styles.triggerActive,
-        disabled && styles.triggerDisabled,
+        isOpen && dynamicStyles.triggerActive,
+        disabled && dynamicStyles.triggerDisabled,
         error ? styles.triggerError : null,
+        error ? dynamicStyles.triggerError : null,
       ]}>
       <Text
         variant="body"
@@ -411,7 +444,7 @@ export function MultiSelect({
       <Feather
         name="chevron-down"
         size={16}
-        color={disabled ? lightColors.textMuted : lightColors.textSecondary}
+        color={disabled ? colors.textMuted : colors.textSecondary}
       />
     </Pressable>
   );
@@ -426,10 +459,8 @@ const styles = StyleSheet.create({
     minHeight: 44,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
-    backgroundColor: lightColors.surfacePrimary,
     borderRadius: radius.md,
     borderWidth: borders.hair,
-    borderColor: lightColors.border,
     gap: spacing[2],
   },
   chipsPlaceholder: {
@@ -453,7 +484,6 @@ const styles = StyleSheet.create({
     paddingStart: spacing[2],
     paddingEnd: spacing[1],
     paddingVertical: 4,
-    backgroundColor: lightColors.brandSubtle,
     borderRadius: radius.full,
   },
   chipText: {
@@ -465,21 +495,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     minHeight: 44,
     paddingHorizontal: spacing[3],
-    backgroundColor: lightColors.surfacePrimary,
     borderRadius: radius.md,
     borderWidth: borders.hair,
-    borderColor: lightColors.border,
   },
   triggerActive: {
-    borderColor: lightColors.brand,
     borderWidth: borders.thin,
   },
-  triggerDisabled: {
-    backgroundColor: lightColors.surfaceSubtle,
-    borderColor: lightColors.border,
-  },
   triggerError: {
-    borderColor: lightColors.danger,
     borderWidth: borders.thin,
   },
   sheetContent: {
@@ -489,13 +511,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingBottom: spacing[3],
     borderBottomWidth: borders.hair,
-    borderBottomColor: lightColors.border,
   },
   searchWrap: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     borderBottomWidth: borders.hair,
-    borderBottomColor: lightColors.border,
   },
   list: {
     paddingVertical: spacing[2],
@@ -510,12 +530,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[4],
   },
-  optionPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
-  },
-  optionSelected: {
-    backgroundColor: lightColors.brandSubtle,
-  },
   optionDisabled: {
     opacity: 0.5,
   },
@@ -527,7 +541,6 @@ const styles = StyleSheet.create({
   },
   selectAllBorder: {
     borderBottomWidth: borders.hair,
-    borderBottomColor: lightColors.border,
     marginBottom: spacing[1],
   },
   value: {
@@ -543,6 +556,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     borderTopWidth: borders.hair,
-    borderTopColor: lightColors.border,
   },
 });

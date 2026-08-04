@@ -1,9 +1,10 @@
+import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, View, type ViewProps } from 'react-native';
 
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { spacing } from './tokens/spacing';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 
 export interface TabOption<T extends string = string> {
   value: T;
@@ -29,6 +30,16 @@ export function Tabs<T extends string = string>({
   style,
   ...rest
 }: TabsProps<T>) {
+  const { colors } = useTheme();
+
+  const dynamicStyles = useMemo(
+    () => ({
+      baseline: { backgroundColor: colors.border },
+      tabSelected: { borderBottomColor: colors.brand },
+    }),
+    [colors]
+  );
+
   const inner = (
     <View style={[styles.row, fullWidth && styles.rowFullWidth]}>
       {options.map((opt) => {
@@ -39,7 +50,11 @@ export function Tabs<T extends string = string>({
             accessibilityRole="tab"
             accessibilityState={{ selected }}
             onPress={() => onChange(opt.value)}
-            style={[styles.tab, fullWidth && styles.tabFullWidth, selected && styles.tabSelected]}>
+            style={[
+              styles.tab,
+              fullWidth && styles.tabFullWidth,
+              selected && dynamicStyles.tabSelected,
+            ]}>
             <Text
               variant="body"
               tone={selected ? 'primary' : 'secondary'}
@@ -64,7 +79,7 @@ export function Tabs<T extends string = string>({
       ) : (
         inner
       )}
-      <View style={styles.baseline} />
+      <View style={[styles.baseline, dynamicStyles.baseline]} />
     </View>
   );
 }
@@ -89,7 +104,6 @@ const styles = StyleSheet.create({
     end: 0,
     bottom: 0,
     height: borders.hair,
-    backgroundColor: lightColors.border,
   },
   tab: {
     paddingVertical: spacing[2],
@@ -100,9 +114,6 @@ const styles = StyleSheet.create({
   tabFullWidth: {
     flex: 1,
     alignItems: 'center',
-  },
-  tabSelected: {
-    borderBottomColor: lightColors.brand,
   },
   labelCentered: {
     textAlign: 'center',

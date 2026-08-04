@@ -19,8 +19,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Input } from './Input';
 import { type SheetBodyProps, useSheet } from './SheetHost';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontSize } from './tokens/typography';
@@ -71,6 +71,17 @@ function ComboboxSheetBody({
   params,
   handleClose = () => {},
 }: SheetBodyProps<ComboboxSheetParams>) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      titleWrap: { borderBottomColor: colors.border },
+      searchWrap: { borderBottomColor: colors.border },
+      optionPressed: { backgroundColor: colors.surfaceSubtle },
+      optionSelected: { backgroundColor: colors.brandSubtle },
+    }),
+    [colors],
+  );
+
   const [search, setSearch] = useState('');
 
   const filteredOptions = useMemo(() => {
@@ -103,16 +114,16 @@ function ComboboxSheetBody({
 
   return (
     <View style={styles.sheetContent}>
-      <View style={styles.titleWrap}>
+      <View style={[styles.titleWrap, dynamicStyles.titleWrap]}>
         <Text variant="subtitle">{params.placeholder}</Text>
       </View>
-      <View style={styles.searchWrap}>
+      <View style={[styles.searchWrap, dynamicStyles.searchWrap]}>
         <Input
           placeholder={params.searchPlaceholder}
           value={search}
           onChangeText={setSearch}
           autoFocus
-          leftIcon={<Feather name="search" size={16} color={lightColors.textSecondary} />}
+          leftIcon={<Feather name="search" size={16} color={colors.textSecondary} />}
         />
       </View>
 
@@ -131,11 +142,11 @@ function ComboboxSheetBody({
                 key={item.value}
                 disabled={item.disabled}
                 onPress={() => handleSelect(item.value)}
-                android_ripple={{ color: lightColors.surfaceSubtle }}
+                android_ripple={{ color: colors.surfaceSubtle }}
                 style={({ pressed }) => [
                   styles.option,
-                  pressed && styles.optionPressed,
-                  isSelected && styles.optionSelected,
+                  pressed && dynamicStyles.optionPressed,
+                  isSelected && dynamicStyles.optionSelected,
                   item.disabled && styles.optionDisabled,
                 ]}>
                 <View style={styles.optionBody}>
@@ -143,7 +154,7 @@ function ComboboxSheetBody({
                     <Feather
                       name={item.icon}
                       size={16}
-                      color={lightColors.textSecondary}
+                      color={colors.textSecondary}
                       style={{ marginEnd: spacing[2] }}
                     />
                   ) : null}
@@ -159,7 +170,7 @@ function ComboboxSheetBody({
                   </View>
                 </View>
                 {isSelected ? (
-                  <Feather name="check" size={16} color={lightColors.brand} />
+                  <Feather name="check" size={16} color={colors.brand} />
                 ) : null}
               </Pressable>
             );
@@ -171,12 +182,12 @@ function ComboboxSheetBody({
             onPress={handleCreate}
             style={({ pressed }) => [
               styles.option,
-              pressed && styles.optionPressed,
+              pressed && dynamicStyles.optionPressed,
             ]}>
             <Feather
               name="plus"
               size={16}
-              color={lightColors.brand}
+              color={colors.brand}
               style={{ marginEnd: spacing[2] }}
             />
             <Text variant="body" tone="brand">
@@ -205,6 +216,16 @@ export function Combobox({
   error,
   disabled,
 }: ComboboxProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      trigger: { backgroundColor: colors.surfacePrimary, borderColor: colors.borderStrong },
+      triggerDisabled: { backgroundColor: colors.surfaceSubtle, borderColor: colors.border },
+      triggerError: { borderColor: colors.danger },
+    }),
+    [colors],
+  );
+
   const sheet = useSheet();
   const [internalValue, setInternalValue] = useState(defaultValue ?? '');
 
@@ -239,8 +260,9 @@ export function Combobox({
       onPress={handleOpen}
       style={[
         styles.trigger,
-        disabled && styles.triggerDisabled,
-        error ? styles.triggerError : null,
+        dynamicStyles.trigger,
+        disabled && dynamicStyles.triggerDisabled,
+        error ? dynamicStyles.triggerError : null,
       ]}>
       <Text
         variant="body"
@@ -252,7 +274,7 @@ export function Combobox({
       <Feather
         name="chevron-down"
         size={16}
-        color={disabled ? lightColors.textMuted : lightColors.textSecondary}
+        color={disabled ? colors.textMuted : colors.textSecondary}
       />
     </Pressable>
   );
@@ -267,17 +289,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     minHeight: 44,
     paddingHorizontal: spacing[3],
-    backgroundColor: lightColors.surfacePrimary,
     borderRadius: radius.md,
     borderWidth: borders.thin,
-    borderColor: lightColors.borderStrong,
-  },
-  triggerDisabled: {
-    backgroundColor: lightColors.surfaceSubtle,
-    borderColor: lightColors.border,
-  },
-  triggerError: {
-    borderColor: lightColors.danger,
   },
   sheetContent: {
     flex: 1,
@@ -286,13 +299,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingBottom: spacing[3],
     borderBottomWidth: borders.hair,
-    borderBottomColor: lightColors.border,
   },
   searchWrap: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     borderBottomWidth: borders.hair,
-    borderBottomColor: lightColors.border,
   },
   list: {
     paddingVertical: spacing[2],
@@ -307,12 +318,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[4],
-  },
-  optionPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
-  },
-  optionSelected: {
-    backgroundColor: lightColors.brandSubtle,
   },
   optionDisabled: {
     opacity: 0.5,

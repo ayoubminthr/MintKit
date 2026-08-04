@@ -1,11 +1,11 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
+import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
-import { Text } from './Text';
 
 export type CardPadding = 'none' | 'sm' | 'md' | 'lg';
 
@@ -15,8 +15,16 @@ export interface CardProps extends ViewProps {
 }
 
 export function Card({ children, padding = 'md', style, ...rest }: CardProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      card: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+    }),
+    [colors],
+  );
+
   return (
-    <View {...rest} style={[styles.card, paddingStyles[padding], style]}>
+    <View {...rest} style={[styles.card, dynamicStyles.card, paddingStyles[padding], style]}>
       {children}
     </View>
   );
@@ -24,8 +32,6 @@ export function Card({ children, padding = 'md', style, ...rest }: CardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: lightColors.surfacePrimary,
-    borderColor: lightColors.border,
     borderWidth: borders.hair,
     borderRadius: radius.lg,
   },
@@ -77,8 +83,16 @@ export interface CardFooterProps extends ViewProps {
 }
 
 export function CardFooter({ children, style, ...rest }: CardFooterProps) {
+  const { colors } = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      footer: { borderTopColor: colors.border },
+    }),
+    [colors],
+  );
+
   return (
-    <View {...rest} style={[subStyles.footer, style]}>
+    <View {...rest} style={[subStyles.footer, dynamicStyles.footer, style]}>
       {children}
     </View>
   );
@@ -96,6 +110,5 @@ const subStyles = StyleSheet.create({
     marginTop: spacing[3],
     paddingTop: spacing[3],
     borderTopWidth: borders.hair,
-    borderTopColor: lightColors.border,
   },
 });

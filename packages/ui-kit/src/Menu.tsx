@@ -23,7 +23,7 @@
  *   />
  */
 import { Feather } from '@expo/vector-icons';
-import { type ComponentProps, type RefObject, useEffect, useState } from 'react';
+import { type ComponentProps, type RefObject, useEffect, useMemo, useState } from 'react';
 import {
   Dimensions,
   Modal as RNModal,
@@ -33,8 +33,8 @@ import {
 } from 'react-native';
 
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { shadows } from './tokens/shadows';
 import { spacing } from './tokens/spacing';
@@ -76,6 +76,7 @@ export function Menu({
   items,
   minWidth = 200,
 }: MenuProps) {
+  const { colors } = useTheme();
   const [anchor, setAnchor] = useState<AnchorBox | null>(null);
 
   useEffect(() => {
@@ -86,6 +87,16 @@ export function Menu({
       setAnchor({ x, y, width, height });
     });
   }, [visible, anchorRef]);
+
+  const dynamicStyles = useMemo(
+    () => ({
+      menu: {
+        backgroundColor: colors.surfacePrimary,
+        borderColor: colors.border,
+      },
+    }),
+    [colors],
+  );
 
   const screen = Dimensions.get('window');
   const estimatedHeight = items.length * ESTIMATED_ROW_HEIGHT + spacing[1] * 2;
@@ -120,7 +131,9 @@ export function Menu({
       onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close menu" />
       {anchor ? (
-        <View style={[styles.menu, shadows.md, menuStyle]} pointerEvents="box-none">
+        <View
+          style={[styles.menu, dynamicStyles.menu, shadows.md, menuStyle]}
+          pointerEvents="box-none">
           <View style={styles.menuInner}>
             {items.map((item, idx) => (
               <MenuRow
@@ -140,16 +153,25 @@ export function Menu({
 }
 
 function MenuRow({ item, onPress }: { item: MenuItem; onPress: () => void }) {
-  const tone = item.destructive ? lightColors.danger : lightColors.textPrimary;
+  const { colors } = useTheme();
+  const tone = item.destructive ? colors.danger : colors.textPrimary;
+
+  const dynamicStyles = useMemo(
+    () => ({
+      rowPressed: { backgroundColor: colors.surfaceSubtle },
+    }),
+    [colors],
+  );
+
   return (
     <Pressable
       accessibilityRole="menuitem"
       disabled={item.disabled}
       onPress={onPress}
-      android_ripple={{ color: lightColors.surfaceSubtle, borderless: false }}
+      android_ripple={{ color: colors.surfaceSubtle, borderless: false }}
       style={({ pressed }) => [
         styles.row,
-        pressed && styles.rowPressed,
+        pressed && dynamicStyles.rowPressed,
         item.disabled && styles.rowDisabled,
       ]}>
       {item.icon ? <Feather name={item.icon} size={16} color={tone} /> : null}
@@ -166,10 +188,8 @@ const styles = StyleSheet.create({
   },
   menu: {
     position: 'absolute',
-    backgroundColor: lightColors.surfacePrimary,
     borderRadius: radius.lg,
     borderWidth: borders.hair,
-    borderColor: lightColors.border,
     overflow: 'hidden',
   },
   menuInner: {
@@ -182,9 +202,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
     minHeight: ESTIMATED_ROW_HEIGHT,
-  },
-  rowPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
   },
   rowDisabled: {
     opacity: 0.5,

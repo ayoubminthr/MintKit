@@ -1,9 +1,11 @@
+import { useMemo } from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
-import { lightColors, palette } from './tokens/colors';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 
 export type PasswordScore = 0 | 1 | 2 | 3 | 4;
 
@@ -47,7 +49,15 @@ const scoreInfo: Record<PasswordScore, ScoreInfo> = {
 };
 
 export function PasswordStrength({ password, style, ...rest }: PasswordStrengthProps) {
+  const { colors } = useTheme();
   const info = getPasswordScore(password);
+
+  const dynamicStyles = useMemo(
+    () => ({
+      bar: { backgroundColor: colors.surfaceSubtle },
+    }),
+    [colors]
+  );
 
   return (
     <View {...rest} style={[styles.container, style]}>
@@ -59,6 +69,7 @@ export function PasswordStrength({ password, style, ...rest }: PasswordStrengthP
               key={idx}
               style={[
                 styles.bar,
+                dynamicStyles.bar,
                 {
                   backgroundColor: filled ? info.color : palette.gray[100],
                 },
@@ -86,7 +97,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 4,
     borderRadius: radius.full,
-    backgroundColor: lightColors.surfaceSubtle,
   },
   label: {
     fontWeight: '500',

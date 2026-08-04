@@ -7,7 +7,7 @@
  * section headers + footer captions.
  */
 import { Feather } from '@expo/vector-icons';
-import { Children, Fragment, type ReactNode } from 'react';
+import { Children, Fragment, type ReactNode, useMemo } from 'react';
 import {
   Pressable,
   type PressableProps,
@@ -17,8 +17,8 @@ import {
 } from 'react-native';
 
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { forwardChevron } from './utils/rtl';
@@ -49,11 +49,20 @@ export function ListItem({
   disabled,
   ...rest
 }: ListItemProps) {
+  const { colors } = useTheme();
   const pressable = Boolean(onPress);
   const shouldShowChevron =
     showChevron !== undefined ? showChevron : pressable && !trailing;
 
   const titleTone = destructive ? 'danger' : 'primary';
+
+  const dynamicStyles = useMemo(
+    () => ({
+      container: { backgroundColor: colors.surfacePrimary },
+      pressed: { backgroundColor: colors.surfaceSubtle },
+    }),
+    [colors],
+  );
 
   const content = (
     <View style={styles.row}>
@@ -73,7 +82,7 @@ export function ListItem({
         <Feather
           name={forwardChevron()}
           size={18}
-          color={lightColors.textMuted}
+          color={colors.textMuted}
           style={styles.chevron}
         />
       ) : null}
@@ -81,7 +90,9 @@ export function ListItem({
   );
 
   if (!pressable) {
-    return <View style={[styles.container, disabled && styles.disabled]}>{content}</View>;
+    return (
+      <View style={[dynamicStyles.container, disabled && styles.disabled]}>{content}</View>
+    );
   }
 
   return (
@@ -90,10 +101,10 @@ export function ListItem({
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
-      android_ripple={{ color: lightColors.surfaceSubtle, borderless: false }}
+      android_ripple={{ color: colors.surfaceSubtle, borderless: false }}
       style={({ pressed }) => [
-        styles.container,
-        pressed && styles.pressed,
+        dynamicStyles.container,
+        pressed && dynamicStyles.pressed,
         disabled && styles.disabled,
       ]}>
       {content}
@@ -108,15 +119,33 @@ export interface ListProps extends ViewProps {
 }
 
 export function List({ bordered = false, children, style, ...rest }: ListProps) {
+  const { colors } = useTheme();
   const items = Children.toArray(children).filter(Boolean);
   const total = items.length;
 
+  const dynamicStyles = useMemo(
+    () => ({
+      bordered: {
+        borderColor: colors.border,
+        backgroundColor: colors.surfacePrimary,
+      },
+      separator: {
+        backgroundColor: colors.border,
+      },
+    }),
+    [colors],
+  );
+
   return (
-    <View {...rest} style={[bordered && styles.bordered, style]}>
+    <View
+      {...rest}
+      style={[bordered && styles.bordered, bordered && dynamicStyles.bordered, style]}>
       {items.map((child, idx) => (
         <Fragment key={idx}>
           {child}
-          {idx < total - 1 ? <View style={styles.separator} /> : null}
+          {idx < total - 1 ? (
+            <View style={[styles.separator, dynamicStyles.separator]} />
+          ) : null}
         </Fragment>
       ))}
     </View>
@@ -159,12 +188,6 @@ export function ListSection({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: lightColors.surfacePrimary,
-  },
-  pressed: {
-    backgroundColor: lightColors.surfaceSubtle,
-  },
   disabled: {
     opacity: 0.5,
   },
@@ -192,14 +215,11 @@ const styles = StyleSheet.create({
   },
   bordered: {
     borderWidth: borders.hair,
-    borderColor: lightColors.border,
     borderRadius: radius.lg,
     overflow: 'hidden',
-    backgroundColor: lightColors.surfacePrimary,
   },
   separator: {
     height: borders.hair,
-    backgroundColor: lightColors.border,
     marginStart: spacing[4],
   },
 });

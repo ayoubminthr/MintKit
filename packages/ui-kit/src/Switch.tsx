@@ -1,13 +1,14 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 
-import { lightColors, palette } from './tokens/colors';
+import { palette } from './tokens/colors';
 import { borders } from './tokens/borders';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize, fontWeight } from './tokens/typography';
 import { rtlSign } from './utils/rtl';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 
 export interface SwitchProps {
   value: boolean;
@@ -26,7 +27,17 @@ const TRACK_PADDING = 3;
 const TRAVEL = TRACK_WIDTH - 2 * borders.thin - 2 * TRACK_PADDING - THUMB_SIZE;
 
 export function Switch({ value, onValueChange, disabled, label, description }: SwitchProps) {
+  const { colors } = useTheme();
   const anim = useRef(new Animated.Value(value ? 1 : 0)).current;
+
+  const dynamicStyles = useMemo(
+    () => ({
+      track: { borderColor: colors.brandSubtle },
+      thumbOn: { backgroundColor: colors.brand },
+      thumbOff: { backgroundColor: colors.borderStrong },
+    }),
+    [colors]
+  );
 
   useEffect(() => {
     Animated.timing(anim, {
@@ -50,13 +61,17 @@ export function Switch({ value, onValueChange, disabled, label, description }: S
       accessibilityRole="switch"
       accessibilityState={{ checked: value, disabled: !!disabled }}
       accessibilityLabel={label}
-      style={[styles.track, disabled && !label && !description && styles.disabled]}
+      style={[
+        styles.track,
+        dynamicStyles.track,
+        disabled && !label && !description && styles.disabled,
+      ]}
     >
       <Animated.View
         style={[
           styles.thumb,
           { transform: [{ translateX }] },
-          value ? styles.thumbOn : styles.thumbOff,
+          value ? dynamicStyles.thumbOn : dynamicStyles.thumbOff,
         ]}
       />
     </Pressable>
@@ -96,19 +111,11 @@ const styles = StyleSheet.create({
     // gray[100] = the documented "secondary surface" track fill (same token SegmentedControl uses).
     backgroundColor: palette.gray[100],
     borderWidth: borders.thin,
-    // Faint green ring — the semantic subtle-brand tint.
-    borderColor: lightColors.brandSubtle,
   },
   thumb: {
     width: THUMB_SIZE,
     height: THUMB_SIZE,
     borderRadius: radius.full,
-  },
-  thumbOn: {
-    backgroundColor: lightColors.brand,
-  },
-  thumbOff: {
-    backgroundColor: lightColors.borderStrong,
   },
   row: {
     flexDirection: 'row',

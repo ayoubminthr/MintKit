@@ -1,8 +1,9 @@
 import { Feather } from '@expo/vector-icons';
+import { useMemo } from 'react';
 import { Pressable, type PressableProps, StyleSheet, type ViewStyle } from 'react-native';
 
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 
 export type IconButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'tint';
@@ -30,7 +31,58 @@ export function IconButton({
   disabled,
   ...rest
 }: IconButtonProps) {
+  const { colors } = useTheme();
   const dims = sizeMap[size];
+
+  const variantStyles = useMemo<
+    Record<
+      IconButtonVariant,
+      {
+        container: ViewStyle;
+        pressed: ViewStyle;
+        iconColor: string;
+        ripple: string;
+      }
+    >
+  >(
+    () => ({
+      primary: {
+        container: { backgroundColor: colors.brand },
+        pressed: { backgroundColor: colors.brandHover },
+        iconColor: colors.onBrand,
+        ripple: colors.brandStrong,
+      },
+      secondary: {
+        container: {
+          backgroundColor: colors.surfacePrimary,
+          borderWidth: borders.hair,
+          borderColor: colors.border,
+        },
+        pressed: { backgroundColor: colors.surfaceSubtle },
+        iconColor: colors.textPrimary,
+        ripple: colors.surfaceSubtle,
+      },
+      ghost: {
+        container: { backgroundColor: 'transparent' },
+        pressed: { backgroundColor: colors.surfaceSubtle },
+        iconColor: colors.textPrimary,
+        ripple: colors.surfaceSubtle,
+      },
+      danger: {
+        container: { backgroundColor: colors.danger },
+        pressed: { backgroundColor: '#B84A24' },
+        iconColor: colors.onBrand,
+        ripple: '#B84A24',
+      },
+      tint: {
+        container: { backgroundColor: colors.brandSubtle },
+        pressed: { backgroundColor: colors.brandSubtle },
+        iconColor: colors.brand,
+        ripple: colors.brand,
+      },
+    }),
+    [colors],
+  );
   const v = variantStyles[variant];
 
   return (
@@ -62,48 +114,3 @@ const baseStyles = StyleSheet.create({
     opacity: 0.5,
   },
 });
-
-const variantStyles: Record<
-  IconButtonVariant,
-  {
-    container: ViewStyle;
-    pressed: ViewStyle;
-    iconColor: string;
-    ripple: string;
-  }
-> = {
-  primary: {
-    container: { backgroundColor: lightColors.brand },
-    pressed: { backgroundColor: lightColors.brandHover },
-    iconColor: lightColors.onBrand,
-    ripple: lightColors.brandStrong,
-  },
-  secondary: {
-    container: {
-      backgroundColor: lightColors.surfacePrimary,
-      borderWidth: borders.hair,
-      borderColor: lightColors.border,
-    },
-    pressed: { backgroundColor: lightColors.surfaceSubtle },
-    iconColor: lightColors.textPrimary,
-    ripple: lightColors.surfaceSubtle,
-  },
-  ghost: {
-    container: { backgroundColor: 'transparent' },
-    pressed: { backgroundColor: lightColors.surfaceSubtle },
-    iconColor: lightColors.textPrimary,
-    ripple: lightColors.surfaceSubtle,
-  },
-  danger: {
-    container: { backgroundColor: lightColors.danger },
-    pressed: { backgroundColor: '#B84A24' },
-    iconColor: lightColors.onBrand,
-    ripple: '#B84A24',
-  },
-  tint: {
-    container: { backgroundColor: lightColors.brandSubtle },
-    pressed: { backgroundColor: lightColors.brandSubtle },
-    iconColor: lightColors.brand,
-    ripple: lightColors.brand,
-  },
-};

@@ -17,9 +17,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Input, type InputProps } from './Input';
 import { type SheetBodyProps, useSheet } from './SheetHost';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { COUNTRIES, type Country, findCountry } from './data/countries';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 
@@ -42,6 +42,7 @@ function PhoneInputSheetBody({
   params,
   handleClose = () => {},
 }: SheetBodyProps<PhoneInputSheetParams>) {
+  const { colors } = useTheme();
   const [search, setSearch] = useState('');
 
   const filteredCountries = useMemo(() => {
@@ -54,6 +55,16 @@ function PhoneInputSheetBody({
     );
   }, [search]);
 
+  const dynamicStyles = useMemo(
+    () => ({
+      titleWrap: { borderBottomColor: colors.border },
+      searchWrap: { borderBottomColor: colors.border },
+      optionPressed: { backgroundColor: colors.surfaceSubtle },
+      optionSelected: { backgroundColor: colors.brandSubtle },
+    }),
+    [colors]
+  );
+
   function handlePick(code: string) {
     params.onCountrySelect(code);
     handleClose();
@@ -61,16 +72,16 @@ function PhoneInputSheetBody({
 
   return (
     <View style={styles.sheetContent}>
-      <View style={styles.titleWrap}>
+      <View style={[styles.titleWrap, dynamicStyles.titleWrap]}>
         <Text variant="subtitle">Select country</Text>
       </View>
-      <View style={styles.searchWrap}>
+      <View style={[styles.searchWrap, dynamicStyles.searchWrap]}>
         <Input
           placeholder="Search countries or codes…"
           value={search}
           onChangeText={setSearch}
           autoFocus
-          leftIcon={<Feather name="search" size={16} color={lightColors.textSecondary} />}
+          leftIcon={<Feather name="search" size={16} color={colors.textSecondary} />}
         />
       </View>
 
@@ -88,11 +99,11 @@ function PhoneInputSheetBody({
               <Pressable
                 key={item.code}
                 onPress={() => handlePick(item.code)}
-                android_ripple={{ color: lightColors.surfaceSubtle }}
+                android_ripple={{ color: colors.surfaceSubtle }}
                 style={({ pressed }) => [
                   styles.option,
-                  pressed && styles.optionPressed,
-                  isSelected && styles.optionSelected,
+                  pressed && dynamicStyles.optionPressed,
+                  isSelected && dynamicStyles.optionSelected,
                 ]}>
                 <Text style={{ fontSize: 18, marginEnd: spacing[3] }}>{item.flag}</Text>
                 <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
@@ -107,7 +118,7 @@ function PhoneInputSheetBody({
                   {item.dialCode}
                 </Text>
                 {isSelected ? (
-                  <Feather name="check" size={16} color={lightColors.brand} />
+                  <Feather name="check" size={16} color={colors.brand} />
                 ) : null}
               </Pressable>
             );
@@ -128,11 +139,19 @@ export function PhoneInput({
   error,
   ...rest
 }: PhoneInputProps) {
+  const { colors } = useTheme();
   const sheet = useSheet();
   const [internalCountry, setInternalCountry] = useState(defaultCountry);
 
   const currentCountryCode = countryProp !== undefined ? countryProp : internalCountry;
   const currentCountry = findCountry(currentCountryCode) ?? COUNTRIES[0];
+
+  const dynamicStyles = useMemo(
+    () => ({
+      indicator: { borderEndColor: colors.border, backgroundColor: colors.surfaceSubtle },
+    }),
+    [colors]
+  );
 
   function handleOpen() {
     sheet.open<PhoneInputSheetParams>({
@@ -152,7 +171,7 @@ export function PhoneInput({
     <Pressable
       disabled={disabled}
       onPress={handleOpen}
-      style={styles.indicator}>
+      style={[styles.indicator, dynamicStyles.indicator]}>
       <Text style={{ fontSize: 16, marginEnd: spacing[1] }}>
         {currentCountry.flag}
       </Text>
@@ -162,7 +181,7 @@ export function PhoneInput({
       <Feather
         name="chevron-down"
         size={14}
-        color={disabled ? lightColors.textMuted : lightColors.textSecondary}
+        color={disabled ? colors.textMuted : colors.textSecondary}
         style={{ marginStart: spacing[1] }}
       />
     </Pressable>
@@ -188,11 +207,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[3],
     height: '100%',
     borderEndWidth: borders.hair,
-    borderEndColor: lightColors.border,
     marginEnd: spacing[2],
     borderTopStartRadius: radius.md - 1,
     borderBottomStartRadius: radius.md - 1,
-    backgroundColor: lightColors.surfaceSubtle,
   },
   sheetContent: {
     flex: 1,
@@ -201,13 +218,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingBottom: spacing[3],
     borderBottomWidth: borders.hair,
-    borderBottomColor: lightColors.border,
   },
   searchWrap: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     borderBottomWidth: borders.hair,
-    borderBottomColor: lightColors.border,
   },
   list: {
     paddingVertical: spacing[2],
@@ -221,11 +236,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[4],
-  },
-  optionPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
-  },
-  optionSelected: {
-    backgroundColor: lightColors.brandSubtle,
   },
 });

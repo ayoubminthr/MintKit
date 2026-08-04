@@ -2,9 +2,9 @@ import { Feather } from '@expo/vector-icons';
 import { Fragment } from 'react';
 import { Pressable, ScrollView, StyleSheet, View, type ViewProps } from 'react-native';
 
-import { lightColors } from './tokens/colors';
 import { spacing } from './tokens/spacing';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { forwardChevron } from './utils/rtl';
 
 export interface BreadcrumbItem {
@@ -17,6 +17,8 @@ export interface BreadcrumbsProps extends ViewProps {
 }
 
 export function Breadcrumbs({ items, style, ...rest }: BreadcrumbsProps) {
+  const { colors } = useTheme();
+
   return (
     <ScrollView
       horizontal
@@ -48,7 +50,7 @@ export function Breadcrumbs({ items, style, ...rest }: BreadcrumbsProps) {
               <Feather
                 name={forwardChevron()}
                 size={12}
-                color={lightColors.textMuted}
+                color={colors.textMuted}
                 style={styles.separator}
               />
             ) : null}

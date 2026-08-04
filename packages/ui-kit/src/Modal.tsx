@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { type ReactNode } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import {
   Modal as RNModal,
   Pressable,
@@ -8,8 +8,8 @@ import {
   View,
 } from 'react-native';
 
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { shadows } from './tokens/shadows';
 import { spacing } from './tokens/spacing';
@@ -34,6 +34,24 @@ export function Modal({
   actions,
   dismissOnBackdrop = true,
 }: ModalProps) {
+  const { colors } = useTheme();
+
+  const dynamicStyles = useMemo(
+    () => ({
+      card: {
+        backgroundColor: colors.surfacePrimary,
+        borderColor: colors.border,
+      },
+      header: {
+        borderBottomColor: colors.border,
+      },
+      actions: {
+        borderTopColor: colors.border,
+      },
+    }),
+    [colors],
+  );
+
   return (
     <RNModal
       visible={visible}
@@ -44,21 +62,23 @@ export function Modal({
       <TouchableWithoutFeedback onPress={dismissOnBackdrop ? onClose : undefined}>
         <View style={styles.backdrop}>
           <TouchableWithoutFeedback>
-            <View style={[styles.card, shadows.lg]}>
+            <View style={[styles.card, dynamicStyles.card, shadows.lg]}>
               {title || true ? (
-                <View style={styles.header}>
+                <View style={[styles.header, dynamicStyles.header]}>
                   {title ? <Text variant="subtitle">{title}</Text> : <View />}
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Close"
                     hitSlop={8}
                     onPress={onClose}>
-                    <Feather name="x" size={18} color={lightColors.textSecondary} />
+                    <Feather name="x" size={18} color={colors.textSecondary} />
                   </Pressable>
                 </View>
               ) : null}
               {children ? <View style={styles.body}>{children}</View> : null}
-              {actions ? <View style={styles.actions}>{actions}</View> : null}
+              {actions ? (
+                <View style={[styles.actions, dynamicStyles.actions]}>{actions}</View>
+              ) : null}
             </View>
           </TouchableWithoutFeedback>
         </View>
@@ -78,10 +98,8 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     maxWidth: 420,
-    backgroundColor: lightColors.surfacePrimary,
     borderRadius: radius.lg,
     borderWidth: borders.hair,
-    borderColor: lightColors.border,
     overflow: 'hidden',
   },
   header: {
@@ -91,7 +109,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     borderBottomWidth: borders.hair,
-    borderBottomColor: lightColors.border,
   },
   body: {
     padding: spacing[4],
@@ -104,6 +121,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     borderTopWidth: borders.hair,
-    borderTopColor: lightColors.border,
   },
 });

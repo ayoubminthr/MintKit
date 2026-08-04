@@ -12,12 +12,12 @@
  * Mount a GestureHandlerRootView ancestor (mintkit wires one in app/_layout.tsx).
  */
 import { Feather } from '@expo/vector-icons';
-import { type ComponentProps, type ReactNode, useRef } from 'react';
+import { type ComponentProps, type ReactNode, useMemo, useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 
 import { Text } from './Text';
-import { lightColors } from './tokens/colors';
+import { useTheme } from './Theme';
 import { spacing } from './tokens/spacing';
 
 export type SwipeActionColor = 'default' | 'brand' | 'success' | 'danger' | 'warning';
@@ -41,25 +41,6 @@ export interface SwipeableRowProps {
 
 const DEFAULT_ACTION_WIDTH = 72;
 
-function backgroundFor(color: SwipeActionColor): string {
-  switch (color) {
-    case 'brand':
-      return lightColors.brand;
-    case 'success':
-      return lightColors.success;
-    case 'danger':
-      return lightColors.danger;
-    case 'warning':
-      return lightColors.warning;
-    default:
-      return lightColors.surfaceSubtle;
-  }
-}
-
-function foregroundFor(color: SwipeActionColor): string {
-  return color === 'default' ? lightColors.textPrimary : lightColors.onBrand;
-}
-
 export function SwipeableRow({
   children,
   leftActions,
@@ -67,7 +48,30 @@ export function SwipeableRow({
   actionWidth = DEFAULT_ACTION_WIDTH,
   onClose,
 }: SwipeableRowProps) {
+  const { colors } = useTheme();
   const swipeRef = useRef<Swipeable>(null);
+
+  const backgroundByColor = useMemo<Record<SwipeActionColor, string>>(
+    () => ({
+      brand: colors.brand,
+      success: colors.success,
+      danger: colors.danger,
+      warning: colors.warning,
+      default: colors.surfaceSubtle,
+    }),
+    [colors]
+  );
+
+  const foregroundByColor = useMemo<Record<SwipeActionColor, string>>(
+    () => ({
+      default: colors.textPrimary,
+      brand: colors.onBrand,
+      success: colors.onBrand,
+      danger: colors.onBrand,
+      warning: colors.onBrand,
+    }),
+    [colors]
+  );
 
   function renderActions(actions: SwipeAction[], side: 'left' | 'right') {
     return (
@@ -88,23 +92,23 @@ export function SwipeableRow({
                 action.onPress();
                 swipeRef.current?.close();
               }}
-              android_ripple={{ color: lightColors.surfacePrimary }}
+              android_ripple={{ color: colors.surfacePrimary }}
               style={({ pressed }) => [
                 styles.action,
-                { width: actionWidth, backgroundColor: backgroundFor(color) },
+                { width: actionWidth, backgroundColor: backgroundByColor[color] },
                 pressed && styles.actionPressed,
               ]}>
               {action.icon ? (
                 <Feather
                   name={action.icon}
                   size={18}
-                  color={foregroundFor(color)}
+                  color={foregroundByColor[color]}
                 />
               ) : null}
               {action.label ? (
                 <Text
                   variant="caption"
-                  style={[styles.actionLabel, { color: foregroundFor(color) }]}
+                  style={[styles.actionLabel, { color: foregroundByColor[color] }]}
                   numberOfLines={1}>
                   {action.label}
                 </Text>

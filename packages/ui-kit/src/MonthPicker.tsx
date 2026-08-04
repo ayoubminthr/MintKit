@@ -9,12 +9,12 @@
  *   const [value, setValue] = useState<{ month: number; year: number } | null>(null);
  *   <MonthPicker value={value} onChange={(month, year) => setValue({ month, year })} />
  */
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { radius } from './tokens/radius';
-import { lightColors } from './tokens/colors';
 import { spacing } from './tokens/spacing';
 import { fontWeight } from './tokens/typography';
 import { backChevron, forwardChevron } from './utils/rtl';
@@ -43,13 +43,23 @@ export function MonthPicker({
   style,
   ...rest
 }: MonthPickerProps) {
+  const { colors } = useTheme();
   const [visibleYear, setVisibleYear] = useState(() => value?.year ?? new Date().getFullYear());
+
+  const dynamicStyles = useMemo(
+    () => ({
+      root: { backgroundColor: colors.surfacePrimary },
+      cellPressed: { backgroundColor: colors.surfaceSubtle },
+      cellSelected: { backgroundColor: colors.brandSubtle },
+    }),
+    [colors]
+  );
 
   const canGoBack = minYear === undefined || visibleYear > minYear;
   const canGoForward = maxYear === undefined || visibleYear < maxYear;
 
   return (
-    <View {...rest} style={[styles.root, style]}>
+    <View {...rest} style={[styles.root, dynamicStyles.root, style]}>
       <View style={styles.header}>
         <NavButton
           direction="back"
@@ -78,16 +88,16 @@ export function MonthPicker({
               accessibilityLabel={name}
               accessibilityState={{ selected }}
               onPress={() => onChange(index, visibleYear)}
-              android_ripple={{ color: lightColors.surfaceSubtle }}
+              android_ripple={{ color: colors.surfaceSubtle }}
               style={({ pressed }) => [
                 styles.cell,
-                selected && styles.cellSelected,
-                pressed && !selected && styles.cellPressed,
+                selected && dynamicStyles.cellSelected,
+                pressed && !selected && dynamicStyles.cellPressed,
               ]}>
               <Text
                 variant="body"
                 style={{
-                  color: selected ? lightColors.brand : lightColors.textPrimary,
+                  color: selected ? colors.brand : colors.textPrimary,
                   fontWeight: selected ? fontWeight.medium : fontWeight.regular,
                 }}>
                 {name}
@@ -111,6 +121,7 @@ function NavButton({
   disabled?: boolean;
   onPress: () => void;
 }) {
+  const { colors } = useTheme();
   const icon = direction === 'back' ? backChevron() : forwardChevron();
   return (
     <Pressable
@@ -119,20 +130,19 @@ function NavButton({
       disabled={disabled}
       hitSlop={spacing[2]}
       onPress={onPress}
-      android_ripple={{ color: lightColors.surfaceSubtle, borderless: true }}
+      android_ripple={{ color: colors.surfaceSubtle, borderless: true }}
       style={({ pressed }) => [
         styles.navButton,
         disabled && styles.navButtonDisabled,
-        pressed && !disabled && styles.navButtonPressed,
+        pressed && !disabled && { backgroundColor: colors.surfaceSubtle },
       ]}>
-      <Feather name={icon} size={20} color={disabled ? lightColors.textMuted : lightColors.textPrimary} />
+      <Feather name={icon} size={20} color={disabled ? colors.textMuted : colors.textPrimary} />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
-    backgroundColor: lightColors.surfacePrimary,
     gap: spacing[3],
   },
   header: {
@@ -152,9 +162,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: radius.full,
   },
-  navButtonPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
-  },
   navButtonDisabled: {
     opacity: 0.4,
   },
@@ -170,11 +177,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.md,
-  },
-  cellPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
-  },
-  cellSelected: {
-    backgroundColor: lightColors.brandSubtle,
   },
 });

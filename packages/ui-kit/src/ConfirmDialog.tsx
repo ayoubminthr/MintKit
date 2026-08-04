@@ -13,12 +13,13 @@
  *   />
  */
 import { Feather } from '@expo/vector-icons';
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Button } from './Button';
 import { Modal } from './Modal';
 import { Text } from './Text';
-import { lightColors, palette } from './tokens/colors';
+import { useTheme } from './Theme';
 import { spacing } from './tokens/spacing';
 
 export type ConfirmDialogVariant = 'default' | 'danger';
@@ -34,11 +35,6 @@ export interface ConfirmDialogProps {
   cancelLabel?: string;
 }
 
-const iconMap: Record<ConfirmDialogVariant, { name: React.ComponentProps<typeof Feather>['name']; color: string }> = {
-  default: { name: 'help-circle', color: lightColors.brand },
-  danger: { name: 'alert-triangle', color: lightColors.danger },
-};
-
 export function ConfirmDialog({
   visible,
   onClose,
@@ -49,6 +45,18 @@ export function ConfirmDialog({
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
 }: ConfirmDialogProps) {
+  const { colors } = useTheme();
+
+  const iconMap = useMemo<
+    Record<ConfirmDialogVariant, { name: React.ComponentProps<typeof Feather>['name']; color: string }>
+  >(
+    () => ({
+      default: { name: 'help-circle', color: colors.brand },
+      danger: { name: 'alert-triangle', color: colors.danger },
+    }),
+    [colors],
+  );
+
   const icon = iconMap[variant];
 
   return (
@@ -67,7 +75,7 @@ export function ConfirmDialog({
         </>
       }>
       <View style={styles.body}>
-        <View style={[styles.iconCircle, { backgroundColor: variant === 'danger' ? lightColors.dangerSubtle : lightColors.brandSubtle }]}>
+        <View style={[styles.iconCircle, { backgroundColor: variant === 'danger' ? colors.dangerSubtle : colors.brandSubtle }]}>
           <Feather name={icon.name} size={20} color={icon.color} />
         </View>
         <Text variant="body" tone="secondary">

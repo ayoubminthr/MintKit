@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize, fontWeight } from './tokens/typography';
@@ -30,9 +30,21 @@ export function OtpInput({
   autoFocus,
   onComplete,
 }: OtpInputProps) {
+  const { colors } = useTheme();
   const [focused, setFocused] = useState(false);
   const ref = useRef<TextInput>(null);
   const isActive = focused || value.length > 0;
+
+  const dynamicStyles = useMemo(
+    () => ({
+      label: { color: colors.textMuted },
+      labelActive: { color: colors.brand },
+      cell: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+      cellActive: { borderColor: colors.brand },
+      cellError: { borderColor: colors.danger },
+    }),
+    [colors]
+  );
 
   useEffect(() => {
     if (value.length === length && onComplete) {
@@ -50,7 +62,9 @@ export function OtpInput({
   return (
     <View style={styles.wrapper}>
       {label ? (
-        <Text variant="caption" style={[styles.label, isActive && styles.labelActive]}>
+        <Text
+          variant="caption"
+          style={[styles.label, dynamicStyles.label, isActive && dynamicStyles.labelActive]}>
           {label}
         </Text>
       ) : null}
@@ -66,8 +80,11 @@ export function OtpInput({
               key={idx}
               style={[
                 styles.cell,
+                dynamicStyles.cell,
                 isActive && styles.cellActive,
+                isActive && dynamicStyles.cellActive,
                 error ? styles.cellError : null,
+                error ? dynamicStyles.cellError : null,
               ]}>
               <Text variant="body" style={styles.cellText}>
                 {char}
@@ -105,10 +122,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: '500',
-    color: lightColors.textMuted,
-  },
-  labelActive: {
-    color: lightColors.brand,
   },
   cellsRow: {
     flexDirection: 'row',
@@ -119,17 +132,13 @@ const styles = StyleSheet.create({
     height: CELL_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: lightColors.surfacePrimary,
-    borderColor: lightColors.border,
     borderWidth: borders.hair,
     borderRadius: radius.md,
   },
   cellActive: {
-    borderColor: lightColors.brand,
     borderWidth: borders.thin,
   },
   cellError: {
-    borderColor: lightColors.danger,
     borderWidth: borders.thin,
   },
   cellText: {

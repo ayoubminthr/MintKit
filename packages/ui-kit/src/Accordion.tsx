@@ -1,12 +1,12 @@
 import { Feather } from '@expo/vector-icons';
-import { createContext, type ReactNode, useContext, useState } from 'react';
+import { createContext, type ReactNode, useContext, useMemo, useState } from 'react';
 import { LayoutAnimation, Platform, Pressable, StyleSheet, UIManager, View } from 'react-native';
 
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -28,6 +28,7 @@ export interface AccordionProps {
 }
 
 export function Accordion({ multiple = false, defaultExpanded = [], children }: AccordionProps) {
+  const { colors } = useTheme();
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set(defaultExpanded));
 
   const toggle = (id: string) => {
@@ -44,9 +45,16 @@ export function Accordion({ multiple = false, defaultExpanded = [], children }: 
     });
   };
 
+  const themedStyles = useMemo(
+    () => ({
+      list: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+    }),
+    [colors]
+  );
+
   return (
     <AccordionContext.Provider value={{ expanded, toggle }}>
-      <View style={styles.list}>{children}</View>
+      <View style={[styles.list, themedStyles.list]}>{children}</View>
     </AccordionContext.Provider>
   );
 }
@@ -58,26 +66,35 @@ export interface AccordionItemProps {
 }
 
 export function AccordionItem({ id, title, children }: AccordionItemProps) {
+  const { colors } = useTheme();
   const ctx = useContext(AccordionContext);
   if (!ctx) {
     throw new Error('AccordionItem must be used inside an Accordion.');
   }
   const isOpen = ctx.expanded.has(id);
 
+  const themedStyles = useMemo(
+    () => ({
+      item: { borderTopColor: colors.border },
+      headerPressed: { backgroundColor: colors.surfaceSubtle },
+    }),
+    [colors]
+  );
+
   return (
-    <View style={styles.item}>
+    <View style={[styles.item, themedStyles.item]}>
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ expanded: isOpen }}
         onPress={() => ctx.toggle(id)}
-        style={({ pressed }) => [styles.header, pressed && styles.headerPressed]}>
+        style={({ pressed }) => [styles.header, pressed && themedStyles.headerPressed]}>
         <Text variant="body" style={styles.title}>
           {title}
         </Text>
         <Feather
           name={isOpen ? 'chevron-up' : 'chevron-down'}
           size={16}
-          color={lightColors.textSecondary}
+          color={colors.textSecondary}
         />
       </Pressable>
       {isOpen ? <View style={styles.body}>{children}</View> : null}
@@ -87,15 +104,12 @@ export function AccordionItem({ id, title, children }: AccordionItemProps) {
 
 const styles = StyleSheet.create({
   list: {
-    backgroundColor: lightColors.surfacePrimary,
     borderRadius: radius.lg,
     borderWidth: borders.hair,
-    borderColor: lightColors.border,
     overflow: 'hidden',
   },
   item: {
     borderTopWidth: borders.hair,
-    borderTopColor: lightColors.border,
   },
   header: {
     flexDirection: 'row',
@@ -104,9 +118,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     gap: spacing[3],
-  },
-  headerPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
   },
   title: {
     flex: 1,

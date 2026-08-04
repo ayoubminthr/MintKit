@@ -1,7 +1,9 @@
 import { Feather } from '@expo/vector-icons';
+import { useMemo } from 'react';
 import { StyleSheet, Text as RNText, View, type ViewProps } from 'react-native';
 
-import { lightColors, palette } from './tokens/colors';
+import { useTheme } from './Theme';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize, fontWeight } from './tokens/typography';
@@ -18,6 +20,38 @@ export interface BadgeProps extends ViewProps {
 }
 
 export function Badge({ label, variant = 'neutral', dot, icon, style, ...rest }: BadgeProps) {
+  const { colors } = useTheme();
+
+  const variantStyles = useMemo<Record<BadgeVariant, { container: object; label: { color: string } }>>(
+    () => ({
+      neutral: {
+        container: { backgroundColor: colors.surfaceSubtle },
+        label: { color: colors.textSecondary },
+      },
+      brand: {
+        container: { backgroundColor: colors.brandSubtle },
+        label: { color: palette.brand[700] },
+      },
+      success: {
+        container: { backgroundColor: colors.successSubtle },
+        label: { color: palette.success[700] },
+      },
+      warning: {
+        container: { backgroundColor: colors.warningSubtle },
+        label: { color: palette.warning[700] },
+      },
+      danger: {
+        container: { backgroundColor: colors.dangerSubtle },
+        label: { color: palette.danger[700] },
+      },
+      info: {
+        container: { backgroundColor: colors.infoSubtle },
+        label: { color: palette.info[700] },
+      },
+    }),
+    [colors]
+  );
+
   const v = variantStyles[variant];
   return (
     <View {...rest} style={[styles.badge, v.container, style]}>
@@ -49,30 +83,3 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
 });
-
-const variantStyles: Record<BadgeVariant, { container: object; label: { color: string } }> = {
-  neutral: {
-    container: { backgroundColor: lightColors.surfaceSubtle },
-    label: { color: lightColors.textSecondary },
-  },
-  brand: {
-    container: { backgroundColor: lightColors.brandSubtle },
-    label: { color: palette.brand[700] },
-  },
-  success: {
-    container: { backgroundColor: lightColors.successSubtle },
-    label: { color: palette.success[700] },
-  },
-  warning: {
-    container: { backgroundColor: lightColors.warningSubtle },
-    label: { color: palette.warning[700] },
-  },
-  danger: {
-    container: { backgroundColor: lightColors.dangerSubtle },
-    label: { color: palette.danger[700] },
-  },
-  info: {
-    container: { backgroundColor: lightColors.infoSubtle },
-    label: { color: palette.info[700] },
-  },
-};

@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
-import { lightColors, palette } from './tokens/colors';
+import { useTheme } from './Theme';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 
 export type ProgressVariant = 'default' | 'success' | 'warning' | 'danger';
@@ -12,13 +14,6 @@ export interface ProgressBarProps extends ViewProps {
   height?: number;
 }
 
-const variantColors: Record<ProgressVariant, string> = {
-  default: lightColors.brand,
-  success: lightColors.success,
-  warning: lightColors.warning,
-  danger: lightColors.danger,
-};
-
 export function ProgressBar({
   value,
   variant = 'default',
@@ -26,8 +21,19 @@ export function ProgressBar({
   style,
   ...rest
 }: ProgressBarProps) {
+  const { colors } = useTheme();
   const clamped = Math.max(0, Math.min(1, value));
   const pct = `${clamped * 100}%` as const;
+
+  const variantColors = useMemo<Record<ProgressVariant, string>>(
+    () => ({
+      default: colors.brand,
+      success: colors.success,
+      warning: colors.warning,
+      danger: colors.danger,
+    }),
+    [colors]
+  );
 
   return (
     <View

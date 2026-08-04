@@ -1,10 +1,11 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
-import { lightColors, palette } from './tokens/colors';
+import { Text } from './Text';
+import { useTheme } from './Theme';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
-import { Text } from './Text';
 
 export type CalloutAccent = 'neutral' | 'brand' | 'info' | 'success' | 'warning' | 'danger';
 
@@ -25,8 +26,27 @@ export function Callout({
   style,
   ...rest
 }: CalloutProps) {
+  const { colors } = useTheme();
+  const accentColors: Record<CalloutAccent, string> = useMemo(
+    () => ({
+      neutral: palette.gray[400],
+      brand: colors.brand,
+      info: colors.info,
+      success: colors.success,
+      warning: colors.warning,
+      danger: colors.danger,
+    }),
+    [colors],
+  );
+  const dynamicStyles = useMemo(
+    () => ({
+      container: { backgroundColor: colors.surfaceSubtle },
+    }),
+    [colors],
+  );
+
   return (
-    <View {...rest} style={[styles.container, style]}>
+    <View {...rest} style={[styles.container, dynamicStyles.container, style]}>
       <View style={[styles.accent, { backgroundColor: accentColors[accent] }]} />
       <View style={styles.content}>
         {title ? (
@@ -48,7 +68,6 @@ export function Callout({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: lightColors.surfaceSubtle,
     borderRadius: radius.md,
     overflow: 'hidden',
   },
@@ -64,12 +83,3 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
-
-const accentColors: Record<CalloutAccent, string> = {
-  neutral: palette.gray[400],
-  brand: lightColors.brand,
-  info: lightColors.info,
-  success: lightColors.success,
-  warning: lightColors.warning,
-  danger: lightColors.danger,
-};

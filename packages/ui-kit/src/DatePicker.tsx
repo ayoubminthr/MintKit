@@ -20,8 +20,8 @@ import { MonthPicker } from './MonthPicker';
 import { type SheetBodyProps, useSheet } from './SheetHost';
 import { SheetHeader } from './SheetHeader';
 import { Text } from './Text';
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize } from './tokens/typography';
@@ -299,9 +299,21 @@ function DatePickerSheetBody({ params, handleClose = () => {} }: SheetBodyProps<
 export function DatePicker(props: DatePickerProps) {
   const { label, floating, placeholder = 'Select a date', title, disabled, error, hint } = props;
 
+  const { colors } = useTheme();
   const sheet = useSheet();
   const [isOpen, setIsOpen] = useState(false);
   const sheetIdRef = useRef<string | null>(null);
+
+  const dynamicStyles = useMemo(
+    () => ({
+      floatingLabel: { backgroundColor: colors.surfacePrimary },
+      field: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
+      fieldActive: { borderColor: colors.brand },
+      fieldError: { borderColor: colors.danger },
+      fieldPressed: { backgroundColor: colors.surfaceSubtle },
+    }),
+    [colors],
+  );
 
   useEffect(() => {
     if (!sheetIdRef.current) return;
@@ -344,10 +356,13 @@ export function DatePicker(props: DatePickerProps) {
       onPress={handleOpen}
       style={({ pressed }) => [
         styles.field,
+        dynamicStyles.field,
         isOpen && styles.fieldActive,
+        isOpen && dynamicStyles.fieldActive,
         error ? styles.fieldError : null,
+        error ? dynamicStyles.fieldError : null,
         disabled && styles.fieldDisabled,
-        pressed && styles.fieldPressed,
+        pressed && dynamicStyles.fieldPressed,
       ]}>
       <Text
         tone={hasValue ? (disabled ? 'muted' : 'primary') : 'muted'}
@@ -358,7 +373,7 @@ export function DatePicker(props: DatePickerProps) {
       <Feather
         name="calendar"
         size={16}
-        color={disabled ? lightColors.textMuted : lightColors.textSecondary}
+        color={disabled ? colors.textMuted : colors.textSecondary}
       />
     </Pressable>
   );
@@ -376,11 +391,12 @@ export function DatePicker(props: DatePickerProps) {
           <Animated.Text
             style={[
               styles.floatingLabel,
+              dynamicStyles.floatingLabel,
               {
                 top: animRef.current.interpolate({ inputRange: [0, 1], outputRange: [11, -8] }),
                 color: animRef.current.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [lightColors.textMuted, lightColors.brand],
+                  outputRange: [colors.textMuted, colors.brand],
                 }),
               },
             ]}>
@@ -422,7 +438,6 @@ const styles = StyleSheet.create({
     start: 8,
     zIndex: 999,
     paddingHorizontal: 5,
-    backgroundColor: lightColors.surfacePrimary,
     fontSize: fontSize.sm,
     fontFamily: fontFamily.sansMedium,
   },
@@ -432,25 +447,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     height: 40,
     paddingHorizontal: spacing[3],
-    backgroundColor: lightColors.surfacePrimary,
-    borderColor: lightColors.border,
     borderWidth: borders.hair,
     borderRadius: radius.md,
     gap: spacing[2],
   },
   fieldActive: {
-    borderColor: lightColors.brand,
     borderWidth: borders.thin,
   },
   fieldError: {
-    borderColor: lightColors.danger,
     borderWidth: borders.thin,
   },
   fieldDisabled: {
     opacity: 0.5,
-  },
-  fieldPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
   },
   value: {
     flex: 1,

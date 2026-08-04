@@ -7,11 +7,11 @@
  * checkbox (multi-select intent).
  */
 import { Feather } from '@expo/vector-icons';
-import { type ReactNode } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 
+import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 
@@ -37,6 +37,18 @@ export function SelectableCard({
   style,
   ...rest
 }: SelectableCardProps) {
+  const { colors } = useTheme();
+
+  const dynamicStyles = useMemo(
+    () => ({
+      card: { backgroundColor: colors.surfacePrimary },
+      cardUnselected: { borderColor: colors.border },
+      cardSelected: { borderColor: colors.brand, backgroundColor: colors.brandSubtle },
+      cardPressed: { backgroundColor: colors.surfaceSubtle },
+    }),
+    [colors]
+  );
+
   return (
     <Pressable
       {...rest}
@@ -44,11 +56,12 @@ export function SelectableCard({
       accessibilityState={{ selected, disabled }}
       disabled={disabled}
       onPress={onPress}
-      android_ripple={{ color: lightColors.surfaceSubtle, borderless: false }}
+      android_ripple={{ color: colors.surfaceSubtle, borderless: false }}
       style={({ pressed }) => [
         styles.card,
-        selected ? styles.cardSelected : styles.cardUnselected,
-        pressed && !selected && styles.cardPressed,
+        dynamicStyles.card,
+        selected ? dynamicStyles.cardSelected : dynamicStyles.cardUnselected,
+        pressed && !selected && dynamicStyles.cardPressed,
         disabled && styles.cardDisabled,
         style,
       ]}>
@@ -65,6 +78,17 @@ function Indicator({
   variant: SelectableCardVariant;
   selected: boolean;
 }) {
+  const { colors } = useTheme();
+
+  const dynamicStyles = useMemo(
+    () => ({
+      indicatorUnselected: { backgroundColor: colors.surfacePrimary, borderColor: colors.borderStrong },
+      indicatorSelected: { backgroundColor: colors.brand, borderColor: colors.brand },
+      radioDot: { backgroundColor: colors.onBrand },
+    }),
+    [colors]
+  );
+
   if (variant === 'radio') {
     return (
       <View
@@ -72,8 +96,9 @@ function Indicator({
           styles.indicator,
           styles.indicatorRound,
           selected ? styles.indicatorSelected : styles.indicatorUnselected,
+          selected ? dynamicStyles.indicatorSelected : dynamicStyles.indicatorUnselected,
         ]}>
-        {selected ? <View style={styles.radioDot} /> : null}
+        {selected ? <View style={[styles.radioDot, dynamicStyles.radioDot]} /> : null}
       </View>
     );
   }
@@ -83,8 +108,9 @@ function Indicator({
         styles.indicator,
         styles.indicatorSquare,
         selected ? styles.indicatorSelected : styles.indicatorUnselected,
+        selected ? dynamicStyles.indicatorSelected : dynamicStyles.indicatorUnselected,
       ]}>
-      {selected ? <Feather name="check" size={14} color={lightColors.onBrand} /> : null}
+      {selected ? <Feather name="check" size={14} color={colors.onBrand} /> : null}
     </View>
   );
 }
@@ -95,19 +121,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: spacing[3],
     padding: spacing[4],
-    backgroundColor: lightColors.surfacePrimary,
     borderRadius: radius.lg,
     borderWidth: borders.thin,
-  },
-  cardUnselected: {
-    borderColor: lightColors.border,
-  },
-  cardSelected: {
-    borderColor: lightColors.brand,
-    backgroundColor: lightColors.brandSubtle,
-  },
-  cardPressed: {
-    backgroundColor: lightColors.surfaceSubtle,
   },
   cardDisabled: {
     opacity: 0.5,
@@ -132,19 +147,14 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
   },
   indicatorUnselected: {
-    backgroundColor: lightColors.surfacePrimary,
     borderWidth: borders.thin,
-    borderColor: lightColors.borderStrong,
   },
   indicatorSelected: {
-    backgroundColor: lightColors.brand,
     borderWidth: borders.thin,
-    borderColor: lightColors.brand,
   },
   radioDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: lightColors.onBrand,
   },
 });
