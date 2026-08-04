@@ -18,6 +18,7 @@ import { AvatarBody } from '../avatar';
 import { AvatarGroupBody } from '../avatar-group';
 import { BadgeBody } from '../badge';
 import { BannerBody } from '../banner';
+import { BarChartBody } from '../bar-chart';
 import { BottomSheetBody } from '../bottom-sheet';
 import { BottomTabBarBody } from '../bottom-tab-bar';
 import { BreadcrumbsBody } from '../breadcrumbs';
@@ -50,15 +51,19 @@ import { PasswordStrengthBody } from '../password-strength';
 import { PhoneInputBody } from '../phone-input';
 import { ProfileHeaderBody } from '../profile-header';
 import { ProgressBarBody } from '../progress-bar';
+import { ProgressRingBody } from '../progress-ring';
 import { PullToRefreshBody } from '../pull-to-refresh';
 import { RadioBody } from '../radio';
+import { RatingBody } from '../rating';
 import { SearchBarBody } from '../search-bar';
 import { SegmentedControlBody } from '../segmented-control';
 import { SelectBody } from '../select';
 import { SelectableCardBody } from '../selectable-card';
 import { SelectionBarBody } from '../selection-bar';
 import { SkeletonBody } from '../skeleton';
+import { SliderBody } from '../slider';
 import { SpinnerBody } from '../spinner';
+import { StatCardBody } from '../stat-card';
 import { StepperBody } from '../stepper';
 import { SwipeableRowBody } from '../swipeable-row';
 import { SwitchBody } from '../switch';
@@ -67,6 +72,7 @@ import { TagBody } from '../tag';
 import { TextBody } from '../text';
 import { TextareaBody } from '../textarea';
 import { TimePickerBody } from '../time-picker';
+import { TimelineBody } from '../timeline';
 import { ToastBody } from '../toast';
 import { TooltipBody } from '../tooltip';
 
@@ -83,6 +89,7 @@ export const demoRegistry: Record<string, DemoEntry> = {
   '/avatar-group': { Body: AvatarGroupBody },
   '/badge': { Body: BadgeBody },
   '/banner': { Body: BannerBody },
+  '/bar-chart': { Body: BarChartBody },
   '/bottom-sheet': { Body: BottomSheetBody },
   '/bottom-tab-bar': { Body: BottomTabBarBody, framed: true },
   '/breadcrumbs': { Body: BreadcrumbsBody },
@@ -115,15 +122,19 @@ export const demoRegistry: Record<string, DemoEntry> = {
   '/phone-input': { Body: PhoneInputBody },
   '/profile-header': { Body: ProfileHeaderBody },
   '/progress-bar': { Body: ProgressBarBody },
+  '/progress-ring': { Body: ProgressRingBody },
   '/pull-to-refresh': { Body: PullToRefreshBody, framed: true },
   '/radio': { Body: RadioBody },
+  '/rating': { Body: RatingBody },
   '/search-bar': { Body: SearchBarBody },
   '/segmented-control': { Body: SegmentedControlBody },
   '/select': { Body: SelectBody },
   '/selectable-card': { Body: SelectableCardBody },
   '/selection-bar': { Body: SelectionBarBody, framed: true },
   '/skeleton': { Body: SkeletonBody },
+  '/slider': { Body: SliderBody },
   '/spinner': { Body: SpinnerBody },
+  '/stat-card': { Body: StatCardBody },
   '/stepper': { Body: StepperBody },
   '/swipeable-row': { Body: SwipeableRowBody },
   '/switch': { Body: SwitchBody },
@@ -132,6 +143,7 @@ export const demoRegistry: Record<string, DemoEntry> = {
   '/text': { Body: TextBody },
   '/textarea': { Body: TextareaBody },
   '/time-picker': { Body: TimePickerBody },
+  '/timeline': { Body: TimelineBody },
   '/toast': { Body: ToastBody },
   '/tooltip': { Body: TooltipBody },
 };

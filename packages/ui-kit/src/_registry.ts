@@ -439,6 +439,48 @@ export const kitComponents: readonly KitComponentEntry[] = [
     status: 'ready',
     description: 'Shared BottomSheet header — title with optional brand-colored count, close button, and left/right accessory slots.',
   },
+  {
+    name: 'StatCard',
+    path: '/stat-card',
+    category: 'Display',
+    status: 'ready',
+    description: 'Metric tile — icon bubble, label, value, and an optional up/down trend.',
+  },
+  {
+    name: 'Timeline',
+    path: '/timeline',
+    category: 'Navigation',
+    status: 'ready',
+    description: 'Vertical connected event list for approval chains and audit trails. Done / active / pending / danger states.',
+  },
+  {
+    name: 'Rating',
+    path: '/rating',
+    category: 'Forms',
+    status: 'ready',
+    description: 'Star rating row with true partial fill for fractional values. Read-only or interactive.',
+  },
+  {
+    name: 'BarChart',
+    path: '/bar-chart',
+    category: 'Display',
+    status: 'ready',
+    description: 'Plain-View bar chart, no line/area charts. Optional compact sparkline mode.',
+  },
+  {
+    name: 'Slider',
+    path: '/slider',
+    category: 'Forms',
+    status: 'ready',
+    description: 'Draggable continuous value control (volume, brightness, zoom, ...).',
+  },
+  {
+    name: 'ProgressRing',
+    path: '/progress-ring',
+    category: 'Feedback',
+    status: 'ready',
+    description: 'Circular 0–1 progress indicator. For linear progress, use ProgressBar instead.',
+  },
 ];
 
 export const kitCategories: readonly ComponentCategory[] = [
