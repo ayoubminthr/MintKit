@@ -55,6 +55,14 @@ export function DividerBody() {
           <Text variant="body">87 active</Text>
         </View>
       </Section>
+
+      <Section label="Dashed">
+        <View>
+          <Text variant="body">Draft</Text>
+          <Divider variant="dashed" spacing="md" />
+          <Text variant="body">Submitted</Text>
+        </View>
+      </Section>
     </>
   );
 }

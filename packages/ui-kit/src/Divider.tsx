@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
 
 import { Text } from './Text';
 import { useTheme } from './Theme';
@@ -8,11 +8,15 @@ import { spacing } from './tokens/spacing';
 
 export type DividerOrientation = 'horizontal' | 'vertical';
 export type DividerSpacing = 'none' | 'sm' | 'md' | 'lg';
+export type DividerVariant = 'solid' | 'dashed';
 
 export interface DividerProps {
   orientation?: DividerOrientation;
   label?: string;
   spacing?: DividerSpacing;
+  variant?: DividerVariant;
+  /** Escape hatch for one-off margin overrides; prefer the `spacing` preset. */
+  style?: StyleProp<ViewStyle>;
 }
 
 const spacingMap: Record<DividerSpacing, number> = {
@@ -26,17 +30,42 @@ export function Divider({
   orientation = 'horizontal',
   label,
   spacing: spaceKey = 'none',
+  variant = 'solid',
+  style,
 }: DividerProps) {
   const { colors } = useTheme();
   const margin = spacingMap[spaceKey];
+  const isDashed = variant === 'dashed';
 
   const dynamicStyles = useMemo(
-    () => ({
-      horizontal: { backgroundColor: colors.border },
-      vertical: { backgroundColor: colors.border },
-      line: { backgroundColor: colors.border },
-    }),
-    [colors],
+    () =>
+      isDashed
+        ? {
+            horizontal: {
+              height: 0,
+              borderBottomWidth: borders.hair,
+              borderStyle: 'dashed' as const,
+              borderBottomColor: colors.border,
+            },
+            vertical: {
+              width: 0,
+              borderStartWidth: borders.hair,
+              borderStyle: 'dashed' as const,
+              borderStartColor: colors.border,
+            },
+            line: {
+              height: 0,
+              borderBottomWidth: borders.hair,
+              borderStyle: 'dashed' as const,
+              borderBottomColor: colors.border,
+            },
+          }
+        : {
+            horizontal: { backgroundColor: colors.border },
+            vertical: { backgroundColor: colors.border },
+            line: { backgroundColor: colors.border },
+          },
+    [colors, isDashed],
   );
 
   if (orientation === 'vertical') {
@@ -47,6 +76,7 @@ export function Divider({
           styles.vertical,
           dynamicStyles.vertical,
           { marginHorizontal: margin },
+          style,
         ]}
       />
     );
@@ -56,7 +86,7 @@ export function Divider({
     return (
       <View
         accessibilityRole="none"
-        style={[styles.labelled, { marginVertical: margin }]}>
+        style={[styles.labelled, { marginVertical: margin }, style]}>
         <View style={[styles.line, dynamicStyles.line]} />
         <Text variant="caption" tone="muted" style={styles.labelText}>
           {label}
@@ -69,7 +99,7 @@ export function Divider({
   return (
     <View
       accessibilityRole="none"
-      style={[styles.horizontal, dynamicStyles.horizontal, { marginVertical: margin }]}
+      style={[styles.horizontal, dynamicStyles.horizontal, { marginVertical: margin }, style]}
     />
   );
 }
@@ -86,6 +116,7 @@ const styles = StyleSheet.create({
   labelled: {
     flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: 'stretch',
     gap: spacing[3],
   },
   line: {
