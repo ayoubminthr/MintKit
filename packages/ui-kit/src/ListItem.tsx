@@ -34,9 +34,12 @@ export interface ListItemProps extends Omit<PressableProps, 'style' | 'children'
   showChevron?: boolean;
   /** Render the title in the danger tone. */
   destructive?: boolean;
+  /** Tighter row — for long lists and sheets where vertical space is scarce. */
+  dense?: boolean;
 }
 
 const ROW_MIN_HEIGHT = 56;
+const DENSE_ROW_MIN_HEIGHT = 44;
 
 export function ListItem({
   title,
@@ -45,6 +48,7 @@ export function ListItem({
   trailing,
   showChevron,
   destructive,
+  dense,
   onPress,
   disabled,
   ...rest
@@ -65,7 +69,7 @@ export function ListItem({
   );
 
   const content = (
-    <View style={styles.row}>
+    <View style={[styles.row, dense && styles.rowDense]}>
       {leading ? <View style={styles.leading}>{leading}</View> : null}
       <View style={styles.text}>
         <Text variant="body" tone={titleTone} numberOfLines={1}>
@@ -198,6 +202,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     gap: spacing[3],
+  },
+  rowDense: {
+    minHeight: DENSE_ROW_MIN_HEIGHT,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    gap: spacing[2],
   },
   leading: {
     flexShrink: 0,

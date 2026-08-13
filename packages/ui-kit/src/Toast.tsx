@@ -207,12 +207,12 @@ function ToastView({
       <Feather name={v.icon} size={16} color={v.iconColor} style={styles.icon} />
       <View style={styles.content}>
         {entry.title ? (
-          <Text variant="body" style={[styles.title, { color: v.titleColor }]}>
+          <Text variant="body" color={v.titleColor} style={styles.title}>
             {entry.title}
           </Text>
         ) : null}
         {entry.description ? (
-          <Text variant="caption" style={{ color: v.descColor }}>
+          <Text variant="caption" color={v.descColor}>
             {entry.description}
           </Text>
         ) : null}

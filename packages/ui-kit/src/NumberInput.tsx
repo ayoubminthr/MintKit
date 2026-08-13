@@ -47,8 +47,6 @@ export function NumberInput({
 
   const dynamicStyles = useMemo(
     () => ({
-      label: { color: colors.textMuted },
-      labelActive: { color: colors.brand },
       fieldWrap: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
       fieldWrapFocused: { borderColor: colors.brand },
       fieldWrapError: { borderColor: colors.danger },
@@ -70,7 +68,8 @@ export function NumberInput({
       {label ? (
         <Text
           variant="caption"
-          style={[styles.label, dynamicStyles.label, isActive && dynamicStyles.labelActive]}>
+          color={isActive ? colors.brand : colors.textMuted}
+          style={styles.label}>
           {label}
         </Text>
       ) : null}

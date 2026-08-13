@@ -1,9 +1,8 @@
 import { Feather } from '@expo/vector-icons';
 import { Fragment, useMemo } from 'react';
-import { StyleSheet, Text as RNText, View, type ViewProps } from 'react-native';
+import { StyleSheet, View, type ViewProps } from 'react-native';
 
 import { borders } from './tokens/borders';
-import { palette } from './tokens/colors';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize, fontWeight } from './tokens/typography';
 import { Text } from './Text';
@@ -30,9 +29,8 @@ export function Stepper({ steps, currentStep, style, ...rest }: StepperProps) {
       circleComplete: { backgroundColor: colors.brand },
       circleCurrent: { backgroundColor: colors.surfacePrimary, borderColor: colors.brand },
       circleUpcoming: { backgroundColor: colors.surfacePrimary, borderColor: colors.borderStrong },
-      circleLabelCurrent: { color: colors.brand },
-      circleLabelUpcoming: { color: colors.textMuted },
       connectorComplete: { backgroundColor: colors.brand },
+      connectorUpcoming: { backgroundColor: colors.border },
     }),
     [colors]
   );
@@ -56,14 +54,18 @@ export function Stepper({ steps, currentStep, style, ...rest }: StepperProps) {
                 {status === 'complete' ? (
                   <Feather name="check" size={14} color={colors.onBrand} />
                 ) : (
-                  <RNText
-                    style={[
-                      styles.circleLabel,
-                      status === 'current' && dynamicStyles.circleLabelCurrent,
-                      status === 'upcoming' && dynamicStyles.circleLabelUpcoming,
-                    ]}>
+                  <Text
+                    scaled={false}
+                    color={
+                      status === 'current'
+                        ? colors.brand
+                        : status === 'upcoming'
+                          ? colors.textMuted
+                          : undefined
+                    }
+                    style={styles.circleLabel}>
                     {idx + 1}
-                  </RNText>
+                  </Text>
                 )}
               </View>
               <View style={styles.text}>
@@ -84,7 +86,7 @@ export function Stepper({ steps, currentStep, style, ...rest }: StepperProps) {
               <View
                 style={[
                   styles.connector,
-                  idx < currentStep ? dynamicStyles.connectorComplete : styles.connectorUpcoming,
+                  idx < currentStep ? dynamicStyles.connectorComplete : dynamicStyles.connectorUpcoming,
                 ]}
               />
             ) : null}
@@ -137,8 +139,5 @@ const styles = StyleSheet.create({
     width: 1,
     height: spacing[3],
     marginVertical: -spacing[1],
-  },
-  connectorUpcoming: {
-    backgroundColor: palette.gray[200],
   },
 });

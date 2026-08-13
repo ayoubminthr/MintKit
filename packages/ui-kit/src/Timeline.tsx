@@ -6,7 +6,7 @@
  * `pending`.
  */
 import { Feather } from '@expo/vector-icons';
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
 import { Text } from './Text';
@@ -22,6 +22,12 @@ export interface TimelineItem {
   subtitle?: string;
   description?: string;
   status: TimelineStatus;
+  /**
+   * Custom content rendered in place of the title/subtitle/description text
+   * block — e.g. a card with an avatar, name, and a status pill. The dot,
+   * connector line, and status icon still come from `status` as usual.
+   */
+  content?: ReactNode;
 }
 
 export interface TimelineProps extends ViewProps {
@@ -88,22 +94,28 @@ export function Timeline({ items, style, ...rest }: TimelineProps) {
             </View>
 
             <View style={[styles.textColumn, isLast && styles.textColumnLast]}>
-              <Text
-                variant="body"
-                tone={item.status === 'pending' ? 'muted' : item.status === 'danger' ? 'danger' : 'primary'}
-                style={item.status !== 'pending' ? styles.titleStrong : undefined}>
-                {item.title}
-              </Text>
-              {item.subtitle ? (
-                <Text variant="caption" tone="muted">
-                  {item.subtitle}
-                </Text>
-              ) : null}
-              {item.description ? (
-                <Text variant="caption" tone="secondary">
-                  {item.description}
-                </Text>
-              ) : null}
+              {item.content ? (
+                item.content
+              ) : (
+                <>
+                  <Text
+                    variant="body"
+                    tone={item.status === 'pending' ? 'muted' : item.status === 'danger' ? 'danger' : 'primary'}
+                    style={item.status !== 'pending' ? styles.titleStrong : undefined}>
+                    {item.title}
+                  </Text>
+                  {item.subtitle ? (
+                    <Text variant="caption" tone="muted">
+                      {item.subtitle}
+                    </Text>
+                  ) : null}
+                  {item.description ? (
+                    <Text variant="caption" tone="secondary">
+                      {item.description}
+                    </Text>
+                  ) : null}
+                </>
+              )}
             </View>
           </View>
         );

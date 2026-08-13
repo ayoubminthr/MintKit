@@ -51,11 +51,27 @@ interface SearchBarProps
   cancelLabel?: string;                  // default 'Cancel'
   onCancel?: () => void;                 // default: clear + blur + Keyboard.dismiss
   disabled?: boolean;
+  trailing?: React.ReactNode;            // slot inside the field, before the clear button
+  clearAccessibilityLabel?: string;      // default 'Clear search' — override to localise
   // returnKeyType, onSubmitEditing, onFocus, onBlur, keyboardType, … from TextInputProps
 }
 ```
 
 `style` and `placeholderTextColor` are `Omit`ted — the look is fixed. There is no `size` or `variant`; `clearButtonMode` is forced to `never` (the kit draws its own clear button for cross-platform consistency).
+
+### The `trailing` slot
+
+Renders inside the pill, after the text and before the clear button. It exists for **short, non-interactive** adornments that belong to the field — a result count, a units hint. [`FilterBar`](./FilterBar.md) uses it to put its `count` inside the search pill.
+
+Keep it to a few characters and give it `flexShrink: 0`; the `TextInput` is `flex: 1` and will yield the space. Don't put buttons in it — a second tappable target crowded against the clear button is a mis-tap waiting to happen; use `showCancel` or a sibling [`IconButton`](../02-actions/IconButton.md) instead.
+
+```tsx
+<SearchBar
+  value={q}
+  onChangeText={setQ}
+  trailing={<Text variant="caption" tone="secondary">{results.length}</Text>}
+/>
+```
 
 ## Examples
 

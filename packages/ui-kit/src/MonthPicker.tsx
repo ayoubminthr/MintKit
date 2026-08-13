@@ -96,8 +96,8 @@ export function MonthPicker({
               ]}>
               <Text
                 variant="body"
+                color={selected ? colors.brand : colors.textPrimary}
                 style={{
-                  color: selected ? colors.brand : colors.textPrimary,
                   fontWeight: selected ? fontWeight.medium : fontWeight.regular,
                 }}>
                 {name}

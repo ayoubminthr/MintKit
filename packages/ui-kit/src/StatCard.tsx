@@ -65,7 +65,7 @@ export function StatCard({ label, value, icon, trend, tone = 'neutral' }: StatCa
             size={14}
             color={dynamicStyles.trendColor}
           />
-          <Text variant="caption" numberOfLines={1} style={{ color: dynamicStyles.trendColor }}>
+          <Text variant="caption" numberOfLines={1} color={dynamicStyles.trendColor}>
             {trend.value}
           </Text>
         </View>

@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
-import { StyleSheet, Text as RNText, View, type ViewProps } from 'react-native';
+import { StyleSheet, View, type ViewProps } from 'react-native';
 
 import { Avatar, type AvatarSize } from './Avatar';
+import { Text } from './Text';
 import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
 import { spacing } from './tokens/spacing';
@@ -48,7 +49,6 @@ export function AvatarGroup({ items, size = 'md', max = 4, style, ...rest }: Ava
     () => ({
       ring: { backgroundColor: colors.surfacePrimary },
       overflow: { backgroundColor: colors.surfaceSubtle, borderColor: colors.border },
-      overflowText: { color: colors.textSecondary },
     }),
     [colors]
   );
@@ -80,11 +80,13 @@ export function AvatarGroup({ items, size = 'md', max = 4, style, ...rest }: Ava
                 borderRadius: box / 2,
               },
             ]}>
-            <RNText
-              style={[styles.overflowText, themedStyles.overflowText, { fontSize: Math.max(10, box * 0.32) }]}
+            <Text
+              scaled={false}
+              color={colors.textSecondary}
+              style={[styles.overflowText, { fontSize: Math.max(10, box * 0.32) }]}
               allowFontScaling={false}>
               +{overflow}
-            </RNText>
+            </Text>
           </View>
         </View>
       ) : null}

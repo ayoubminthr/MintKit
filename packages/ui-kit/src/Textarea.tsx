@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import {
   StyleSheet,
-  Text as RNText,
   TextInput,
   type TextInputProps,
   View,
 } from 'react-native';
 
+import { Text } from './Text';
 import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
 import { radius } from './tokens/radius';
@@ -38,8 +38,6 @@ export function Textarea({
 
   const dynamicStyles = useMemo(
     () => ({
-      label: { color: colors.textMuted },
-      labelActive: { color: colors.brand },
       input: {
         backgroundColor: colors.surfacePrimary,
         borderColor: colors.border,
@@ -47,8 +45,6 @@ export function Textarea({
       },
       inputFocused: { borderColor: colors.brand },
       inputError: { borderColor: colors.danger },
-      hint: { color: colors.textMuted },
-      error: { color: colors.danger },
     }),
     [colors],
   );
@@ -56,9 +52,9 @@ export function Textarea({
   return (
     <View style={styles.wrapper}>
       {label ? (
-        <RNText style={[styles.label, dynamicStyles.label, isActive && dynamicStyles.labelActive]}>
+        <Text scaled={false} color={isActive ? colors.brand : colors.textMuted} style={styles.label}>
           {label}
-        </RNText>
+        </Text>
       ) : null}
       <TextInput
         {...rest}
@@ -85,9 +81,13 @@ export function Textarea({
         ]}
       />
       {error ? (
-        <RNText style={[styles.error, dynamicStyles.error]}>{error}</RNText>
+        <Text scaled={false} color={colors.danger} style={styles.error}>
+          {error}
+        </Text>
       ) : hint ? (
-        <RNText style={[styles.hint, dynamicStyles.hint]}>{hint}</RNText>
+        <Text scaled={false} color={colors.textMuted} style={styles.hint}>
+          {hint}
+        </Text>
       ) : null}
     </View>
   );

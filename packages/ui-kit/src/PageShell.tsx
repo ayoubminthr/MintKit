@@ -4,9 +4,9 @@
  * Handles the repetitive per-screen chrome so product screens only render
  * their content: safe-area insets, a consistent screen background, an optional
  * `PageHeader` (built from title / subtitle / onBack / actions, or passed
- * whole via `header`), a scrolling or fixed body, pull-to-refresh, and a
- * bottom-pinned `footer` slot (e.g. a primary action) that clears the home
- * indicator.
+ * whole via `header`), a pinned `filterBar` slot for list chrome, a scrolling
+ * or fixed body, pull-to-refresh, and a bottom-pinned `footer` slot (e.g. a
+ * primary action) that clears the home indicator.
  *
  * Usage:
  *   <PageShell
@@ -15,6 +15,7 @@
  *     onBack={router.back}
  *     refreshing={refreshing}
  *     onRefresh={reload}
+ *     filterBar={<FilterBar search={…} filters={…} count={total} />}
  *     footer={<Button label="New request" onPress={create} fullWidth />}>
  *     {…content…}
  *   </PageShell>
@@ -64,6 +65,13 @@ export interface PageShellProps {
   headerActions?: ReactNode;
   /** Primary action — builds a compact Button at the end of the header title row. */
   primaryAction?: PageShellAction;
+  /**
+   * Pinned list chrome between the header and the body — typically a
+   * `FilterBar`. Sits outside the scroll view, so search and filters stay
+   * reachable while the list scrolls, and always carries the standard
+   * horizontal inset regardless of `padded`.
+   */
+  filterBar?: ReactNode;
   /** Bottom-pinned slot rendered above the safe-area inset. */
   footer?: ReactNode;
   /** Scroll the body (default) or keep it fixed for full-height layouts. */
@@ -95,6 +103,7 @@ export function PageShell({
   onBack,
   headerActions,
   primaryAction,
+  filterBar,
   footer,
   scroll = true,
   padded = true,
@@ -208,6 +217,8 @@ export function PageShell({
         </View>
       ) : null}
 
+      {filterBar ? <View style={styles.filterBarSlot}>{filterBar}</View> : null}
+
       {body}
 
       {footerNode ? (
@@ -234,6 +245,10 @@ const styles = StyleSheet.create({
   },
   headerSlot: {
     paddingHorizontal: spacing[5],
+  },
+  filterBarSlot: {
+    paddingHorizontal: spacing[5],
+    paddingBottom: spacing[3],
   },
   contentPadded: {
     padding: spacing[5],

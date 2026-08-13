@@ -27,6 +27,8 @@ export default function PasswordStrengthDemo() {
 export function PasswordStrengthBody() {
   const [pwd, setPwd] = useState('');
   const [shown, setShown] = useState(false);
+  const [checked, setChecked] = useState('');
+  const [confirmed, setConfirmed] = useState('');
 
   return (
     <>
@@ -59,6 +61,38 @@ export function PasswordStrengthBody() {
             }
           />
           <PasswordStrength password={pwd} />
+        </View>
+      </Section>
+
+      <Section label="With requirements checklist">
+        <View style={{ gap: spacing[2] }}>
+          <Input
+            label="Choose a password"
+            placeholder="At least 12 characters"
+            value={checked}
+            onChangeText={setChecked}
+            secureTextEntry
+            autoCapitalize="none"
+          />
+          <Input
+            label="Confirm password"
+            placeholder="Repeat it"
+            value={confirmed}
+            onChangeText={setConfirmed}
+            secureTextEntry
+            autoCapitalize="none"
+          />
+          <PasswordStrength
+            password={checked}
+            title="Password strength"
+            requirements={[
+              { label: 'Upper and lower case', met: /[a-z]/.test(checked) && /[A-Z]/.test(checked) },
+              { label: 'At least one number', met: /\d/.test(checked) },
+              { label: 'At least one special character', met: /[^A-Za-z0-9]/.test(checked) },
+              { label: 'At least 12 characters', met: checked.length >= 12 },
+              { label: 'Both passwords match', met: !!checked && checked === confirmed },
+            ]}
+          />
         </View>
       </Section>
 

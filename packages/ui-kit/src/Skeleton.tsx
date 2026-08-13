@@ -1,17 +1,18 @@
 import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, type ViewStyle } from 'react-native';
+import { Animated, type StyleProp, type ViewStyle } from 'react-native';
 
-import { palette } from './tokens/colors';
+import { useTheme } from './Theme';
 import { radius as radiusTokens } from './tokens/radius';
 
 export interface SkeletonProps {
   width?: number | `${number}%`;
   height?: number;
   radius?: number;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function Skeleton({ width = '100%', height = 12, radius, style }: SkeletonProps) {
+  const { colors } = useTheme();
   const opacity = useRef(new Animated.Value(0.5)).current;
 
   useEffect(() => {
@@ -30,11 +31,11 @@ export function Skeleton({ width = '100%', height = 12, radius, style }: Skeleto
       accessibilityRole="none"
       accessibilityLabel="Loading"
       style={[
-        styles.skeleton,
         {
           width,
           height,
           borderRadius: radius ?? radiusTokens.sm,
+          backgroundColor: colors.border,
           opacity,
         },
         style,
@@ -42,9 +43,3 @@ export function Skeleton({ width = '100%', height = 12, radius, style }: Skeleto
     />
   );
 }
-
-const styles = StyleSheet.create({
-  skeleton: {
-    backgroundColor: palette.gray[100],
-  },
-});

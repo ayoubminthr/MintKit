@@ -3,7 +3,6 @@ import {
   isValidElement,
   type ReactElement,
   type ReactNode,
-  useMemo,
   useState,
 } from 'react';
 import {
@@ -16,7 +15,6 @@ import {
 } from 'react-native';
 
 import { Text } from './Text';
-import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
 import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
@@ -38,13 +36,6 @@ export interface TooltipProps {
  * canonical disclosure gesture.
  */
 export function Tooltip({ label, children }: TooltipProps) {
-  const { colors } = useTheme();
-  const dynamicStyles = useMemo(
-    () => ({
-      label: { color: colors.textInverse },
-    }),
-    [colors],
-  );
   const [open, setOpen] = useState(false);
 
   const trigger = isValidElement(children)
@@ -64,7 +55,7 @@ export function Tooltip({ label, children }: TooltipProps) {
         <TouchableWithoutFeedback onPress={() => setOpen(false)}>
           <View style={styles.backdrop}>
             <View style={[styles.bubble, shadows.md]}>
-              <Text variant="caption" tone="inverse" style={dynamicStyles.label}>
+              <Text variant="caption" tone="inverse">
                 {label}
               </Text>
             </View>

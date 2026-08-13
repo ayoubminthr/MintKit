@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 
-import { palette } from './tokens/colors';
 import { borders } from './tokens/borders';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
@@ -32,7 +31,7 @@ export function Switch({ value, onValueChange, disabled, label, description }: S
 
   const dynamicStyles = useMemo(
     () => ({
-      track: { borderColor: colors.brandSubtle },
+      track: { backgroundColor: colors.surfaceSubtle, borderColor: colors.brandSubtle },
       thumbOn: { backgroundColor: colors.brand },
       thumbOff: { backgroundColor: colors.borderStrong },
     }),
@@ -108,8 +107,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: TRACK_PADDING,
     flexDirection: 'row',
     alignItems: 'center',
-    // gray[100] = the documented "secondary surface" track fill (same token SegmentedControl uses).
-    backgroundColor: palette.gray[100],
     borderWidth: borders.thin,
   },
   thumb: {

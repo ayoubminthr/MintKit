@@ -35,11 +35,17 @@ export interface ThemeProviderProps {
   children: ReactNode;
   /** Force a theme instead of following the OS setting / manual toggle. */
   theme?: ThemeName;
+  /**
+   * Seeds the manual-toggle state on mount — e.g. a previously persisted
+   * user choice. `null`/`undefined` falls back to the OS color scheme, same
+   * as never having called `setTheme`.
+   */
+  initialTheme?: ThemeName | null;
 }
 
-export function ThemeProvider({ children, theme: forcedTheme }: ThemeProviderProps) {
+export function ThemeProvider({ children, theme: forcedTheme, initialTheme }: ThemeProviderProps) {
   const systemScheme = useColorScheme();
-  const [manualTheme, setManualTheme] = useState<ThemeName | null>(null);
+  const [manualTheme, setManualTheme] = useState<ThemeName | null>(initialTheme ?? null);
 
   const theme: ThemeName = forcedTheme ?? manualTheme ?? (systemScheme === 'dark' ? 'dark' : 'light');
 

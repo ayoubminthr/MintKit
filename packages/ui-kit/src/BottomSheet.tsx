@@ -27,7 +27,6 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "./Theme";
-import { palette } from "./tokens/colors";
 
 const CONTENT_PADDING = 0;
 const MIN_SHEET_HEIGHT = 150;
@@ -54,6 +53,7 @@ const SheetHandle: React.FC<SheetHandleProps> = ({
   const dynamicStyles = useMemo(
     () => ({
       handleContainer: { backgroundColor: colors.surfacePrimary },
+      handle: { backgroundColor: colors.borderStrong },
     }),
     [colors]
   );
@@ -67,7 +67,7 @@ const SheetHandle: React.FC<SheetHandleProps> = ({
       ]}
     >
       <View style={styles.handleWrapper}>
-        <View style={styles.handle} />
+        <View style={[styles.handle, dynamicStyles.handle]} />
       </View>
       {HeaderComponent && (
         <View style={styles.headerContent}>
@@ -187,7 +187,7 @@ const SheetItem = React.memo(
     const dynamicStyles = useMemo(
       () => ({
         sheetBackground: { backgroundColor: colors.surfacePrimary },
-        footerContainer: { backgroundColor: colors.surfacePrimary },
+        footerContainer: { backgroundColor: colors.surfacePrimary, borderTopColor: colors.border },
       }),
       [colors]
     );
@@ -633,7 +633,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 4,
     borderRadius: 4,
-    backgroundColor: palette.gray[300],
   },
   handleStyle: {
     padding: 0,
@@ -656,8 +655,6 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "rgba(0,0,0,0.05)",
-
   },
 });
 

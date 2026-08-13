@@ -120,7 +120,7 @@ export function BottomTabBarItemView<T extends string>({
 }: BottomTabBarItemViewProps<T>) {
   const { colors } = useTheme();
   const isPrimary = item.kind === 'primary';
-  const tint = active ? colors.brand : colors.textSecondary;
+  const tint = active ? colors.brand : colors.textMuted;
   const hasNumericBadge = typeof item.badge === 'number' && item.badge > 0;
   const hasDotBadge = item.badge === true;
   const dynamicStyles = useMemo(
@@ -129,7 +129,6 @@ export function BottomTabBarItemView<T extends string>({
       primaryCircle: { backgroundColor: colors.brand },
       primaryCirclePressed: { backgroundColor: colors.brandHover },
       badgeCount: { backgroundColor: colors.danger, borderColor: colors.surfacePrimary },
-      badgeCountLabel: { color: colors.onBrand },
       badgeDot: { backgroundColor: colors.danger, borderColor: colors.surfacePrimary },
       primaryBadgeCount: { backgroundColor: colors.danger, borderColor: colors.surfacePrimary },
       primaryBadgeDot: { backgroundColor: colors.danger, borderColor: colors.surfacePrimary },
@@ -171,7 +170,7 @@ export function BottomTabBarItemView<T extends string>({
             </View>
             {hasNumericBadge ? (
               <View style={[styles.primaryBadgeCount, dynamicStyles.primaryBadgeCount]}>
-                <Text style={[styles.badgeCountLabel, dynamicStyles.badgeCountLabel]} numberOfLines={1}>
+                <Text style={styles.badgeCountLabel} color={colors.onBrand} numberOfLines={1}>
                   {(item.badge as number) > 99 ? '99+' : String(item.badge)}
                 </Text>
               </View>
@@ -184,7 +183,7 @@ export function BottomTabBarItemView<T extends string>({
               <Feather name={item.icon} size={ICON_SIZE} color={tint} />
               {hasNumericBadge ? (
                 <View style={[styles.badgeCount, dynamicStyles.badgeCount]}>
-                  <Text style={[styles.badgeCountLabel, dynamicStyles.badgeCountLabel]} numberOfLines={1}>
+                  <Text style={styles.badgeCountLabel} color={colors.onBrand} numberOfLines={1}>
                     {(item.badge as number) > 99 ? '99+' : String(item.badge)}
                   </Text>
                 </View>
@@ -195,11 +194,8 @@ export function BottomTabBarItemView<T extends string>({
               <Text
                 variant="caption"
                 numberOfLines={1}
-                style={[
-                  styles.label,
-                  { color: tint },
-                  active && styles.labelActive,
-                ]}>
+                color={tint}
+                style={[styles.label, active && styles.labelActive]}>
                 {item.label}
               </Text>
             ) : null}

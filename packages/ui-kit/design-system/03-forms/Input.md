@@ -52,7 +52,8 @@ interface InputProps extends TextInputProps {
   hint?: string;
   error?: string;          // non-empty → error state + message, overrides hint
   disabled?: boolean;      // combines with `editable`
-  leftIcon?: ReactNode;    // start-edge slot inside the field
+  leftIcon?: ReactNode;    // start-edge slot inside the field, padded
+  leftAddon?: ReactNode;   // start-edge slot, flush + full height (segmented pickers); wins over leftIcon
   rightIcon?: ReactNode;   // end-edge slot inside the field
   // value, onChangeText, placeholder, keyboardType, secureTextEntry,
   // autoCapitalize, onSubmitEditing, onFocus, onBlur, style, … from TextInputProps

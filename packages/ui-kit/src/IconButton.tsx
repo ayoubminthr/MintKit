@@ -70,9 +70,9 @@ export function IconButton({
       },
       danger: {
         container: { backgroundColor: colors.danger },
-        pressed: { backgroundColor: '#B84A24' },
+        pressed: { backgroundColor: colors.dangerHover },
         iconColor: colors.onBrand,
-        ripple: '#B84A24',
+        ripple: colors.dangerHover,
       },
       tint: {
         container: { backgroundColor: colors.brandSubtle },

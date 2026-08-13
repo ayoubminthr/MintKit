@@ -21,7 +21,6 @@ import {
   Animated,
   Pressable,
   StyleSheet,
-  Text as RNText,
   View,
 } from 'react-native';
 import { useEffect, useMemo, useRef } from 'react';
@@ -68,7 +67,6 @@ export function SelectionBar({
     () => ({
       bar: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
       countPill: { backgroundColor: colors.brand },
-      countText: { color: colors.onBrand },
       divider: { backgroundColor: colors.border },
       actionPressed: { backgroundColor: colors.surfaceSubtle },
       actionPressedDanger: { backgroundColor: colors.dangerSubtle },
@@ -122,7 +120,9 @@ export function SelectionBar({
       {/* Count pill + label */}
       <View style={styles.countSection}>
         <View style={[styles.countPill, dynamicStyles.countPill]}>
-          <RNText style={[styles.countText, dynamicStyles.countText]}>{count}</RNText>
+          <Text scaled={false} color={colors.onBrand} style={styles.countText}>
+            {count}
+          </Text>
         </View>
         <Text variant="caption" style={{ fontWeight: fontWeight.medium }}>
           {label}

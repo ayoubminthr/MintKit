@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
-import { Card, FilterBar, Text, spacing, useToast } from '@minthr-saas/mobile-ui-kit';
+import { Card, FilterBar, IconButton, Text, spacing, useToast } from '@minthr-saas/mobile-ui-kit';
 
 import { Section } from './_components/Section';
 
@@ -26,43 +26,115 @@ export function FilterBarBody() {
     { key: 'role', label: 'Senior' },
     { key: 'tenure', label: '2+ years' },
   ]);
+  const [query, setQuery] = useState('');
+  const [sortActive, setSortActive] = useState(false);
   const toast = useToast();
+
+  const chips = filters.map((f) => ({
+    key: f.key,
+    label: f.label,
+    onRemove: () => setFilters((prev) => prev.filter((p) => p.key !== f.key)),
+  }));
 
   return (
     <>
       <Text variant="body" tone="secondary">
-        Add-filter trigger plus a horizontally scrollable list of removable chips. Pair with a
-        BottomSheet (or Select) to pick new filters.
+        A flat layout, not a surface — the SearchBar pill carries the only border, triggers are
+        borderless, and chips sit directly on the page. Pair with a BottomSheet (or Select) to
+        pick new filters; the filter trigger tints brand once at least one chip is active.
       </Text>
 
       <Section label="With active filters">
         <FilterBar
-          filters={filters.map((f) => ({
-            key: f.key,
-            label: f.label,
-            onRemove: () => setFilters((prev) => prev.filter((p) => p.key !== f.key)),
-          }))}
+          filters={chips}
           onClearAll={() => setFilters([])}
           onAdd={() => toast.info('Hook up a BottomSheet here to pick filter values.')}
         />
       </Section>
 
-      <Section label="Inside a results card">
+      <Section label="Search + filter + sort (the mobile 'SearchFilterBar' pattern)">
+        <FilterBar
+          search={{ value: query, onChange: setQuery, placeholder: 'Rechercher…' }}
+          filters={chips}
+          onClearAll={() => setFilters([])}
+          onAdd={() => toast.info('Hook up a BottomSheet here to pick filter values.')}
+          trigger={
+            <IconButton
+              icon="sliders"
+              variant={sortActive ? 'tint' : 'ghost'}
+              size="sm"
+              accessibilityLabel="Sort"
+              onPress={() => setSortActive((v) => !v)}
+            />
+          }
+        />
+      </Section>
+
+      <Section label="Empty state (search only, no filters yet)">
+        <FilterBar
+          search={{ value: '', onChange: () => {}, placeholder: 'Rechercher un document…' }}
+          filters={[]}
+          onAdd={() => toast.info('Open picker')}
+        />
+      </Section>
+
+      <Section label="With a count (rendered inside the search pill)">
+        <FilterBar
+          search={{ value: query, onChange: setQuery, placeholder: 'Rechercher…' }}
+          filters={chips}
+          onClearAll={() => setFilters([])}
+          onAdd={() => toast.info('Hook up a BottomSheet here to pick filter values.')}
+          count={filters.length === 0 ? 1243 : 342}
+          countLabel="résultats"
+          trigger={
+            <IconButton
+              icon="sliders"
+              variant={sortActive ? 'tint' : 'ghost'}
+              size="sm"
+              accessibilityLabel="Sort"
+              onPress={() => setSortActive((v) => !v)}
+            />
+          }
+        />
+      </Section>
+
+      <Section label="Localised labels (filterLabel / clearAllLabel / search.clearLabel)">
+        <FilterBar
+          search={{
+            value: query,
+            onChange: setQuery,
+            placeholder: 'Rechercher…',
+            clearLabel: 'Effacer la recherche',
+          }}
+          filters={chips}
+          onClearAll={() => setFilters([])}
+          onAdd={() => toast.info('Ouvrir le sélecteur')}
+          count={filters.length === 0 ? 1243 : 342}
+          countLabel="résultats"
+          clearAllLabel="Effacer tout"
+        />
+      </Section>
+
+      <Section label="Count with no search (spacer pushes the trigger to the end)">
+        <FilterBar
+          filters={[]}
+          count={1243}
+          countLabel="employees"
+          onAdd={() => toast.info('Open picker')}
+        />
+      </Section>
+
+      <Section label="Inside a card (the card is the surface, the bar stays flat)">
         <Card padding="none">
-          <View style={{ padding: spacing[3], gap: spacing[3] }}>
+          <View style={{ padding: spacing[3] }}>
             <FilterBar
-              filters={filters.map((f) => ({
-                key: f.key,
-                label: f.label,
-                onRemove: () => setFilters((prev) => prev.filter((p) => p.key !== f.key)),
-              }))}
+              search={{ value: query, onChange: setQuery }}
+              filters={chips}
               onClearAll={() => setFilters([])}
               onAdd={() => toast.info('Open picker')}
+              count={filters.length === 0 ? 1243 : 342}
+              countLabel="employees"
             />
-            <Text variant="body" tone="secondary">
-              Showing {filters.length === 0 ? 'all 1,243 employees' : '342 employees'} matching
-              your filters.
-            </Text>
           </View>
         </Card>
       </Section>

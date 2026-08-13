@@ -89,9 +89,16 @@ export const lightColors = {
   warning: palette.warning[500],
   warningSubtle: palette.warning[50],
   danger: palette.danger[500],
+  dangerHover: '#B84A24',
   dangerSubtle: palette.danger[50],
   info: palette.info[500],
   infoSubtle: palette.info[50],
+
+  // Categorical / decorative accents — no semantic meaning of their own
+  // (status dots, the auth-hero gradient's second stop). Not on the numbered
+  // `palette` scale since each is a one-off design pick, not a hue ramp.
+  categoryPurple: '#B589C8',
+  brandGradientEnd: '#7AD0A8',
 } as const;
 
 // Widened to plain `string` per key (not `typeof lightColors` directly) —
@@ -106,11 +113,13 @@ export type SemanticColors = { [K in keyof typeof lightColors]: string };
 /**
  * Dark theme. Paired with the `useTheme()`/`ThemeProvider` in `../Theme.tsx`.
  *
- * IMPORTANT — this is a first-pass placeholder, not a design-reviewed dark
- * palette: values are systematically derived (inverted gray ramp, palette's
- * darkest 900 step for "Subtle" tints, a lighter brand step for on-dark
- * legibility) rather than picked by a designer against real screens. Treat it
- * as a reasonable starting point, not a finished theme.
+ * Deliberately tuned darker than a mechanical gray-ramp inversion would give:
+ * surfaces sit near-black with a bare whisper of the brand hue (rather than a
+ * flat neutral gray) for a more premium, less "washed-out" feel, and text/
+ * borders are softened (off-white instead of stark white, low-contrast
+ * hairlines) so the whole theme reads calmer and more deliberate. Still a
+ * first pass, not pixel-checked against every screen — but a considered
+ * design direction now, not a placeholder derivation.
  *
  * Bigger caveat: no existing component in this kit reads `darkColors` (every
  * component's StyleSheet is built once at module scope from static
@@ -120,32 +129,42 @@ export type SemanticColors = { [K in keyof typeof lightColors]: string };
  * plus the hook are the foundation for that work, not the work itself.
  */
 export const darkColors: SemanticColors = {
-  // Surfaces — no existing gray step is dark enough for a true near-black app
-  // background, so these three are new placeholder values (not sourced from
-  // `palette.gray`), chosen to preserve the light theme's relationship where
-  // surfacePrimary reads slightly "brighter" than the page behind it.
-  surfacePage: '#15170F',
-  surfacePrimary: palette.gray[800],
-  surfaceSubtle: '#20221D',
+  // Surfaces — a 3-step near-black elevation ramp (page < card < subtle),
+  // extending `palette.gray`'s own neutral-green-gray character darker
+  // (rather than the previous pass's more visibly green-tinted literals),
+  // so the brand green pops cleanly against a properly neutral background
+  // instead of competing with a same-hue backdrop.
+  surfacePage: '#0A0B0A',
+  surfacePrimary: '#1A1C1A',
+  surfaceSubtle: '#232523',
 
-  // Text — inverted gray ramp.
-  textPrimary: palette.gray[50],
-  textSecondary: palette.gray[400],
-  textMuted: palette.gray[600],
+  // Text — soft near-white instead of stark white, staying in the same
+  // neutral family as the surfaces above.
+  textPrimary: '#EEF0EE',
+  textSecondary: '#A6ABA5',
+  textMuted: '#6C716B',
   textInverse: '#FFFFFF',
 
-  // Borders — dimmer steps read as more visible against a dark surface than
-  // the same step does against white.
-  border: palette.gray[700],
-  borderStrong: palette.gray[600],
+  // Borders — solid literals tuned as subtle hairlines against the new
+  // surfaces (kept as plain hex, not rgba-alpha, since `hexToRgba()`
+  // call sites throughout the app — including `separatorAlpha` below —
+  // parse this value as a hex string).
+  border: '#282A27',
+  borderStrong: '#383B36',
 
-  // Brand — a lighter step as the plain text/icon accent (legible on dark
-  // surfaces); solid CTA surfaces (e.g. a filled Button) can keep using the
-  // vivid palette.brand[500] the same as light mode.
-  brand: palette.brand[300],
-  brandHover: palette.brand[100],
+  // Brand — kept in the same "doesn't wash out" spirit as `brand` itself:
+  // `brandHover` matches light mode exactly (brand identity shouldn't flip),
+  // and `brandStrong` uses a vivid mid-tone rather than the old near-white
+  // (which made CTA-gradient buttons look pale/washed-out on a dark screen)
+  // while still escalating from the base `brand` step, same relationship as
+  // light mode's brand(500) -> brandStrong(700). `brandSubtle` stays the
+  // darkest palette step — it's a background tint (icon bubbles, badges),
+  // and reads as an elegant dark-green fill against the near-black surfaces
+  // above.
+  brand: palette.brand[500],
+  brandHover: palette.brand[600],
   brandSubtle: palette.brand[900],
-  brandStrong: palette.brand[50],
+  brandStrong: palette.brand[500],
   onBrand: '#FFFFFF',
 
   // Semantic — solid tones unchanged from light mode (still enough contrast
@@ -156,7 +175,14 @@ export const darkColors: SemanticColors = {
   warning: palette.warning[500],
   warningSubtle: palette.warning[900],
   danger: palette.danger[500],
+  dangerHover: '#B84A24',
   dangerSubtle: palette.danger[900],
   info: palette.info[500],
   infoSubtle: palette.info[900],
+
+  // Categorical / decorative accents — kept identical to light mode; both
+  // are drawn as solid dots/gradient fills rather than backgrounds, so they
+  // stay legible against a dark surface without needing a separate tint.
+  categoryPurple: '#B589C8',
+  brandGradientEnd: '#7AD0A8',
 } as const;

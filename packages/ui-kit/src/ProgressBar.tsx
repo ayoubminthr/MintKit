@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
 import { useTheme } from './Theme';
-import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 
 export type ProgressVariant = 'default' | 'success' | 'warning' | 'danger';
@@ -40,7 +39,7 @@ export function ProgressBar({
       accessibilityRole="progressbar"
       accessibilityValue={{ now: Math.round(clamped * 100), min: 0, max: 100 }}
       {...rest}
-      style={[styles.track, { height, borderRadius: height / 2 }, style]}>
+      style={[styles.track, { backgroundColor: colors.border, height, borderRadius: height / 2 }, style]}>
       <View
         style={[
           styles.fill,
@@ -58,7 +57,6 @@ export function ProgressBar({
 const styles = StyleSheet.create({
   track: {
     width: '100%',
-    backgroundColor: palette.gray[100],
     overflow: 'hidden',
     borderRadius: radius.full,
   },

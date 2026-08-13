@@ -3,13 +3,13 @@ import {
   Pressable,
   type PressableProps,
   StyleSheet,
-  Text as RNText,
   type TextStyle,
   View,
   type ViewStyle,
 } from 'react-native';
 
 import { Spinner, type SpinnerSize, type SpinnerTone } from './Spinner';
+import { Text } from './Text';
 import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
 import { radius } from './tokens/radius';
@@ -80,21 +80,21 @@ export function Button({
       primary: { backgroundColor: colors.brandHover },
       secondary: { backgroundColor: colors.surfaceSubtle },
       ghost: { backgroundColor: colors.surfaceSubtle },
-      danger: { backgroundColor: '#B84A24' },
+      danger: { backgroundColor: colors.dangerHover },
       'danger-ghost': { backgroundColor: colors.dangerSubtle },
       link: { backgroundColor: 'transparent', opacity: 0.7 },
     }),
     [colors]
   );
 
-  const labelVariantStyles = useMemo<Record<ButtonVariant, TextStyle>>(
+  const labelColorByVariant = useMemo<Record<ButtonVariant, string>>(
     () => ({
-      primary: { color: colors.onBrand },
-      secondary: { color: colors.textPrimary },
-      ghost: { color: colors.textPrimary },
-      danger: { color: colors.onBrand },
-      'danger-ghost': { color: colors.danger },
-      link: { color: colors.brand, textDecorationLine: 'underline' },
+      primary: colors.onBrand,
+      secondary: colors.textPrimary,
+      ghost: colors.textPrimary,
+      danger: colors.onBrand,
+      'danger-ghost': colors.danger,
+      link: colors.brand,
     }),
     [colors]
   );
@@ -104,7 +104,7 @@ export function Button({
       primary: colors.brandStrong,
       secondary: colors.surfaceSubtle,
       ghost: colors.surfaceSubtle,
-      danger: '#B84A24',
+      danger: colors.dangerHover,
       'danger-ghost': colors.dangerSubtle,
       link: 'transparent',
     }),
@@ -129,9 +129,12 @@ export function Button({
       ) : (
         <>
           {leftIcon ? <View style={baseStyles.iconSlot}>{leftIcon}</View> : null}
-          <RNText style={[baseStyles.label, labelSizeStyles[size], labelVariantStyles[variant]]}>
+          <Text
+            scaled={false}
+            color={labelColorByVariant[variant]}
+            style={[baseStyles.label, labelSizeStyles[size], labelExtraStyles[variant]]}>
             {label}
-          </RNText>
+          </Text>
           {rightIcon ? <View style={baseStyles.iconSlot}>{rightIcon}</View> : null}
         </>
       )}
@@ -159,8 +162,8 @@ const baseStyles = StyleSheet.create({
 
 const sizeStyles: Record<ButtonSize, ViewStyle> = {
   sm: { height: 32, paddingHorizontal: spacing[3], gap: spacing[1] },
-  md: { height: 38, paddingHorizontal: spacing[4], gap: spacing[2] },
-  lg: { height: 44, paddingHorizontal: spacing[4], gap: spacing[2] },
+  md: { height: 44, paddingHorizontal: spacing[4], gap: spacing[2] },
+  lg: { height: 52, paddingHorizontal: spacing[5], gap: spacing[2] },
 };
 
 const labelSizeStyles = StyleSheet.create({
@@ -168,3 +171,7 @@ const labelSizeStyles = StyleSheet.create({
   md: { fontSize: fontSize.md },
   lg: { fontSize: fontSize.md },
 });
+
+const labelExtraStyles: Partial<Record<ButtonVariant, TextStyle>> = {
+  link: { textDecorationLine: 'underline' },
+};

@@ -4,7 +4,6 @@ import {
   Animated,
   Pressable,
   StyleSheet,
-  Text as RNText,
   TextInput,
   type TextInputProps,
   View,
@@ -12,6 +11,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
+import { Text } from './Text';
 import { useTheme } from './Theme';
 import { useFloatingLabel } from './hooks/useFloatingLabel';
 import { borders } from './tokens/borders';
@@ -35,6 +35,12 @@ export interface InputProps extends TextInputProps {
   disabled?: boolean;
   /** Slot rendered inside the field on the start (leading) edge. */
   leftIcon?: ReactNode;
+  /**
+   * Slot rendered flush against the field's start edge and stretched to its full
+   * height — for segmented adornments like a country-code or currency picker.
+   * Unlike `leftIcon` it gets no padding of its own. Wins over `leftIcon`.
+   */
+  leftAddon?: ReactNode;
   /** Slot rendered inside the field on the end (trailing) edge. Ignored when `secureTextEntry` is true — the built-in show/hide toggle takes that slot instead. */
   rightIcon?: ReactNode;
   /** Style override for the bordered field box (the element that owns focus/error/disabled styling) — `style` targets the inner text input instead. */
@@ -49,6 +55,7 @@ export function Input({
   disabled,
   editable,
   leftIcon,
+  leftAddon,
   rightIcon,
   onFocus,
   onBlur,
@@ -75,10 +82,6 @@ export function Input({
     () => ({
       label: {
         backgroundColor: colors.surfacePrimary,
-        color: colors.textMuted,
-      },
-      labelActive: {
-        color: colors.brand,
       },
       fieldWrap: {
         backgroundColor: colors.surfacePrimary,
@@ -98,12 +101,6 @@ export function Input({
       },
       inputDisabled: {
         color: colors.textSecondary,
-      },
-      hint: {
-        color: colors.textMuted,
-      },
-      error: {
-        color: colors.danger,
       },
     }),
     [colors],
@@ -130,15 +127,12 @@ export function Input({
               {label}
             </Animated.Text>
           ) : (
-            <RNText
-              style={[
-                styles.label,
-                dynamicStyles.label,
-                { top: -8 },
-                isActive && dynamicStyles.labelActive,
-              ]}>
+            <Text
+              scaled={false}
+              color={isActive ? colors.brand : colors.textMuted}
+              style={[styles.label, dynamicStyles.label, { top: -8 }]}>
               {label}
-            </RNText>
+            </Text>
           )
         ) : null}
         <View
@@ -154,7 +148,11 @@ export function Input({
             !isEditable && dynamicStyles.fieldWrapDisabled,
             containerStyle,
           ]}>
-          {leftIcon ? <View style={styles.iconStart}>{leftIcon}</View> : null}
+          {leftAddon ? (
+            <View style={styles.addonStart}>{leftAddon}</View>
+          ) : leftIcon ? (
+            <View style={styles.iconStart}>{leftIcon}</View>
+          ) : null}
           <TextInput
             {...rest}
             value={value}
@@ -176,7 +174,7 @@ export function Input({
               dynamicStyles.input,
               multiline && styles.inputMultiline,
               { textAlign: isRTL() ? 'right' : 'left' },
-              leftIcon ? styles.inputWithLeftIcon : null,
+              leftIcon || leftAddon ? styles.inputWithLeftIcon : null,
               resolvedRightIcon ? styles.inputWithRightIcon : null,
               !isEditable && dynamicStyles.inputDisabled,
               style,
@@ -186,9 +184,13 @@ export function Input({
         </View>
       </View>
       {error ? (
-        <RNText style={[styles.error, dynamicStyles.error]}>{error}</RNText>
+        <Text scaled={false} color={colors.danger} style={styles.error}>
+          {error}
+        </Text>
       ) : hint ? (
-        <RNText style={[styles.hint, dynamicStyles.hint]}>{hint}</RNText>
+        <Text scaled={false} color={colors.textMuted} style={styles.hint}>
+          {hint}
+        </Text>
       ) : null}
     </View>
   );
@@ -237,6 +239,10 @@ const styles = StyleSheet.create({
   iconStart: {
     paddingStart: spacing[3],
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addonStart: {
+    alignSelf: 'stretch',
     justifyContent: 'center',
   },
   iconEnd: {

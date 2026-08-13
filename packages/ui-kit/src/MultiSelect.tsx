@@ -25,7 +25,7 @@ import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
-import { fontSize } from './tokens/typography';
+import { fontFamily, fontSize } from './tokens/typography';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -382,7 +382,7 @@ export function MultiSelect({
           error ? dynamicStyles.triggerError : null,
         ]}>
         {currentValues.length === 0 ? (
-          <Text variant="body" tone="muted" style={styles.chipsPlaceholder}>
+          <Text scaled={false} tone="muted" style={styles.chipsPlaceholder}>
             {placeholder}
           </Text>
         ) : (
@@ -435,10 +435,10 @@ export function MultiSelect({
         error ? dynamicStyles.triggerError : null,
       ]}>
       <Text
-        variant="body"
+        scaled={false}
         tone={currentValues.length > 0 ? (disabled ? 'muted' : 'primary') : 'muted'}
         numberOfLines={1}
-        style={currentValues.length > 0 ? styles.value : [styles.value, styles.placeholderText]}>
+        style={styles.value}>
         {triggerText}
       </Text>
       <Feather
@@ -465,6 +465,7 @@ const styles = StyleSheet.create({
   },
   chipsPlaceholder: {
     flex: 1,
+    fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
   },
   chipsWrap: {
@@ -543,10 +544,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: borders.hair,
     marginBottom: spacing[1],
   },
+  // Mirrors `Input`'s TextInput — see the note in Select.tsx.
   value: {
     flex: 1,
-  },
-  placeholderText: {
+    fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
   },
   footer: {

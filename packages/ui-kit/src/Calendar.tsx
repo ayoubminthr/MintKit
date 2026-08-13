@@ -429,8 +429,8 @@ function DayCell({
         ]}>
         <Text
           variant="body"
+          color={textColor}
           style={{
-            color: textColor,
             fontWeight: selected ? fontWeight.medium : fontWeight.regular,
           }}>
           {date.getDate()}

@@ -57,7 +57,6 @@ export function FAB({
     () => ({
       base: { backgroundColor: colors.brand },
       pressed: { backgroundColor: colors.brandHover },
-      label: { color: colors.onBrand },
     }),
     [colors]
   );
@@ -100,7 +99,8 @@ export function FAB({
         {variant === 'extended' && label ? (
           <Text
             variant="body"
-            style={[styles.label, dynamicStyles.label]}>
+            color={colors.onBrand}
+            style={styles.label}>
             {label}
           </Text>
         ) : null}

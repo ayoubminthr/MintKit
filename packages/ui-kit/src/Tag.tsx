@@ -1,7 +1,8 @@
 import { Feather } from '@expo/vector-icons';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text as RNText, View, type ViewProps } from 'react-native';
+import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 
+import { Text } from './Text';
 import { useTheme } from './Theme';
 import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
@@ -17,7 +18,8 @@ export interface TagProps extends ViewProps {
 }
 
 export function Tag({ label, variant = 'neutral', onRemove, style, ...rest }: TagProps) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
 
   const variantStyles = useMemo<Record<TagVariant, { container: object; label: { color: string } }>>(
     () => ({
@@ -27,35 +29,35 @@ export function Tag({ label, variant = 'neutral', onRemove, style, ...rest }: Ta
       },
       brand: {
         container: { backgroundColor: colors.brandSubtle },
-        label: { color: palette.brand[700] },
+        label: { color: isDark ? palette.brand[100] : palette.brand[700] },
       },
       success: {
         container: { backgroundColor: colors.successSubtle },
-        label: { color: palette.success[700] },
+        label: { color: isDark ? palette.success[100] : palette.success[700] },
       },
       warning: {
         container: { backgroundColor: colors.warningSubtle },
-        label: { color: palette.warning[700] },
+        label: { color: isDark ? palette.warning[100] : palette.warning[700] },
       },
       danger: {
         container: { backgroundColor: colors.dangerSubtle },
-        label: { color: palette.danger[700] },
+        label: { color: isDark ? palette.danger[100] : palette.danger[700] },
       },
       info: {
         container: { backgroundColor: colors.infoSubtle },
-        label: { color: palette.info[700] },
+        label: { color: isDark ? palette.info[100] : palette.info[700] },
       },
     }),
-    [colors]
+    [colors, isDark]
   );
 
   const v = variantStyles[variant];
 
   return (
     <View {...rest} style={[styles.container, v.container, style]}>
-      <RNText style={[styles.label, v.label]} numberOfLines={1}>
+      <Text scaled={false} color={v.label.color} style={styles.label} numberOfLines={1}>
         {label}
-      </RNText>
+      </Text>
       {onRemove ? (
         <Pressable
           accessibilityRole="button"

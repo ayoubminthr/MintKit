@@ -8,6 +8,9 @@ import { useTheme } from './Theme';
 
 export interface EmptyStateProps extends ViewProps {
   icon?: React.ComponentProps<typeof Feather>['name'];
+  illustration?: ReactNode;
+  illustrationSize?: number;
+  illustrationTint?: string;
   title: string;
   description?: string;
   action?: ReactNode;
@@ -15,6 +18,9 @@ export interface EmptyStateProps extends ViewProps {
 
 export function EmptyState({
   icon = 'inbox',
+  illustration,
+  illustrationSize = 48,
+  illustrationTint,
   title,
   description,
   action,
@@ -24,15 +30,20 @@ export function EmptyState({
   const { colors } = useTheme();
   const dynamicStyles = useMemo(
     () => ({
-      iconBubble: { backgroundColor: colors.surfaceSubtle },
+      iconBubble: {
+        backgroundColor: illustrationTint ?? colors.surfaceSubtle,
+        width: illustrationSize,
+        height: illustrationSize,
+        borderRadius: illustrationSize / 2,
+      },
     }),
-    [colors]
+    [colors, illustrationTint, illustrationSize]
   );
 
   return (
     <View {...rest} style={[styles.container, style]}>
       <View style={[styles.iconBubble, dynamicStyles.iconBubble]}>
-        <Feather name={icon} size={20} color={colors.textMuted} />
+        {illustration ?? <Feather name={icon} size={20} color={colors.textMuted} />}
       </View>
       <View style={styles.text}>
         <Text variant="subtitle">{title}</Text>
@@ -55,11 +66,9 @@ const styles = StyleSheet.create({
     gap: spacing[4],
   },
   iconBubble: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   text: {
     alignItems: 'center',

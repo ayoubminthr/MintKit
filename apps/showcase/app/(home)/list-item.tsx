@@ -49,6 +49,14 @@ export function ListItemBody() {
         </List>
       </Section>
 
+      <Section label="Dense (tighter rows for sheets and long lists)">
+        <List bordered>
+          <ListItem title="Function" trailing={<Text variant="caption" tone="muted">All</Text>} dense onPress={() => {}} />
+          <ListItem title="Site" trailing={<Text variant="caption" tone="brand">Casablanca +2</Text>} dense onPress={() => {}} />
+          <ListItem title="Department" trailing={<Text variant="caption" tone="muted">All</Text>} dense onPress={() => {}} />
+        </List>
+      </Section>
+
       <Section label="With trailing slots">
         <List bordered>
           <ListItem

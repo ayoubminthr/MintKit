@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 
 import { Text } from './Text';
 import { useTheme } from './Theme';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { backChevron } from './utils/rtl';
@@ -31,14 +32,16 @@ export function PageHeader({
   style,
   ...rest
 }: PageHeaderProps) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
 
   const dynamicStyles = useMemo(
     () => ({
       backButtonPressed: { backgroundColor: colors.surfaceSubtle },
       iconBubble: { backgroundColor: colors.brandSubtle },
+      icon: { color: isDark ? palette.brand[100] : colors.brand },
     }),
-    [colors]
+    [colors, isDark]
   );
 
   return (
@@ -61,7 +64,7 @@ export function PageHeader({
       <View style={styles.titleRow}>
         {icon ? (
           <View style={[styles.iconBubble, dynamicStyles.iconBubble]}>
-            <Feather name={icon} size={16} color={colors.brand} />
+            <Feather name={icon} size={16} color={dynamicStyles.icon.color} />
           </View>
         ) : null}
         <View style={styles.titleStack}>

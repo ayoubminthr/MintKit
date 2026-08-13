@@ -1,3 +1,4 @@
+import { Feather } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
@@ -9,14 +10,36 @@ import { useTheme } from './Theme';
 
 export type PasswordScore = 0 | 1 | 2 | 3 | 4;
 
+/** One rule the password is checked against — resolved by the caller. */
+export interface PasswordRequirement {
+  label: string;
+  met: boolean;
+}
+
 export interface PasswordStrengthProps extends ViewProps {
   password: string;
+  /** Heading above the meter. */
+  title?: string;
+  /**
+   * Per-score strength wording. Merged over the built-in English labels, so
+   * localized apps can pass their translated set.
+   */
+  labels?: Partial<Record<PasswordScore, string>>;
+  /** Hide the strength wording and show the meter alone. */
+  showLabel?: boolean;
+  /**
+   * Checklist rendered under the meter. Each entry gets a check/cross glyph.
+   * Caller-resolved so rules the component can't see (e.g. "passwords match")
+   * work the same as the ones it could.
+   */
+  requirements?: readonly PasswordRequirement[];
 }
 
 interface ScoreInfo {
   score: PasswordScore;
   label: string;
-  color: string;
+  /** Omitted for the empty-password state, which falls back to a muted tone. */
+  color?: string;
 }
 
 /**
@@ -25,7 +48,7 @@ interface ScoreInfo {
  */
 export function getPasswordScore(password: string): ScoreInfo {
   if (!password) {
-    return { score: 0, label: 'Empty', color: palette.gray[300] };
+    return { score: 0, label: 'Empty' };
   }
 
   let score = 0;
@@ -48,19 +71,35 @@ const scoreInfo: Record<PasswordScore, ScoreInfo> = {
   4: { score: 4, label: 'Strong', color: palette.success[700] },
 };
 
-export function PasswordStrength({ password, style, ...rest }: PasswordStrengthProps) {
+export function PasswordStrength({
+  password,
+  title,
+  labels,
+  showLabel = true,
+  requirements,
+  style,
+  ...rest
+}: PasswordStrengthProps) {
   const { colors } = useTheme();
   const info = getPasswordScore(password);
+  const label = labels?.[info.score] ?? info.label;
 
   const dynamicStyles = useMemo(
     () => ({
       bar: { backgroundColor: colors.surfaceSubtle },
+      track: { backgroundColor: colors.border },
     }),
     [colors]
   );
 
   return (
     <View {...rest} style={[styles.container, style]}>
+      {title ? (
+        <Text variant="caption" tone="secondary">
+          {title}
+        </Text>
+      ) : null}
+
       <View style={styles.bars}>
         {([0, 1, 2, 3] as const).map((idx) => {
           const filled = info.score > idx;
@@ -70,17 +109,40 @@ export function PasswordStrength({ password, style, ...rest }: PasswordStrengthP
               style={[
                 styles.bar,
                 dynamicStyles.bar,
-                {
-                  backgroundColor: filled ? info.color : palette.gray[100],
-                },
+                filled ? { backgroundColor: info.color } : dynamicStyles.track,
               ]}
             />
           );
         })}
       </View>
-      <Text variant="caption" style={[styles.label, { color: info.color }]}>
-        {info.label}
-      </Text>
+
+      {showLabel ? (
+        <Text
+          variant="caption"
+          tone={info.color ? undefined : 'muted'}
+          color={info.color}
+          style={styles.label}
+        >
+          {label}
+        </Text>
+      ) : null}
+
+      {requirements?.length ? (
+        <View style={styles.requirements}>
+          {requirements.map((requirement) => (
+            <View key={requirement.label} style={styles.requirement}>
+              <Feather
+                name={requirement.met ? 'check' : 'x'}
+                size={14}
+                color={requirement.met ? colors.success : colors.textMuted}
+              />
+              <Text variant="caption" tone={requirement.met ? 'secondary' : 'muted'}>
+                {requirement.label}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -100,5 +162,14 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: '500',
+  },
+  requirements: {
+    gap: spacing[1],
+    marginTop: spacing[1],
+  },
+  requirement: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
   },
 });

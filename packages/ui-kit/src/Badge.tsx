@@ -1,7 +1,8 @@
 import { Feather } from '@expo/vector-icons';
 import { useMemo } from 'react';
-import { StyleSheet, Text as RNText, View, type ViewProps } from 'react-native';
+import { StyleSheet, View, type ViewProps } from 'react-native';
 
+import { Text } from './Text';
 import { useTheme } from './Theme';
 import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
@@ -20,7 +21,8 @@ export interface BadgeProps extends ViewProps {
 }
 
 export function Badge({ label, variant = 'neutral', dot, icon, style, ...rest }: BadgeProps) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
 
   const variantStyles = useMemo<Record<BadgeVariant, { container: object; label: { color: string } }>>(
     () => ({
@@ -30,26 +32,26 @@ export function Badge({ label, variant = 'neutral', dot, icon, style, ...rest }:
       },
       brand: {
         container: { backgroundColor: colors.brandSubtle },
-        label: { color: palette.brand[700] },
+        label: { color: isDark ? palette.brand[100] : palette.brand[700] },
       },
       success: {
         container: { backgroundColor: colors.successSubtle },
-        label: { color: palette.success[700] },
+        label: { color: isDark ? palette.success[100] : palette.success[700] },
       },
       warning: {
         container: { backgroundColor: colors.warningSubtle },
-        label: { color: palette.warning[700] },
+        label: { color: isDark ? palette.warning[100] : palette.warning[700] },
       },
       danger: {
         container: { backgroundColor: colors.dangerSubtle },
-        label: { color: palette.danger[700] },
+        label: { color: isDark ? palette.danger[100] : palette.danger[700] },
       },
       info: {
         container: { backgroundColor: colors.infoSubtle },
-        label: { color: palette.info[700] },
+        label: { color: isDark ? palette.info[100] : palette.info[700] },
       },
     }),
-    [colors]
+    [colors, isDark]
   );
 
   const v = variantStyles[variant];
@@ -57,7 +59,9 @@ export function Badge({ label, variant = 'neutral', dot, icon, style, ...rest }:
     <View {...rest} style={[styles.badge, v.container, style]}>
       {dot ? <View style={[styles.dot, { backgroundColor: v.label.color }]} /> : null}
       {icon ? <Feather name={icon} size={11} color={v.label.color} /> : null}
-      <RNText style={[styles.label, v.label]}>{label}</RNText>
+      <Text scaled={false} color={v.label.color} style={styles.label}>
+        {label}
+      </Text>
     </View>
   );
 }

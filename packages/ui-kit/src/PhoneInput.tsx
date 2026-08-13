@@ -2,6 +2,10 @@
  * PhoneInput — phone number input with international country code selector.
  * Mobile adaptation of the web kit's PhoneInput.
  *
+ * Holds the national number only; the country lives in `countryCode`. Use
+ * `splitPhoneNumber`/`formatE164` from the kit to move between that pair and a
+ * single stored E.164 string, and `isValidNationalNumber` to validate.
+ *
  * Usage:
  *   <PhoneInput
  *     value={phone}
@@ -15,26 +19,42 @@ import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Input, type InputProps } from './Input';
+import { SearchBar } from './SearchBar';
+import { SheetHeader } from './SheetHeader';
 import { type SheetBodyProps, useSheet } from './SheetHost';
 import { Text } from './Text';
 import { useTheme } from './Theme';
-import { COUNTRIES, type Country, findCountry } from './data/countries';
+import { COUNTRIES, type Country, DEFAULT_FAVORITES, findCountry } from './data/countries';
 import { borders } from './tokens/borders';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export interface PhoneInputProps extends Omit<InputProps, 'left'> {
+export interface PhoneInputProps extends Omit<InputProps, 'leftIcon' | 'leftAddon'> {
   countryCode?: string;
   onCountryChange?: (countryCode: string) => void;
   defaultCountry?: string;
+  /** Country codes pinned above the full list in the picker. */
+  favorites?: string[];
+  /** Picker copy — override to localise. */
+  pickerTitle?: string;
+  searchPlaceholder?: string;
+  favoritesLabel?: string;
+  allCountriesLabel?: string;
+  emptyLabel?: string;
 }
 
 // ─── Sheet body ───────────────────────────────────────────────────────────────
 
 interface PhoneInputSheetParams {
   currentCode: string;
+  favorites: string[];
+  title: string;
+  searchPlaceholder: string;
+  favoritesLabel: string;
+  allCountriesLabel: string;
+  emptyLabel: string;
   onCountrySelect: (code: string) => void;
 }
 
@@ -45,25 +65,40 @@ function PhoneInputSheetBody({
   const { colors } = useTheme();
   const [search, setSearch] = useState('');
 
-  const filteredCountries = useMemo(() => {
-    if (!search) return COUNTRIES;
-    const q = search.toLowerCase();
-    return COUNTRIES.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.dialCode.includes(q),
-    );
-  }, [search]);
+  const sections = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (query) {
+      const matches = COUNTRIES.filter(
+        (c) =>
+          c.name.toLowerCase().includes(query) ||
+          c.dialCode.includes(query) ||
+          c.code.toLowerCase() === query,
+      );
+      return [{ label: undefined, countries: matches }];
+    }
+
+    const pinned = params.favorites
+      .map((code) => findCountry(code))
+      .filter((c): c is Country => Boolean(c));
+    if (pinned.length === 0) {
+      return [{ label: undefined, countries: COUNTRIES }];
+    }
+    return [
+      { label: params.favoritesLabel, countries: pinned },
+      { label: params.allCountriesLabel, countries: COUNTRIES },
+    ];
+  }, [search, params.favorites, params.favoritesLabel, params.allCountriesLabel]);
 
   const dynamicStyles = useMemo(
     () => ({
-      titleWrap: { borderBottomColor: colors.border },
       searchWrap: { borderBottomColor: colors.border },
       optionPressed: { backgroundColor: colors.surfaceSubtle },
       optionSelected: { backgroundColor: colors.brandSubtle },
     }),
-    [colors]
+    [colors],
   );
+
+  const isEmpty = sections.every((section) => section.countries.length === 0);
 
   function handlePick(code: string) {
     params.onCountrySelect(code);
@@ -72,57 +107,67 @@ function PhoneInputSheetBody({
 
   return (
     <View style={styles.sheetContent}>
-      <View style={[styles.titleWrap, dynamicStyles.titleWrap]}>
-        <Text variant="subtitle">Select country</Text>
-      </View>
+      <SheetHeader title={params.title} onClose={handleClose} />
       <View style={[styles.searchWrap, dynamicStyles.searchWrap]}>
-        <Input
-          placeholder="Search countries or codes…"
+        <SearchBar
           value={search}
           onChangeText={setSearch}
+          placeholder={params.searchPlaceholder}
           autoFocus
-          leftIcon={<Feather name="search" size={16} color={colors.textSecondary} />}
         />
       </View>
 
       <View style={styles.list}>
-        {filteredCountries.length === 0 ? (
+        {isEmpty ? (
           <View style={styles.emptyWrap}>
             <Text variant="body" tone="muted">
-              No countries found
+              {params.emptyLabel}
             </Text>
           </View>
         ) : (
-          filteredCountries.map((item: Country) => {
-            const isSelected = item.code === params.currentCode;
-            return (
-              <Pressable
-                key={item.code}
-                onPress={() => handlePick(item.code)}
-                android_ripple={{ color: colors.surfaceSubtle }}
-                style={({ pressed }) => [
-                  styles.option,
-                  pressed && dynamicStyles.optionPressed,
-                  isSelected && dynamicStyles.optionSelected,
-                ]}>
-                <Text style={{ fontSize: 18, marginEnd: spacing[3] }}>{item.flag}</Text>
-                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-                  <Text variant="body" tone={isSelected ? 'brand' : 'primary'}>
-                    {item.name}
-                  </Text>
-                </View>
-                <Text
-                  variant="body"
-                  tone="secondary"
-                  style={{ fontWeight: '500', marginEnd: isSelected ? spacing[3] : 0 }}>
-                  {item.dialCode}
+          sections.map((section, sectionIndex) => (
+            <View key={section.label ?? `section-${sectionIndex}`}>
+              {section.label ? (
+                <Text variant="caption" tone="muted" style={styles.sectionLabel}>
+                  {section.label}
                 </Text>
-                {isSelected ? (
-                  <Feather name="check" size={16} color={colors.brand} />
-                ) : null}
-              </Pressable>
-            );
-          })
+              ) : null}
+              {section.countries.map((item) => {
+                const isSelected = item.code === params.currentCode;
+                return (
+                  <Pressable
+                    key={`${section.label ?? 'all'}-${item.code}`}
+                    onPress={() => handlePick(item.code)}
+                    android_ripple={{ color: colors.surfaceSubtle }}
+                    style={({ pressed }) => [
+                      styles.option,
+                      pressed && dynamicStyles.optionPressed,
+                      isSelected && dynamicStyles.optionSelected,
+                    ]}>
+                    <Text style={styles.optionFlag}>{item.flag}</Text>
+                    <Text
+                      variant="body"
+                      tone={isSelected ? 'brand' : 'primary'}
+                      numberOfLines={1}
+                      style={styles.optionName}>
+                      {item.name}
+                    </Text>
+                    <Text variant="body" tone="secondary" style={styles.optionDialCode}>
+                      {item.dialCode}
+                    </Text>
+                    {isSelected ? (
+                      <Feather
+                        name="check"
+                        size={16}
+                        color={colors.brand}
+                        style={styles.optionCheck}
+                      />
+                    ) : null}
+                  </Pressable>
+                );
+              })}
+            </View>
+          ))
         )}
       </View>
     </View>
@@ -135,6 +180,12 @@ export function PhoneInput({
   countryCode: countryProp,
   onCountryChange,
   defaultCountry = 'FR',
+  favorites = DEFAULT_FAVORITES,
+  pickerTitle = 'Select country',
+  searchPlaceholder = 'Search countries or codes',
+  favoritesLabel = 'Suggested',
+  allCountriesLabel = 'All countries',
+  emptyLabel = 'No countries found',
   disabled,
   error,
   ...rest
@@ -144,13 +195,13 @@ export function PhoneInput({
   const [internalCountry, setInternalCountry] = useState(defaultCountry);
 
   const currentCountryCode = countryProp !== undefined ? countryProp : internalCountry;
-  const currentCountry = findCountry(currentCountryCode) ?? COUNTRIES[0];
+  const currentCountry = findCountry(currentCountryCode) ?? findCountry(defaultCountry) ?? COUNTRIES[0];
 
   const dynamicStyles = useMemo(
     () => ({
       indicator: { borderEndColor: colors.border, backgroundColor: colors.surfaceSubtle },
     }),
-    [colors]
+    [colors],
   );
 
   function handleOpen() {
@@ -159,6 +210,12 @@ export function PhoneInput({
       body: PhoneInputSheetBody,
       params: {
         currentCode: currentCountry.code,
+        favorites,
+        title: pickerTitle,
+        searchPlaceholder,
+        favoritesLabel,
+        allCountriesLabel,
+        emptyLabel,
         onCountrySelect: (code: string) => {
           if (countryProp === undefined) setInternalCountry(code);
           onCountryChange?.(code);
@@ -171,18 +228,18 @@ export function PhoneInput({
     <Pressable
       disabled={disabled}
       onPress={handleOpen}
+      accessibilityRole="button"
+      accessibilityLabel={`${currentCountry.name} ${currentCountry.dialCode}`}
       style={[styles.indicator, dynamicStyles.indicator]}>
-      <Text style={{ fontSize: 16, marginEnd: spacing[1] }}>
-        {currentCountry.flag}
-      </Text>
-      <Text variant="body" tone={disabled ? 'muted' : 'primary'} style={{ fontWeight: '500' }}>
+      <Text style={styles.indicatorFlag}>{currentCountry.flag}</Text>
+      <Text variant="body" tone={disabled ? 'muted' : 'primary'} style={styles.indicatorDialCode}>
         {currentCountry.dialCode}
       </Text>
       <Feather
         name="chevron-down"
         size={14}
         color={disabled ? colors.textMuted : colors.textSecondary}
-        style={{ marginStart: spacing[1] }}
+        style={styles.indicatorChevron}
       />
     </Pressable>
   );
@@ -193,7 +250,7 @@ export function PhoneInput({
       disabled={disabled}
       error={error}
       keyboardType="phone-pad"
-      leftIcon={indicator}
+      leftAddon={indicator}
     />
   );
 }
@@ -207,25 +264,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[3],
     height: '100%',
     borderEndWidth: borders.hair,
-    marginEnd: spacing[2],
     borderTopStartRadius: radius.md - 1,
     borderBottomStartRadius: radius.md - 1,
+  },
+  indicatorFlag: {
+    fontSize: 16,
+    marginEnd: spacing[1],
+  },
+  indicatorDialCode: {
+    fontWeight: '500',
+  },
+  indicatorChevron: {
+    marginStart: spacing[1],
   },
   sheetContent: {
     flex: 1,
   },
-  titleWrap: {
+  searchWrap: {
     paddingHorizontal: spacing[4],
     paddingBottom: spacing[3],
     borderBottomWidth: borders.hair,
   },
-  searchWrap: {
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
-    borderBottomWidth: borders.hair,
-  },
   list: {
-    paddingVertical: spacing[2],
+    paddingBottom: spacing[2],
+  },
+  sectionLabel: {
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[4],
+    paddingBottom: spacing[1],
   },
   emptyWrap: {
     paddingVertical: spacing[8],
@@ -236,5 +302,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[4],
+  },
+  optionFlag: {
+    fontSize: 18,
+    marginEnd: spacing[3],
+  },
+  optionName: {
+    flex: 1,
+  },
+  optionDialCode: {
+    fontWeight: '500',
+    marginStart: spacing[3],
+  },
+  optionCheck: {
+    marginStart: spacing[3],
   },
 });

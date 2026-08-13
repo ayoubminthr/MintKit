@@ -365,9 +365,10 @@ export function DatePicker(props: DatePickerProps) {
         pressed && dynamicStyles.fieldPressed,
       ]}>
       <Text
+        scaled={false}
         tone={hasValue ? (disabled ? 'muted' : 'primary') : 'muted'}
         numberOfLines={1}
-        style={[styles.value, !hasValue && styles.placeholderText]}>
+        style={styles.value}>
         {hasValue ? displayText : showFloating ? '' : placeholder}
       </Text>
       <Feather
@@ -460,10 +461,10 @@ const styles = StyleSheet.create({
   fieldDisabled: {
     opacity: 0.5,
   },
+  // Mirrors `Input`'s TextInput — see the note in Select.tsx.
   value: {
     flex: 1,
-  },
-  placeholderText: {
+    fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
   },
 });

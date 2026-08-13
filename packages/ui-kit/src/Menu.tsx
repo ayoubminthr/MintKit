@@ -175,7 +175,7 @@ function MenuRow({ item, onPress }: { item: MenuItem; onPress: () => void }) {
         item.disabled && styles.rowDisabled,
       ]}>
       {item.icon ? <Feather name={item.icon} size={16} color={tone} /> : null}
-      <Text variant="body" style={{ color: tone, flex: 1 }} numberOfLines={1}>
+      <Text variant="body" color={tone} style={{ flex: 1 }} numberOfLines={1}>
         {item.label}
       </Text>
     </Pressable>

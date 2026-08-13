@@ -59,39 +59,40 @@ export function Banner({
   style,
   ...rest
 }: BannerProps) {
-  const { colors } = useTheme();
+  const { colors, theme: themeMode } = useTheme();
+  const isDark = themeMode === 'dark';
   const themeByVariant = useMemo<Record<BannerVariant, BannerTheme>>(
     () => ({
       info: {
         background: colors.infoSubtle,
-        border: palette.info[100],
+        border: isDark ? palette.info[700] : palette.info[100],
         icon: palette.info[500],
-        text: palette.info[900],
-        action: palette.info[700],
+        text: isDark ? palette.info[50] : palette.info[900],
+        action: isDark ? palette.info[100] : palette.info[700],
       },
       success: {
         background: colors.successSubtle,
-        border: palette.success[100],
+        border: isDark ? palette.success[700] : palette.success[100],
         icon: palette.success[500],
-        text: palette.success[900],
-        action: palette.success[700],
+        text: isDark ? palette.success[50] : palette.success[900],
+        action: isDark ? palette.success[100] : palette.success[700],
       },
       warning: {
         background: colors.warningSubtle,
-        border: palette.warning[100],
+        border: isDark ? palette.warning[700] : palette.warning[100],
         icon: palette.warning[500],
-        text: palette.warning[900],
-        action: palette.warning[700],
+        text: isDark ? palette.warning[50] : palette.warning[900],
+        action: isDark ? palette.warning[100] : palette.warning[700],
       },
       danger: {
         background: colors.dangerSubtle,
-        border: palette.danger[100],
+        border: isDark ? palette.danger[700] : palette.danger[100],
         icon: palette.danger[500],
-        text: palette.danger[900],
-        action: palette.danger[700],
+        text: isDark ? palette.danger[50] : palette.danger[900],
+        action: isDark ? palette.danger[100] : palette.danger[700],
       },
     }),
-    [colors]
+    [colors, isDark]
   );
   const theme = themeByVariant[variant];
 
@@ -105,7 +106,7 @@ export function Banner({
         style,
       ]}>
       <Feather name={iconByVariant[variant]} size={16} color={theme.icon} style={styles.icon} />
-      <Text variant="body" style={[styles.message, { color: theme.text }]} numberOfLines={3}>
+      <Text variant="body" color={theme.text} style={styles.message} numberOfLines={3}>
         {message}
       </Text>
       {actionLabel && onAction ? (
@@ -117,7 +118,8 @@ export function Banner({
           style={styles.actionButton}>
           <Text
             variant="body"
-            style={{ color: theme.action, fontWeight: fontWeight.medium }}>
+            color={theme.action}
+            style={{ fontWeight: fontWeight.medium }}>
             {actionLabel}
           </Text>
         </Pressable>

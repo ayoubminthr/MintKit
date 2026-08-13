@@ -6,7 +6,7 @@
  *   <SearchBar value={q} onChangeText={setQ} showCancel onCancel={handleCancel} />
  */
 import { Feather } from '@expo/vector-icons';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   Keyboard,
   Pressable,
@@ -35,6 +35,10 @@ export interface SearchBarProps
   /** Fires when the user taps Cancel. Defaults to clearing + blurring. */
   onCancel?: () => void;
   disabled?: boolean;
+  /** Slot rendered inside the field, after the text and before the clear button. */
+  trailing?: ReactNode;
+  /** Accessibility label for the clear-text button. Override to localise. */
+  clearAccessibilityLabel?: string;
 }
 
 export function SearchBar({
@@ -45,6 +49,8 @@ export function SearchBar({
   cancelLabel = 'Cancel',
   onCancel,
   disabled,
+  trailing,
+  clearAccessibilityLabel = 'Clear search',
   onFocus,
   onBlur,
   ...rest
@@ -111,10 +117,11 @@ export function SearchBar({
           }}
           style={[styles.input, dynamicStyles.input, { textAlign: isRTL() ? 'right' : 'left' }]}
         />
+        {trailing}
         {value.length > 0 ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Clear search"
+            accessibilityLabel={clearAccessibilityLabel}
             onPress={handleClear}
             hitSlop={6}
             style={styles.iconEnd}>
@@ -148,6 +155,7 @@ const styles = StyleSheet.create({
   },
   fieldWrap: {
     flex: 1,
+    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: borders.hair,
@@ -174,6 +182,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    minWidth: 0,
     height: '100%',
     fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,

@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { Image } from 'react-native';
-import { StyleSheet, Text as RNText, View, type ViewProps } from 'react-native';
+import { StyleSheet, View, type ViewProps } from 'react-native';
 
+import { Text } from './Text';
 import { useTheme } from './Theme';
 import { palette } from './tokens/colors';
 import { fontFamily, fontWeight } from './tokens/typography';
@@ -68,7 +69,6 @@ export function Avatar({ name, imageUri, size = 'md', presence, style, ...rest }
 
   const themedStyles = useMemo(
     () => ({
-      initialsText: { color: colors.textInverse },
       presence: { borderColor: colors.surfacePrimary },
     }),
     [colors]
@@ -93,12 +93,14 @@ export function Avatar({ name, imageUri, size = 'md', presence, style, ...rest }
             styles.initialsContainer,
             { backgroundColor: bg, width: dims.box, height: dims.box, borderRadius: dims.box / 2 },
           ]}>
-          <RNText
-            style={[styles.initialsText, themedStyles.initialsText, { fontSize: dims.font }]}
+          <Text
+            scaled={false}
+            color={colors.textInverse}
+            style={[styles.initialsText, { fontSize: dims.font }]}
             numberOfLines={1}
             allowFontScaling={false}>
             {getInitials(name)}
-          </RNText>
+          </Text>
         </View>
       )}
       {presence ? (

@@ -37,8 +37,6 @@ export function OtpInput({
 
   const dynamicStyles = useMemo(
     () => ({
-      label: { color: colors.textMuted },
-      labelActive: { color: colors.brand },
       cell: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
       cellActive: { borderColor: colors.brand },
       cellError: { borderColor: colors.danger },
@@ -64,7 +62,8 @@ export function OtpInput({
       {label ? (
         <Text
           variant="caption"
-          style={[styles.label, dynamicStyles.label, isActive && dynamicStyles.labelActive]}>
+          color={isActive ? colors.brand : colors.textMuted}
+          style={styles.label}>
           {label}
         </Text>
       ) : null}

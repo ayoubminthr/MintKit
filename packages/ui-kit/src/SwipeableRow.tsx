@@ -108,7 +108,8 @@ export function SwipeableRow({
               {action.label ? (
                 <Text
                   variant="caption"
-                  style={[styles.actionLabel, { color: foregroundByColor[color] }]}
+                  color={foregroundByColor[color]}
+                  style={styles.actionLabel}
                   numberOfLines={1}>
                   {action.label}
                 </Text>

@@ -33,7 +33,8 @@ export function Alert({
   style,
   ...rest
 }: AlertProps) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
 
   const variantStyles = useMemo<
     Record<
@@ -48,31 +49,31 @@ export function Alert({
   >(
     () => ({
       info: {
-        container: { backgroundColor: colors.infoSubtle, borderColor: palette.info[100] },
+        container: { backgroundColor: colors.infoSubtle, borderColor: isDark ? palette.info[700] : palette.info[100] },
         iconColor: palette.info[500],
-        titleColor: palette.info[900],
-        descColor: palette.info[700],
+        titleColor: isDark ? palette.info[50] : palette.info[900],
+        descColor: isDark ? palette.info[100] : palette.info[700],
       },
       success: {
-        container: { backgroundColor: colors.successSubtle, borderColor: palette.success[100] },
+        container: { backgroundColor: colors.successSubtle, borderColor: isDark ? palette.success[700] : palette.success[100] },
         iconColor: palette.success[500],
-        titleColor: palette.success[900],
-        descColor: palette.success[700],
+        titleColor: isDark ? palette.success[50] : palette.success[900],
+        descColor: isDark ? palette.success[100] : palette.success[700],
       },
       warning: {
-        container: { backgroundColor: colors.warningSubtle, borderColor: palette.warning[100] },
+        container: { backgroundColor: colors.warningSubtle, borderColor: isDark ? palette.warning[700] : palette.warning[100] },
         iconColor: palette.warning[500],
-        titleColor: palette.warning[900],
-        descColor: palette.warning[700],
+        titleColor: isDark ? palette.warning[50] : palette.warning[900],
+        descColor: isDark ? palette.warning[100] : palette.warning[700],
       },
       danger: {
-        container: { backgroundColor: colors.dangerSubtle, borderColor: palette.danger[100] },
+        container: { backgroundColor: colors.dangerSubtle, borderColor: isDark ? palette.danger[700] : palette.danger[100] },
         iconColor: palette.danger[500],
-        titleColor: palette.danger[900],
-        descColor: palette.danger[700],
+        titleColor: isDark ? palette.danger[50] : palette.danger[900],
+        descColor: isDark ? palette.danger[100] : palette.danger[700],
       },
     }),
-    [colors]
+    [colors, isDark]
   );
 
   const v = variantStyles[variant];
@@ -86,12 +87,12 @@ export function Alert({
       />
       <View style={styles.content}>
         {title ? (
-          <Text variant="body" style={[styles.title, { color: v.titleColor }]}>
+          <Text variant="body" color={v.titleColor} style={styles.title}>
             {title}
           </Text>
         ) : null}
         {description ? (
-          <Text variant="caption" style={{ color: v.descColor }}>
+          <Text variant="caption" color={v.descColor}>
             {description}
           </Text>
         ) : null}

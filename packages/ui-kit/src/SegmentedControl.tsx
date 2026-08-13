@@ -4,7 +4,6 @@ import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 import { Text } from './Text';
 import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
-import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 
@@ -33,6 +32,7 @@ export function SegmentedControl<T extends string = string>({
   const { colors } = useTheme();
   const dynamicStyles = useMemo(
     () => ({
+      track: { backgroundColor: colors.surfaceSubtle },
       segmentSelected: { backgroundColor: colors.surfacePrimary, borderColor: colors.border },
     }),
     [colors],
@@ -41,7 +41,7 @@ export function SegmentedControl<T extends string = string>({
   return (
     <View
       {...rest}
-      style={[styles.track, fullWidth && styles.fullWidth, disabled && styles.disabled, style]}>
+      style={[styles.track, dynamicStyles.track, fullWidth && styles.fullWidth, disabled && styles.disabled, style]}>
       {options.map((opt) => {
         const selected = opt.value === value;
         return (
@@ -73,7 +73,6 @@ export function SegmentedControl<T extends string = string>({
 const styles = StyleSheet.create({
   track: {
     flexDirection: 'row',
-    backgroundColor: palette.gray[100],
     borderRadius: radius.md,
     padding: 2,
     gap: 2,

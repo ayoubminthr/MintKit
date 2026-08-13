@@ -136,7 +136,8 @@ export const kitComponents: readonly KitComponentEntry[] = [
     path: '/empty-state',
     category: 'Display',
     status: 'ready',
-    description: 'Centered icon + title + description with an optional action button.',
+    description:
+      'Centered icon or custom illustration + title + description with an optional action button.',
   },
   {
     name: 'Modal',
@@ -269,7 +270,7 @@ export const kitComponents: readonly KitComponentEntry[] = [
     path: '/filter-bar',
     category: 'Forms',
     status: 'ready',
-    description: 'Trigger button + horizontally scrollable list of active filter chips, with Clear all.',
+    description: 'Optional inline search + result count + trigger button + scrollable active filter chips, with Clear all.',
   },
   {
     name: 'ConfirmDialog',
@@ -447,6 +448,13 @@ export const kitComponents: readonly KitComponentEntry[] = [
     description: 'Metric tile — icon bubble, label, value, and an optional up/down trend.',
   },
   {
+    name: 'StatGrid',
+    path: '/stat-grid',
+    category: 'Display',
+    status: 'ready',
+    description: 'Wrapping grid of tinted metric tiles for a single overview card — optional icons, tones, and drill-in press.',
+  },
+  {
     name: 'Timeline',
     path: '/timeline',
     category: 'Navigation',
@@ -472,7 +480,8 @@ export const kitComponents: readonly KitComponentEntry[] = [
     path: '/slider',
     category: 'Forms',
     status: 'ready',
-    description: 'Draggable continuous value control (volume, brightness, zoom, ...).',
+    description:
+      'Draggable value control (volume, brightness, zoom, ...). Optional step snapping and two-thumb range mode.',
   },
   {
     name: 'ProgressRing',

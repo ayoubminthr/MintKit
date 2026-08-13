@@ -16,6 +16,12 @@ export interface TextProps extends RNTextProps {
   variant?: TextVariant;
   tone?: TextTone;
   /**
+   * Explicit color override for cases `tone` doesn't cover (a semantic color
+   * not in `TextTone`, or a caller-computed value like a status color).
+   * Takes precedence over `tone`; `style` can still override this.
+   */
+  color?: string;
+  /**
    * Scale the rendered font size to the device (mirrors the app's `RFValue`).
    * On by default — pass `false` for text that must stay a fixed size.
    */
@@ -38,7 +44,7 @@ const variantLineHeight: Record<TextVariant, number> = {
   mono: Math.round(fontSize.sm * lineHeight.normal),
 };
 
-export function Text({ variant = 'body', tone = 'primary', scaled = true, style, ...rest }: TextProps) {
+export function Text({ variant = 'body', tone = 'primary', color, scaled = true, style, ...rest }: TextProps) {
   const { colors } = useTheme();
 
   const toneStyles = useMemo<Record<TextTone, TextStyle>>(
@@ -79,7 +85,17 @@ export function Text({ variant = 'body', tone = 'primary', scaled = true, style,
   }
 
   return (
-    <RNText {...rest} style={[styles[variant], toneStyles[tone], style, weightRemap, scaleOverride]} />
+    <RNText
+      {...rest}
+      style={[
+        styles[variant],
+        toneStyles[tone],
+        color ? { color } : undefined,
+        style,
+        weightRemap,
+        scaleOverride,
+      ]}
+    />
   );
 }
 

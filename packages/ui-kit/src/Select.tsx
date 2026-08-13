@@ -174,10 +174,10 @@ export function Select<T extends string = string>({
         pressed && dynamicStyles.fieldPressed,
       ]}>
       <Text
-        variant="body"
+        scaled={false}
         tone={selected ? 'primary' : 'muted'}
         numberOfLines={1}
-        style={[styles.value, !selected && styles.placeholderText]}>
+        style={styles.value}>
         {selected ? selected.label : showFloating ? '' : placeholder}
       </Text>
       <Feather name="chevron-down" size={16} color={colors.textSecondary} />
@@ -238,10 +238,12 @@ const styles = StyleSheet.create({
   fieldDisabled: {
     opacity: 0.5,
   },
+  // Deliberately mirrors `Input`'s TextInput — same family, same size, and
+  // `scaled={false}` at the call site to match its lack of device scaling — so
+  // a chosen value and a typed value read identically side by side in a form.
   value: {
     flex: 1,
-  },
-  placeholderText: {
+    fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
   },
 });

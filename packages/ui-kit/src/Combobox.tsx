@@ -23,7 +23,7 @@ import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
-import { fontSize } from './tokens/typography';
+import { fontFamily, fontSize } from './tokens/typography';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -265,10 +265,10 @@ export function Combobox({
         error ? dynamicStyles.triggerError : null,
       ]}>
       <Text
-        variant="body"
+        scaled={false}
         tone={selectedOption ? (disabled ? 'muted' : 'primary') : 'muted'}
         numberOfLines={1}
-        style={selectedOption ? styles.value : [styles.value, styles.placeholderText]}>
+        style={styles.value}>
         {selectedOption ? selectedOption.label : placeholder}
       </Text>
       <Feather
@@ -327,10 +327,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
+  // Mirrors `Input`'s TextInput — see the note in Select.tsx.
   value: {
     flex: 1,
-  },
-  placeholderText: {
+    fontFamily: fontFamily.sans,
     fontSize: fontSize.sm,
   },
 });

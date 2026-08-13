@@ -1,7 +1,16 @@
 import { Stack } from 'expo-router';
 import { ScrollView, View } from 'react-native';
 
-import { Button, Card, EmptyState, Text, spacing } from '@minthr-saas/mobile-ui-kit';
+import { Feather } from '@expo/vector-icons';
+
+import {
+  Button,
+  Card,
+  EmptyState,
+  Text,
+  spacing,
+  useTheme,
+} from '@minthr-saas/mobile-ui-kit';
 
 import { Section } from './_components/Section';
 
@@ -15,6 +24,7 @@ export default function EmptyStateDemo() {
 }
 
 export function EmptyStateBody() {
+  const { colors } = useTheme();
   return (
     <>
       <Text variant="body" tone="secondary">
@@ -50,6 +60,19 @@ export function EmptyStateBody() {
                 <Button label="Create survey" onPress={() => {}} />
               </View>
             }
+          />
+        </Card>
+      </Section>
+
+      <Section label="Custom illustration">
+        <Card padding="none">
+          <EmptyState
+            illustration={<Feather name="file-text" size={40} color={colors.brand} />}
+            illustrationSize={104}
+            illustrationTint={colors.brandSubtle}
+            title="No contracts yet"
+            description="Add a contract to start tracking salary, dates and amendments."
+            action={<Button label="Add contract" variant="link" onPress={() => {}} />}
           />
         </Card>
       </Section>
