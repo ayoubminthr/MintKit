@@ -54,6 +54,22 @@ export function SegmentedControlBody() {
         />
       </Section>
 
+      <Section label="Icon-only (view switcher)">
+        <SegmentedControl
+          options={[
+            { value: 'list', icon: 'list' },
+            { value: 'grid', icon: 'grid' },
+          ]}
+          value={view}
+          onChange={setView}
+          fullWidth={false}
+        />
+        <Text variant="caption" tone="muted">
+          A segment with an icon and no label renders icon-only. Segments also take their own
+          disabled flag.
+        </Text>
+      </Section>
+
       <Section label="Disabled">
         <SegmentedControl
           options={[

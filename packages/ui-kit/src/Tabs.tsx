@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { Feather } from '@expo/vector-icons';
+import { useMemo, type ComponentProps } from 'react';
 import { Pressable, ScrollView, StyleSheet, View, type ViewProps } from 'react-native';
 
 import { borders } from './tokens/borders';
@@ -8,7 +9,12 @@ import { useTheme } from './Theme';
 
 export interface TabOption<T extends string = string> {
   value: T;
-  label: string;
+  /** Optional when `icon` is set, so a tab can be icon-only. */
+  label?: string;
+  /** Feather icon name, rendered before the label and tinted to match it. */
+  icon?: ComponentProps<typeof Feather>['name'];
+  /** Dims the tab and blocks selection. */
+  disabled?: boolean;
 }
 
 export interface TabsProps<T extends string = string> extends ViewProps {
@@ -48,19 +54,32 @@ export function Tabs<T extends string = string>({
           <Pressable
             key={opt.value}
             accessibilityRole="tab"
-            accessibilityState={{ selected }}
+            accessibilityState={{ selected, disabled: opt.disabled }}
+            disabled={opt.disabled}
             onPress={() => onChange(opt.value)}
             style={[
               styles.tab,
               fullWidth && styles.tabFullWidth,
               selected && dynamicStyles.tabSelected,
+              opt.disabled && styles.tabDisabled,
             ]}>
-            <Text
-              variant="body"
-              tone={selected ? 'primary' : 'secondary'}
-              style={[fullWidth && styles.labelCentered, selected && styles.labelSelected]}>
-              {opt.label}
-            </Text>
+            <View style={styles.tabInner}>
+              {opt.icon ? (
+                <Feather
+                  name={opt.icon}
+                  size={16}
+                  color={selected ? colors.textPrimary : colors.textSecondary}
+                />
+              ) : null}
+              {opt.label ? (
+                <Text
+                  variant="body"
+                  tone={selected ? 'primary' : 'secondary'}
+                  style={[fullWidth && styles.labelCentered, selected && styles.labelSelected]}>
+                  {opt.label}
+                </Text>
+              ) : null}
+            </View>
           </Pressable>
         );
       })}
@@ -114,6 +133,15 @@ const styles = StyleSheet.create({
   tabFullWidth: {
     flex: 1,
     alignItems: 'center',
+  },
+  tabDisabled: {
+    opacity: 0.5,
+  },
+  tabInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[2],
   },
   labelCentered: {
     textAlign: 'center',

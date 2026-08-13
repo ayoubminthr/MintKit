@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { Feather } from '@expo/vector-icons';
+import { useMemo, type ComponentProps } from 'react';
 import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 
 import { Text } from './Text';
@@ -9,7 +10,12 @@ import { spacing } from './tokens/spacing';
 
 export interface SegmentedOption<T extends string = string> {
   value: T;
-  label: string;
+  /** Optional when `icon` is set, so a segment can be icon-only. */
+  label?: string;
+  /** Feather icon name, rendered before the label and tinted to match it. */
+  icon?: ComponentProps<typeof Feather>['name'];
+  /** Dims the segment and blocks selection. */
+  disabled?: boolean;
 }
 
 export interface SegmentedControlProps<T extends string = string> extends ViewProps {
@@ -44,25 +50,38 @@ export function SegmentedControl<T extends string = string>({
       style={[styles.track, dynamicStyles.track, fullWidth && styles.fullWidth, disabled && styles.disabled, style]}>
       {options.map((opt) => {
         const selected = opt.value === value;
+        const segmentDisabled = disabled || opt.disabled;
         return (
           <Pressable
             key={opt.value}
             accessibilityRole="button"
-            accessibilityState={{ selected, disabled }}
-            disabled={disabled}
+            accessibilityState={{ selected, disabled: segmentDisabled }}
+            disabled={segmentDisabled}
             onPress={() => onChange(opt.value)}
             style={[
               styles.segment,
               fullWidth && styles.segmentFlex,
               selected && styles.segmentSelected,
               selected && dynamicStyles.segmentSelected,
+              !disabled && opt.disabled && styles.disabled,
             ]}>
-            <Text
-              variant="caption"
-              tone={selected ? 'primary' : 'secondary'}
-              style={selected ? styles.labelSelected : undefined}>
-              {opt.label}
-            </Text>
+            <View style={styles.segmentInner}>
+              {opt.icon ? (
+                <Feather
+                  name={opt.icon}
+                  size={14}
+                  color={selected ? colors.textPrimary : colors.textSecondary}
+                />
+              ) : null}
+              {opt.label ? (
+                <Text
+                  variant="caption"
+                  tone={selected ? 'primary' : 'secondary'}
+                  style={selected ? styles.labelSelected : undefined}>
+                  {opt.label}
+                </Text>
+              ) : null}
+            </View>
           </Pressable>
         );
       })}
@@ -93,6 +112,12 @@ const styles = StyleSheet.create({
   },
   segmentFlex: {
     flex: 1,
+  },
+  segmentInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[2],
   },
   segmentSelected: {
     borderWidth: borders.hair,

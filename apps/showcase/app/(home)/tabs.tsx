@@ -20,6 +20,7 @@ export function TabsBody() {
     'overview',
   );
   const [filter, setFilter] = useState<'all' | 'mine' | 'archived'>('all');
+  const [step, setStep] = useState<'summary' | 'people' | 'payroll'>('summary');
 
   return (
     <>
@@ -57,6 +58,23 @@ export function TabsBody() {
           value={filter}
           onChange={setFilter}
         />
+      </Section>
+
+      <Section label="Icons and locked tabs">
+        <Tabs
+          scrollable={false}
+          options={[
+            { value: 'summary', icon: 'home' },
+            { value: 'people', label: 'People', icon: 'users' },
+            { value: 'payroll', label: 'Payroll', disabled: true },
+          ]}
+          value={step}
+          onChange={setStep}
+        />
+        <Text variant="caption" tone="muted">
+          A tab with an icon and no label renders icon-only; disabled dims it and blocks selection —
+          use it for steps the user has not unlocked yet.
+        </Text>
       </Section>
     </>
   );
