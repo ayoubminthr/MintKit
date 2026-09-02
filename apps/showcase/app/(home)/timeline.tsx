@@ -48,6 +48,32 @@ const rejectedItems: TimelineItem[] = [
   },
 ];
 
+const customIconItems: TimelineItem[] = [
+  {
+    title: 'Expense report created',
+    subtitle: 'April 2, 2025 · 8:15 AM',
+    status: 'done',
+    icon: 'plus',
+  },
+  {
+    title: 'Receipts attached',
+    subtitle: 'April 2, 2025 · 8:31 AM',
+    status: 'done',
+    icon: 'paperclip',
+  },
+  {
+    title: 'Reimbursement issued',
+    subtitle: 'April 4, 2025 · 11:00 AM',
+    status: 'done',
+    icon: 'credit-card',
+  },
+  {
+    title: 'Awaiting payroll run',
+    status: 'active',
+    icon: 'clock',
+  },
+];
+
 export default function TimelineDemo() {
   return (
     <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[5] }}>
@@ -62,7 +88,7 @@ export function TimelineBody() {
     <>
       <Text variant="body" tone="secondary">
         Vertical connected list of events or steps for approval chains and audit trails. Each
-        entry can carry a title, a timestamp, and a description, with a status dot for
+        entry can carry a title, a timestamp, and a description, with a tinted marker for
         `done` / `active` / `pending` / `danger`.
       </Text>
 
@@ -72,6 +98,12 @@ export function TimelineBody() {
 
       <Section label="Rejected step" description="`danger` marks a rejected or failed step.">
         <Timeline items={rejectedItems} />
+      </Section>
+
+      <Section
+        label="Custom step icons"
+        description="`icon` swaps the Feather glyph in a step's marker. The tint still follows `status`.">
+        <Timeline items={customIconItems} />
       </Section>
     </>
   );

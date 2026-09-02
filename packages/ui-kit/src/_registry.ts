@@ -459,7 +459,7 @@ export const kitComponents: readonly KitComponentEntry[] = [
     path: '/timeline',
     category: 'Navigation',
     status: 'ready',
-    description: 'Vertical connected event list for approval chains and audit trails. Done / active / pending / danger states.',
+    description: 'Vertical connected event list for approval chains and audit trails. Done / active / pending / danger states, with a per-step Feather icon override.',
   },
   {
     name: 'Rating',

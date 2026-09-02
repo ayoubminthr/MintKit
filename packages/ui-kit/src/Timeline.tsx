@@ -4,17 +4,22 @@
  * a subtitle (e.g. a timestamp), and a longer description, and the status
  * set adds `danger` for a rejected/failed step alongside `done` / `active` /
  * `pending`.
+ *
+ * Each step's marker is a soft tinted disc with a Feather glyph. The glyph
+ * defaults to the one for `status`; pass `icon` on an item to override it.
  */
 import { Feather } from '@expo/vector-icons';
-import { useMemo, type ReactNode } from 'react';
+import { useMemo, type ComponentProps, type ReactNode } from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
 import { Text } from './Text';
 import { useTheme } from './Theme';
-import { borders } from './tokens/borders';
+import { palette } from './tokens/colors';
 import { spacing } from './tokens/spacing';
 
 export type TimelineStatus = 'done' | 'active' | 'pending' | 'danger';
+
+type FeatherName = ComponentProps<typeof Feather>['name'];
 
 export interface TimelineItem {
   title: string;
@@ -23,9 +28,15 @@ export interface TimelineItem {
   description?: string;
   status: TimelineStatus;
   /**
+   * Feather glyph drawn inside this step's marker. Defaults to the glyph for
+   * `status` (`check` / `x` / `refresh-cw` / `plus`). The marker's tint always
+   * follows `status`, so an override changes the symbol, not the semantics.
+   */
+  icon?: FeatherName;
+  /**
    * Custom content rendered in place of the title/subtitle/description text
-   * block — e.g. a card with an avatar, name, and a status pill. The dot,
-   * connector line, and status icon still come from `status` as usual.
+   * block — e.g. a card with an avatar, name, and a status pill. The marker
+   * and connector line still come from `status` as usual.
    */
   content?: ReactNode;
 }
@@ -34,63 +45,59 @@ export interface TimelineProps extends ViewProps {
   items: readonly TimelineItem[];
 }
 
-const CIRCLE_SIZE = 24;
-const INNER_DOT_SIZE = 10;
-const ICON_SIZE = 14;
+const MARKER_SIZE = 22;
+const ICON_SIZE = 12;
+
+const STATUS_ICON: Record<TimelineStatus, FeatherName> = {
+  done: 'check',
+  active: 'refresh-cw',
+  danger: 'x',
+  pending: 'plus',
+};
 
 export function Timeline({ items, style, ...rest }: TimelineProps) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
 
-  const dynamicStyles = useMemo(
+  const markerStyles = useMemo<Record<TimelineStatus, { container: object; color: string }>>(
     () => ({
-      circleDone: { backgroundColor: colors.brand },
-      circleActive: {
-        backgroundColor: colors.surfacePrimary,
-        borderColor: colors.brand,
+      done: {
+        container: { backgroundColor: colors.successSubtle },
+        color: isDark ? palette.success[100] : palette.success[700],
       },
-      circleDanger: { backgroundColor: colors.danger },
-      circlePending: {
-        backgroundColor: colors.surfacePrimary,
-        borderColor: colors.border,
+      active: {
+        container: { backgroundColor: colors.warningSubtle },
+        color: isDark ? palette.warning[100] : palette.warning[700],
       },
-      innerDotActive: { backgroundColor: colors.brand },
-      lineDone: { backgroundColor: colors.brand },
-      lineDanger: { backgroundColor: colors.danger },
-      linePending: { backgroundColor: colors.border },
+      danger: {
+        container: { backgroundColor: colors.dangerSubtle },
+        color: isDark ? palette.danger[100] : palette.danger[700],
+      },
+      pending: {
+        container: { backgroundColor: colors.surfaceSubtle },
+        color: colors.textMuted,
+      },
     }),
-    [colors],
+    [colors, isDark],
   );
 
   return (
     <View {...rest} style={[styles.container, style]}>
       {items.map((item, idx) => {
         const isLast = idx === items.length - 1;
-        const lineStyle =
-          item.status === 'done'
-            ? dynamicStyles.lineDone
-            : item.status === 'danger'
-              ? dynamicStyles.lineDanger
-              : dynamicStyles.linePending;
+        const marker = markerStyles[item.status];
 
         return (
           <View key={`${idx}-${item.title}`} style={styles.item}>
-            <View style={styles.dotColumn}>
-              {item.status === 'done' ? (
-                <View style={[styles.circle, dynamicStyles.circleDone]}>
-                  <Feather name="check" size={ICON_SIZE} color={colors.onBrand} />
-                </View>
-              ) : item.status === 'danger' ? (
-                <View style={[styles.circle, dynamicStyles.circleDanger]}>
-                  <Feather name="x" size={ICON_SIZE} color={colors.onBrand} />
-                </View>
-              ) : item.status === 'active' ? (
-                <View style={[styles.circle, styles.circleOutlined, dynamicStyles.circleActive]}>
-                  <View style={[styles.innerDot, dynamicStyles.innerDotActive]} />
-                </View>
-              ) : (
-                <View style={[styles.circle, styles.circleOutlined, dynamicStyles.circlePending]} />
-              )}
-              {!isLast ? <View style={[styles.line, lineStyle]} /> : null}
+            <View style={styles.markerColumn}>
+              <View style={[styles.marker, marker.container]}>
+                <Feather
+                  name={item.icon ?? STATUS_ICON[item.status]}
+                  size={ICON_SIZE}
+                  color={marker.color}
+                />
+              </View>
+              {!isLast ? <View style={[styles.line, { backgroundColor: colors.brandSubtle }]} /> : null}
             </View>
 
             <View style={[styles.textColumn, isLast && styles.textColumnLast]}>
@@ -129,34 +136,25 @@ const styles = StyleSheet.create({
   item: {
     flexDirection: 'row',
   },
-  dotColumn: {
-    width: CIRCLE_SIZE,
+  markerColumn: {
+    width: MARKER_SIZE,
     alignItems: 'center',
   },
-  circle: {
-    width: CIRCLE_SIZE,
-    height: CIRCLE_SIZE,
-    borderRadius: CIRCLE_SIZE / 2,
+  marker: {
+    width: MARKER_SIZE,
+    height: MARKER_SIZE,
+    borderRadius: MARKER_SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  circleOutlined: {
-    borderWidth: borders.thin,
-  },
-  innerDot: {
-    width: INNER_DOT_SIZE,
-    height: INNER_DOT_SIZE,
-    borderRadius: INNER_DOT_SIZE / 2,
   },
   line: {
     flex: 1,
     width: 1,
-    marginVertical: spacing[1],
   },
   textColumn: {
     flex: 1,
     gap: 2,
-    paddingStart: spacing[3],
+    paddingStart: spacing[2],
     paddingTop: 2,
     paddingBottom: spacing[4],
     minWidth: 0,
