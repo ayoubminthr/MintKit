@@ -4,6 +4,7 @@ import { Pressable, type PressableProps, StyleSheet, type ViewStyle } from 'reac
 
 import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 
 export type IconButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'tint';
@@ -31,7 +32,8 @@ export function IconButton({
   disabled,
   ...rest
 }: IconButtonProps) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
   const dims = sizeMap[size];
 
   const variantStyles = useMemo<
@@ -77,11 +79,11 @@ export function IconButton({
       tint: {
         container: { backgroundColor: colors.brandSubtle },
         pressed: { backgroundColor: colors.brandSubtle },
-        iconColor: colors.brand,
-        ripple: colors.brand,
+        iconColor: isDark ? palette.brand[100] : colors.brand,
+        ripple: isDark ? palette.brand[100] : colors.brand,
       },
     }),
-    [colors],
+    [colors, isDark],
   );
   const v = variantStyles[variant];
 

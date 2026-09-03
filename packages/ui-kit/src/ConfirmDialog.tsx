@@ -20,6 +20,7 @@ import { Button } from './Button';
 import { Modal } from './Modal';
 import { Text } from './Text';
 import { useTheme } from './Theme';
+import { palette } from './tokens/colors';
 import { spacing } from './tokens/spacing';
 
 export type ConfirmDialogVariant = 'default' | 'danger';
@@ -45,16 +46,23 @@ export function ConfirmDialog({
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
 }: ConfirmDialogProps) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
 
   const iconMap = useMemo<
     Record<ConfirmDialogVariant, { name: React.ComponentProps<typeof Feather>['name']; color: string }>
   >(
     () => ({
-      default: { name: 'help-circle', color: colors.brand },
-      danger: { name: 'alert-triangle', color: colors.danger },
+      default: {
+        name: 'help-circle',
+        color: isDark ? palette.brand[100] : colors.brand,
+      },
+      danger: {
+        name: 'alert-triangle',
+        color: isDark ? palette.danger[100] : colors.danger,
+      },
     }),
-    [colors],
+    [colors, isDark],
   );
 
   const icon = iconMap[variant];

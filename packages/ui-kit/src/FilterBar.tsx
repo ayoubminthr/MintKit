@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View, type ViewProps } from 'react-n
 
 import { SearchBar } from './SearchBar';
 import { Tag } from './Tag';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { Text } from './Text';
@@ -56,7 +57,8 @@ export function FilterBar({
   style,
   ...rest
 }: FilterBarProps) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
   const hasFilters = filters.length > 0;
   const hasCount = count !== undefined && count !== null && count !== '';
 
@@ -64,8 +66,9 @@ export function FilterBar({
     () => ({
       addButtonActive: { backgroundColor: colors.brandSubtle },
       addButtonPressed: { backgroundColor: colors.surfaceSubtle },
+      addIconActive: isDark ? palette.brand[100] : colors.brand,
     }),
-    [colors]
+    [colors, isDark]
   );
 
   const countNode = hasCount ? (
@@ -115,7 +118,7 @@ export function FilterBar({
             <Feather
               name="filter"
               size={15}
-              color={hasFilters ? colors.brand : colors.textMuted}
+              color={hasFilters ? dynamicStyles.addIconActive : colors.textMuted}
             />
             {search ? null : (
               <Text variant="caption" style={styles.addLabel} numberOfLines={1}>

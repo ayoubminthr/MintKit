@@ -14,6 +14,7 @@ import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 
 import { Text } from './Text';
 import { useTheme } from './Theme';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontWeight } from './tokens/typography';
@@ -43,7 +44,8 @@ export function MonthPicker({
   style,
   ...rest
 }: MonthPickerProps) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
   const [visibleYear, setVisibleYear] = useState(() => value?.year ?? new Date().getFullYear());
 
   const dynamicStyles = useMemo(
@@ -51,8 +53,9 @@ export function MonthPicker({
       root: { backgroundColor: colors.surfacePrimary },
       cellPressed: { backgroundColor: colors.surfaceSubtle },
       cellSelected: { backgroundColor: colors.brandSubtle },
+      onBrandSubtle: isDark ? palette.brand[100] : colors.brand,
     }),
-    [colors]
+    [colors, isDark]
   );
 
   const canGoBack = minYear === undefined || visibleYear > minYear;
@@ -96,7 +99,7 @@ export function MonthPicker({
               ]}>
               <Text
                 variant="body"
-                color={selected ? colors.brand : colors.textPrimary}
+                color={selected ? dynamicStyles.onBrandSubtle : colors.textPrimary}
                 style={{
                   fontWeight: selected ? fontWeight.medium : fontWeight.regular,
                 }}>

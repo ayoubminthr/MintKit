@@ -23,6 +23,7 @@ import { type SheetBodyProps, useSheet } from './SheetHost';
 import { Text } from './Text';
 import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize } from './tokens/typography';
@@ -82,7 +83,8 @@ function MultiSelectSheetBody({
   params,
   handleClose = () => {},
 }: SheetBodyProps<MultiSelectSheetParams>) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
   const [search, setSearch] = useState('');
   const [currentValues, setCurrentValues] = useState<string[]>(params.initialValues);
 
@@ -92,10 +94,11 @@ function MultiSelectSheetBody({
       searchWrap: { borderBottomColor: colors.border },
       optionPressed: { backgroundColor: colors.surfaceSubtle },
       optionSelected: { backgroundColor: colors.brandSubtle },
+      onBrandSubtle: isDark ? palette.brand[100] : colors.brand,
       selectAllBorder: { borderBottomColor: colors.border },
       footer: { borderTopColor: colors.border },
     }),
-    [colors]
+    [colors, isDark]
   );
 
   const filteredOptions = useMemo(() => {
@@ -229,7 +232,10 @@ function MultiSelectSheetBody({
                     />
                   ) : null}
                   <View style={{ flex: 1 }}>
-                    <Text variant="body" tone={isSelected ? 'brand' : 'primary'}>
+                    <Text
+                      variant="body"
+                      tone="primary"
+                      color={isSelected ? dynamicStyles.onBrandSubtle : undefined}>
                       {item.label}
                     </Text>
                     {item.description ? (

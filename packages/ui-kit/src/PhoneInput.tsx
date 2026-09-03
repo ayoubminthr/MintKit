@@ -26,6 +26,7 @@ import { Text } from './Text';
 import { useTheme } from './Theme';
 import { COUNTRIES, type Country, DEFAULT_FAVORITES, findCountry } from './data/countries';
 import { borders } from './tokens/borders';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 
@@ -62,7 +63,8 @@ function PhoneInputSheetBody({
   params,
   handleClose = () => {},
 }: SheetBodyProps<PhoneInputSheetParams>) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
   const [search, setSearch] = useState('');
 
   const sections = useMemo(() => {
@@ -94,8 +96,9 @@ function PhoneInputSheetBody({
       searchWrap: { borderBottomColor: colors.border },
       optionPressed: { backgroundColor: colors.surfaceSubtle },
       optionSelected: { backgroundColor: colors.brandSubtle },
+      onBrandSubtle: isDark ? palette.brand[100] : colors.brand,
     }),
-    [colors],
+    [colors, isDark],
   );
 
   const isEmpty = sections.every((section) => section.countries.length === 0);
@@ -147,7 +150,8 @@ function PhoneInputSheetBody({
                     <Text style={styles.optionFlag}>{item.flag}</Text>
                     <Text
                       variant="body"
-                      tone={isSelected ? 'brand' : 'primary'}
+                      tone="primary"
+                      color={isSelected ? dynamicStyles.onBrandSubtle : undefined}
                       numberOfLines={1}
                       style={styles.optionName}>
                       {item.name}
@@ -159,7 +163,7 @@ function PhoneInputSheetBody({
                       <Feather
                         name="check"
                         size={16}
-                        color={colors.brand}
+                        color={dynamicStyles.onBrandSubtle}
                         style={styles.optionCheck}
                       />
                     ) : null}

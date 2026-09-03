@@ -20,6 +20,7 @@ import { Text } from './Text';
 import { useTheme } from './Theme';
 import { CURRENCIES, type Currency } from './data/currencies';
 import { borders } from './tokens/borders';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 
@@ -52,7 +53,8 @@ function CurrencyInputSheetBody({
   params,
   handleClose = () => {},
 }: SheetBodyProps<CurrencyInputSheetParams>) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
   const [search, setSearch] = useState('');
 
   const dynamicStyles = useMemo(
@@ -61,8 +63,9 @@ function CurrencyInputSheetBody({
       searchWrap: { borderBottomColor: colors.border },
       optionPressed: { backgroundColor: colors.surfaceSubtle },
       optionSelected: { backgroundColor: colors.brandSubtle },
+      onBrandSubtle: isDark ? palette.brand[100] : colors.brand,
     }),
-    [colors],
+    [colors, isDark],
   );
 
   const filteredCurrencies = useMemo(() => {
@@ -116,12 +119,20 @@ function CurrencyInputSheetBody({
                   isSelected && dynamicStyles.optionSelected,
                 ]}>
                 <View style={styles.symbolCol}>
-                  <Text variant="body" tone={isSelected ? 'brand' : 'primary'} style={{ fontWeight: '500' }}>
+                  <Text
+                    variant="body"
+                    tone="primary"
+                    color={isSelected ? dynamicStyles.onBrandSubtle : undefined}
+                    style={{ fontWeight: '500' }}>
                     {item.symbol ?? item.code}
                   </Text>
                 </View>
                 <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-                  <Text variant="body" tone={isSelected ? 'brand' : 'primary'} style={{ fontWeight: '500' }}>
+                  <Text
+                    variant="body"
+                    tone="primary"
+                    color={isSelected ? dynamicStyles.onBrandSubtle : undefined}
+                    style={{ fontWeight: '500' }}>
                     {item.code}
                   </Text>
                   {item.name ? (
@@ -132,7 +143,7 @@ function CurrencyInputSheetBody({
                   ) : null}
                 </View>
                 {isSelected ? (
-                  <Feather name="check" size={16} color={colors.brand} />
+                  <Feather name="check" size={16} color={dynamicStyles.onBrandSubtle} />
                 ) : null}
               </Pressable>
             );

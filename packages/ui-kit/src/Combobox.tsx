@@ -21,6 +21,7 @@ import { type SheetBodyProps, useSheet } from './SheetHost';
 import { Text } from './Text';
 import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontFamily, fontSize } from './tokens/typography';
@@ -71,15 +72,17 @@ function ComboboxSheetBody({
   params,
   handleClose = () => {},
 }: SheetBodyProps<ComboboxSheetParams>) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
   const dynamicStyles = useMemo(
     () => ({
       titleWrap: { borderBottomColor: colors.border },
       searchWrap: { borderBottomColor: colors.border },
       optionPressed: { backgroundColor: colors.surfaceSubtle },
       optionSelected: { backgroundColor: colors.brandSubtle },
+      onBrandSubtle: isDark ? palette.brand[100] : colors.brand,
     }),
-    [colors],
+    [colors, isDark],
   );
 
   const [search, setSearch] = useState('');
@@ -159,7 +162,10 @@ function ComboboxSheetBody({
                     />
                   ) : null}
                   <View style={{ flex: 1 }}>
-                    <Text variant="body" tone={isSelected ? 'brand' : 'primary'}>
+                    <Text
+                      variant="body"
+                      tone="primary"
+                      color={isSelected ? dynamicStyles.onBrandSubtle : undefined}>
                       {item.label}
                     </Text>
                     {item.description ? (
@@ -170,7 +176,7 @@ function ComboboxSheetBody({
                   </View>
                 </View>
                 {isSelected ? (
-                  <Feather name="check" size={16} color={colors.brand} />
+                  <Feather name="check" size={16} color={dynamicStyles.onBrandSubtle} />
                 ) : null}
               </Pressable>
             );

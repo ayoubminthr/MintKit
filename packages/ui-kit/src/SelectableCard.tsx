@@ -12,6 +12,7 @@ import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 
 import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
+import { palette } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 
@@ -37,16 +38,20 @@ export function SelectableCard({
   style,
   ...rest
 }: SelectableCardProps) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
 
   const dynamicStyles = useMemo(
     () => ({
       card: { backgroundColor: colors.surfacePrimary },
       cardUnselected: { borderColor: colors.border },
-      cardSelected: { borderColor: colors.brand, backgroundColor: colors.brandSubtle },
+      cardSelected: {
+        borderColor: isDark ? palette.brand[100] : colors.brand,
+        backgroundColor: colors.brandSubtle,
+      },
       cardPressed: { backgroundColor: colors.surfaceSubtle },
     }),
-    [colors]
+    [colors, isDark]
   );
 
   return (
@@ -78,15 +83,22 @@ function Indicator({
   variant: SelectableCardVariant;
   selected: boolean;
 }) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
+
+  // The indicator sits on the card's `brandSubtle` fill once selected, so in
+  // dark mode a solid `brand` chip would all but vanish against it — swap the
+  // chip and its mark for the light-on-dark pairing.
+  const chip = isDark ? palette.brand[100] : colors.brand;
+  const mark = isDark ? palette.brand[900] : colors.onBrand;
 
   const dynamicStyles = useMemo(
     () => ({
       indicatorUnselected: { backgroundColor: colors.surfacePrimary, borderColor: colors.borderStrong },
-      indicatorSelected: { backgroundColor: colors.brand, borderColor: colors.brand },
-      radioDot: { backgroundColor: colors.onBrand },
+      indicatorSelected: { backgroundColor: chip, borderColor: chip },
+      radioDot: { backgroundColor: mark },
     }),
-    [colors]
+    [colors, chip, mark]
   );
 
   if (variant === 'radio') {
@@ -110,7 +122,7 @@ function Indicator({
         selected ? styles.indicatorSelected : styles.indicatorUnselected,
         selected ? dynamicStyles.indicatorSelected : dynamicStyles.indicatorUnselected,
       ]}>
-      {selected ? <Feather name="check" size={14} color={colors.onBrand} /> : null}
+      {selected ? <Feather name="check" size={14} color={mark} /> : null}
     </View>
   );
 }

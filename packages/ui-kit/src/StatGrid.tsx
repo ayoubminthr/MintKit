@@ -16,7 +16,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Skeleton } from './Skeleton';
 import { Text } from './Text';
 import { useTheme } from './Theme';
-import { type SemanticColors } from './tokens/colors';
+import { palette, type SemanticColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { spacing } from './tokens/spacing';
 import { fontWeight } from './tokens/typography';
@@ -51,18 +51,33 @@ export interface StatGridProps {
   loading?: boolean;
 }
 
-function toneColors(colors: SemanticColors, tone: StatGridTone) {
+function toneColors(colors: SemanticColors, tone: StatGridTone, isDark: boolean) {
   switch (tone) {
     case 'brand':
-      return { background: colors.brandSubtle, foreground: colors.brand };
+      return {
+        background: colors.brandSubtle,
+        foreground: isDark ? palette.brand[100] : colors.brand,
+      };
     case 'success':
-      return { background: colors.successSubtle, foreground: colors.success };
+      return {
+        background: colors.successSubtle,
+        foreground: isDark ? palette.success[100] : colors.success,
+      };
     case 'warning':
-      return { background: colors.warningSubtle, foreground: colors.warning };
+      return {
+        background: colors.warningSubtle,
+        foreground: isDark ? palette.warning[100] : colors.warning,
+      };
     case 'danger':
-      return { background: colors.dangerSubtle, foreground: colors.danger };
+      return {
+        background: colors.dangerSubtle,
+        foreground: isDark ? palette.danger[100] : colors.danger,
+      };
     case 'info':
-      return { background: colors.infoSubtle, foreground: colors.info };
+      return {
+        background: colors.infoSubtle,
+        foreground: isDark ? palette.info[100] : colors.info,
+      };
     default:
       return { background: colors.surfaceSubtle, foreground: colors.textPrimary };
   }
@@ -74,7 +89,8 @@ export function StatGrid({
   density = 'default',
   loading = false,
 }: StatGridProps) {
-  const { colors } = useTheme();
+  const { colors, theme } = useTheme();
+  const isDark = theme === 'dark';
 
   const basis = useMemo(() => columnStyles[columns], [columns]);
   const scale = densityScale[density];
@@ -82,7 +98,7 @@ export function StatGrid({
   return (
     <View style={[styles.grid, gridStyles[density]]}>
       {items.map((item, index) => {
-        const tone = toneColors(colors, item.tone ?? 'neutral');
+        const tone = toneColors(colors, item.tone ?? 'neutral', isDark);
         const tile = (
           <>
             <View style={[styles.valueRow, valueRowStyles[density]]}>
