@@ -94,6 +94,11 @@ export const lightColors = {
   info: palette.info[500],
   infoSubtle: palette.info[50],
 
+  // Scrim behind floating overlays (Modal, Drawer, a full-screen media viewer).
+  // Deliberately identical in both themes: it dims whatever sits beneath it,
+  // so it takes its cue from the content, not the theme.
+  overlay: 'rgba(11, 14, 11, 0.45)',
+
   // Categorical / decorative accents — no semantic meaning of their own
   // (status dots, the auth-hero gradient's second stop). Not on the numbered
   // `palette` scale since each is a one-off design pick, not a hue ramp.
@@ -179,6 +184,9 @@ export const darkColors: SemanticColors = {
   dangerSubtle: palette.danger[900],
   info: palette.info[500],
   infoSubtle: palette.info[900],
+
+  // Scrim — see the light theme's note; identical by design.
+  overlay: 'rgba(11, 14, 11, 0.45)',
 
   // Categorical / decorative accents — kept identical to light mode; both
   // are drawn as solid dots/gradient fills rather than backgrounds, so they

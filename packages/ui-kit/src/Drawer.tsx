@@ -25,6 +25,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from './Text';
 import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
+import { lightColors } from './tokens/colors';
 import { shadows } from './tokens/shadows';
 import { spacing } from './tokens/spacing';
 import { rtlSign } from './utils/rtl';
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(11, 14, 11, 0.45)',
+    backgroundColor: lightColors.overlay,
   },
   drawer: {
     position: 'absolute',

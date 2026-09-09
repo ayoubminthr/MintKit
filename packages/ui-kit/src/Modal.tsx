@@ -10,6 +10,7 @@ import {
 
 import { useTheme } from './Theme';
 import { borders } from './tokens/borders';
+import { lightColors } from './tokens/colors';
 import { radius } from './tokens/radius';
 import { shadows } from './tokens/shadows';
 import { spacing } from './tokens/spacing';
@@ -90,7 +91,7 @@ export function Modal({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(11, 14, 11, 0.45)',
+    backgroundColor: lightColors.overlay,
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing[5],
