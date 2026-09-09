@@ -245,6 +245,13 @@ export const kitComponents: readonly KitComponentEntry[] = [
     description: 'Action-sheet picker — taps open a BottomSheet of options. Idiomatic on mobile.',
   },
   {
+    name: 'PickerField',
+    path: '/picker-field',
+    category: 'Forms',
+    status: 'ready',
+    description: "Select's bordered field and floating label, fronting a picker the kit does not own.",
+  },
+  {
     name: 'NumberInput',
     path: '/number-input',
     category: 'Forms',

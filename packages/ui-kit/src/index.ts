@@ -12,6 +12,7 @@ export * from './NumberInput';
 export * from './OtpInput';
 export * from './PasswordStrength';
 export * from './Select';
+export * from './PickerField';
 export * from './Avatar';
 export * from './AvatarGroup';
 export * from './Switch';
