@@ -354,7 +354,8 @@ export const kitComponents: readonly KitComponentEntry[] = [
     path: '/file-upload',
     category: 'Forms',
     status: 'ready',
-    description: 'Document/image picker with dashed dropzone and file list preview.',
+    description:
+      'Attach and review files — dropzone, attach field, card or photo-grid presentation, with image thumbnails, per-item upload progress and retry.',
   },
   {
     name: 'SearchBar',
