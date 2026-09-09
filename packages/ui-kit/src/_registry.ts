@@ -59,7 +59,7 @@ export const kitComponents: readonly KitComponentEntry[] = [
     path: '/input',
     category: 'Forms',
     status: 'ready',
-    description: 'Single-line text field with a floating notched label, hint/error state, and a built-in password show/hide toggle.',
+    description: 'Single-line text field with a notched or stacked label, hint/error state, and a built-in password show/hide toggle.',
   },
   {
     name: 'Avatar',

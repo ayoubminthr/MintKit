@@ -23,6 +23,14 @@ import { isRTL } from './utils/rtl';
 export interface InputProps extends TextInputProps {
   label?: string;
   /**
+   * Where `label` sits. `'notch'` (default) pins it onto the field's top
+   * border, matching Select/DatePicker/TimePicker. `'stacked'` renders it as
+   * an ordinary line of text above the field — the classic web form layout,
+   * for dense forms and auth screens where the notch reads as too decorative.
+   * `floating` is ignored when stacked (there is no notch to animate into).
+   */
+  labelPlacement?: 'notch' | 'stacked';
+  /**
    * Animates `label` between a resting position inside the field (like a
    * placeholder) and a notch above the border, based on focus/value —
    * matching Select/DatePicker/TimePicker's floating label. Requires
@@ -49,6 +57,7 @@ export interface InputProps extends TextInputProps {
 
 export function Input({
   label,
+  labelPlacement = 'notch',
   floating,
   hint,
   error,
@@ -75,7 +84,8 @@ export function Input({
   const hasValue = Boolean(value);
   const isActive = focused || hasValue;
 
-  const showFloating = Boolean(floating) && !!label;
+  const isStacked = labelPlacement === 'stacked';
+  const showFloating = Boolean(floating) && !!label && !isStacked;
   const floatingLabel = useFloatingLabel(showFloating && isActive);
 
   const dynamicStyles = useMemo(
@@ -108,15 +118,20 @@ export function Input({
 
   const passwordToggle = secureTextEntry ? (
     <Pressable onPress={() => setShowPassword((prev) => !prev)}>
-      <Feather name={showPassword ? 'eye' : 'eye-off'} size={18} color={colors.textSecondary} />
+      <Feather name={showPassword ? 'eye' : 'eye-off'} size={16} color={colors.textMuted} />
     </Pressable>
   ) : null;
   const resolvedRightIcon = secureTextEntry ? passwordToggle : rightIcon;
 
   return (
     <View style={styles.wrapper}>
+      {label && isStacked ? (
+        <Text scaled={false} color={colors.textSecondary} style={styles.labelStacked}>
+          {label}
+        </Text>
+      ) : null}
       <View style={styles.fieldContainer}>
-        {label ? (
+        {label && !isStacked ? (
           showFloating ? (
             <Animated.Text
               style={[
@@ -211,6 +226,11 @@ const styles = StyleSheet.create({
     start: 8,
     zIndex: 999,
     paddingHorizontal: 5,
+    fontFamily: fontFamily.sansMedium,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.medium,
+  },
+  labelStacked: {
     fontFamily: fontFamily.sansMedium,
     fontSize: fontSize.sm,
     fontWeight: fontWeight.medium,

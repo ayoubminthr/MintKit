@@ -24,13 +24,15 @@ export function InputBody() {
   const [search, setSearch] = useState('');
   const [password, setPassword] = useState('');
   const [floatingValue, setFloatingValue] = useState('');
+  const [stackedValue, setStackedValue] = useState('');
 
   return (
     <>
       <Text variant="body" tone="secondary">
         Single-line text field. Optional label, hint, error, and `leftIcon` / `rightIcon` slots.
         Border switches to brand on focus. `label` renders as a notch above the border; add
-        `floating` to animate it between a resting placeholder-like position and the notch.
+        `floating` to animate it between a resting placeholder-like position and the notch. Pass
+        `labelPlacement="stacked"` to render it as a plain line of text above the field instead.
         `secureTextEntry` gets a built-in show/hide toggle for free.
       </Text>
 
@@ -86,6 +88,16 @@ export function InputBody() {
           value={floatingValue}
           onChangeText={setFloatingValue}
           floating
+        />
+      </Section>
+
+      <Section label="Stacked label">
+        <Input
+          label="Identifier"
+          labelPlacement="stacked"
+          placeholder="your.name@company.com"
+          value={stackedValue}
+          onChangeText={setStackedValue}
         />
       </Section>
 
