@@ -71,3 +71,5 @@ export * from './Rating';
 export * from './BarChart';
 export * from './Slider';
 export * from './ProgressRing';
+export * from './ChatBubble';
+export * from './MessageComposer';

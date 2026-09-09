@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
 import { Avatar, type AvatarSize } from './Avatar';
@@ -11,6 +11,11 @@ import { fontFamily, fontWeight } from './tokens/typography';
 export interface AvatarGroupItem {
   name: string;
   imageUri?: string;
+  /**
+   * Render this node instead of the kit `Avatar` — for images the consumer has
+   * to fetch itself (signed URLs, auth headers). Size it to match `size`.
+   */
+  avatar?: ReactNode;
 }
 
 export interface AvatarGroupProps extends ViewProps {
@@ -60,7 +65,7 @@ export function AvatarGroup({ items, size = 'md', max = 4, style, ...rest }: Ava
           key={`${idx}-${item.name}`}
           style={[styles.ringWrap, idx > 0 && { marginStart: -overlap }]}>
           <View style={[styles.ring, themedStyles.ring, { borderRadius: (box + 2) / 2 }]}>
-            <Avatar name={item.name} imageUri={item.imageUri} size={size} />
+            {item.avatar ?? <Avatar name={item.name} imageUri={item.imageUri} size={size} />}
           </View>
         </View>
       ))}

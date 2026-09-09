@@ -77,6 +77,25 @@ export function EmptyStateBody() {
         </Card>
       </Section>
 
+      <Section
+        label="Bare illustration"
+        description="illustrationFit='bare' drops the circle, so wide artwork isn't clipped.">
+        <Card padding="none">
+          <EmptyState
+            illustration={
+              <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                {(['image', 'film', 'music'] as const).map((icon) => (
+                  <Feather key={icon} name={icon} size={28} color={colors.textMuted} />
+                ))}
+              </View>
+            }
+            illustrationFit="bare"
+            title="Nothing in this album"
+            description="Photos and clips you upload will show up here."
+          />
+        </Card>
+      </Section>
+
       <Section label="Different icons">
         <View style={{ gap: spacing[3] }}>
           <Card padding="none">

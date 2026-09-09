@@ -25,7 +25,8 @@ import { forwardChevron } from './utils/rtl';
 
 export interface ListItemProps extends Omit<PressableProps, 'style' | 'children'> {
   title: string;
-  subtitle?: string;
+  /** Secondary line. Pass a node when the row needs an icon or badge inline in it. */
+  subtitle?: ReactNode;
   /** Leading slot — icon, Avatar, Checkbox, etc. */
   leading?: ReactNode;
   /** Trailing slot — Badge, Switch, secondary text, etc. */
@@ -75,11 +76,13 @@ export function ListItem({
         <Text variant="body" tone={titleTone} numberOfLines={1}>
           {title}
         </Text>
-        {subtitle ? (
+        {typeof subtitle === 'string' ? (
           <Text variant="caption" tone="secondary" numberOfLines={2}>
             {subtitle}
           </Text>
-        ) : null}
+        ) : (
+          subtitle ?? null
+        )}
       </View>
       {trailing ? <View style={styles.trailing}>{trailing}</View> : null}
       {shouldShowChevron ? (

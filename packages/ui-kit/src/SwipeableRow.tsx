@@ -12,7 +12,16 @@
  * Mount a GestureHandlerRootView ancestor (mintkit wires one in app/_layout.tsx).
  */
 import { Feather } from '@expo/vector-icons';
-import { type ComponentProps, type ReactNode, useMemo, useRef } from 'react';
+import {
+  type ComponentProps,
+  forwardRef,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 
@@ -37,19 +46,67 @@ export interface SwipeableRowProps {
   actionWidth?: number;
   /** Called after the row closes on its own (e.g. after an action fires). */
   onClose?: () => void;
+  /**
+   * Rows sharing a group name behave as one list: opening one closes whichever
+   * other row in the group was open. Omit for rows that may stay open together.
+   */
+  group?: string;
+  /** Set false to lock the row shut — e.g. while a sheet covers the list. */
+  enabled?: boolean;
+}
+
+/** Imperative handle — lets a list close its rows on scroll or outside press. */
+export interface SwipeableRowHandle {
+  close: () => void;
 }
 
 const DEFAULT_ACTION_WIDTH = 72;
 
-export function SwipeableRow({
-  children,
-  leftActions,
-  rightActions,
-  actionWidth = DEFAULT_ACTION_WIDTH,
-  onClose,
-}: SwipeableRowProps) {
+/** The row currently open in each group, keyed by group name. */
+const openRowByGroup = new Map<string, () => void>();
+
+export const SwipeableRow = forwardRef<SwipeableRowHandle, SwipeableRowProps>(function SwipeableRow(
+  {
+    children,
+    leftActions,
+    rightActions,
+    actionWidth = DEFAULT_ACTION_WIDTH,
+    onClose,
+    group,
+    enabled = true,
+  },
+  ref,
+) {
   const { colors } = useTheme();
   const swipeRef = useRef<Swipeable>(null);
+
+  const close = useCallback(() => swipeRef.current?.close(), []);
+
+  useImperativeHandle(ref, () => ({ close }), [close]);
+
+  // Give up this row's claim on the group when it unmounts mid-swipe.
+  useEffect(
+    () => () => {
+      if (group && openRowByGroup.get(group) === close) {
+        openRowByGroup.delete(group);
+      }
+    },
+    [group, close],
+  );
+
+  const handleWillOpen = useCallback(() => {
+    if (!group) return;
+    const previous = openRowByGroup.get(group);
+    if (previous && previous !== close) previous();
+    openRowByGroup.set(group, close);
+  }, [group, close]);
+
+  const handleClose = useCallback(() => {
+    if (group && openRowByGroup.get(group) === close) {
+      openRowByGroup.delete(group);
+    }
+    onClose?.();
+  }, [group, close, onClose]);
 
   const backgroundByColor = useMemo<Record<SwipeActionColor, string>>(
     () => ({
@@ -125,9 +182,11 @@ export function SwipeableRow({
     <Swipeable
       ref={swipeRef}
       friction={2}
+      enabled={enabled}
       overshootLeft={false}
       overshootRight={false}
-      onSwipeableClose={onClose}
+      onSwipeableWillOpen={handleWillOpen}
+      onSwipeableClose={handleClose}
       renderLeftActions={
         leftActions && leftActions.length > 0
           ? () => renderActions(leftActions, 'left')
@@ -141,7 +200,7 @@ export function SwipeableRow({
       {children}
     </Swipeable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   actionsContainer: {

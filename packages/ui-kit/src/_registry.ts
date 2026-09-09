@@ -490,6 +490,22 @@ export const kitComponents: readonly KitComponentEntry[] = [
     status: 'ready',
     description: 'Circular 0–1 progress indicator. For linear progress, use ProgressBar instead.',
   },
+  {
+    name: 'ChatBubble',
+    path: '/chat-bubble',
+    category: 'Display',
+    status: 'ready',
+    description:
+      'One message in a conversation thread. Logical incoming / outgoing sides, avatar gutter, attachment slot, delivery status and per-message script direction.',
+  },
+  {
+    name: 'MessageComposer',
+    path: '/message-composer',
+    category: 'Forms',
+    status: 'ready',
+    description:
+      'Bottom-pinned conversation composer: growing multiline field, attach and send buttons, and a slot for staged attachments.',
+  },
 ];
 
 export const kitCategories: readonly ComponentCategory[] = [

@@ -104,6 +104,33 @@ export function SwipeableRowBody() {
         )}
       </Section>
 
+      <Section
+        label="One open at a time"
+        description="Rows sharing a `group` close each other. Open one, then swipe another.">
+        <View style={styles.list}>
+          {SEED.slice(0, 3).map((person) => (
+            <SwipeableRow
+              key={person.id}
+              group="demo-inbox"
+              rightActions={[
+                {
+                  icon: 'trash-2',
+                  color: 'danger',
+                  label: 'Delete',
+                  onPress: () => toast.danger(`${person.name} removed`),
+                },
+              ]}>
+              <View style={styles.row}>
+                <Avatar name={person.name} size="md" />
+                <Text variant="body" style={{ flex: 1 }}>
+                  {person.name}
+                </Text>
+              </View>
+            </SwipeableRow>
+          ))}
+        </View>
+      </Section>
+
       <Section label="Single-action (delete only)">
         <SwipeableRow
           rightActions={[

@@ -6,11 +6,19 @@ import { spacing } from './tokens/spacing';
 import { Text } from './Text';
 import { useTheme } from './Theme';
 
+export type EmptyStateIllustrationFit = 'bubble' | 'bare';
+
 export interface EmptyStateProps extends ViewProps {
   icon?: React.ComponentProps<typeof Feather>['name'];
   illustration?: ReactNode;
   illustrationSize?: number;
   illustrationTint?: string;
+  /**
+   * How the illustration is framed. `bubble` (default) centers it in a tinted
+   * circle — right for an icon. `bare` drops the circle so a wide artwork isn't
+   * clipped; it sizes itself.
+   */
+  illustrationFit?: EmptyStateIllustrationFit;
   title: string;
   description?: string;
   action?: ReactNode;
@@ -21,6 +29,7 @@ export function EmptyState({
   illustration,
   illustrationSize = 48,
   illustrationTint,
+  illustrationFit = 'bubble',
   title,
   description,
   action,
@@ -42,13 +51,19 @@ export function EmptyState({
 
   return (
     <View {...rest} style={[styles.container, style]}>
-      <View style={[styles.iconBubble, dynamicStyles.iconBubble]}>
-        {illustration ?? <Feather name={icon} size={20} color={colors.textMuted} />}
-      </View>
+      {illustration && illustrationFit === 'bare' ? (
+        illustration
+      ) : (
+        <View style={[styles.iconBubble, dynamicStyles.iconBubble]}>
+          {illustration ?? <Feather name={icon} size={20} color={colors.textMuted} />}
+        </View>
+      )}
       <View style={styles.text}>
-        <Text variant="subtitle">{title}</Text>
+        <Text variant="subtitle" style={styles.centered}>
+          {title}
+        </Text>
         {description ? (
-          <Text variant="body" tone="secondary" style={styles.description}>
+          <Text variant="body" tone="secondary" style={styles.centered}>
             {description}
           </Text>
         ) : null}
@@ -75,7 +90,8 @@ const styles = StyleSheet.create({
     gap: spacing[1],
     maxWidth: 320,
   },
-  description: {
+  // `text`'s alignItems only centers the boxes; a wrapping line needs this too.
+  centered: {
     textAlign: 'center',
   },
   action: {
